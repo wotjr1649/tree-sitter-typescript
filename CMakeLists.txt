@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 project(tree-sitter-typescript
         VERSION "0.23.2"
 		DESCRIPTION "TypeScript and TSX grammars for tree-sitter"
-        HOMEPAGE_URL "https://github.com/tree-sitter/tree-sitter-typescript"
+        HOMEPAGE_URL "https://github.com/wotjr1649/tree-sitter-typescript"
         LANGUAGES C)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
