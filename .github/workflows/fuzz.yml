@@ -7,11 +7,19 @@ on:
       - typescript/src/scanner.c
       - tsx/src/scanner.c
       - common/scanner.h
+      - "*/src/**"
+      - .github/workflows/fuzz.yml
   pull_request:
     paths:
       - typescript/src/scanner.c
       - tsx/src/scanner.c
       - common/scanner.h
+      - "*/src/**"
+      - .github/workflows/fuzz.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   fuzz:

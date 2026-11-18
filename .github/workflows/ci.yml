@@ -3,29 +3,29 @@ name: CI
 on:
   push:
     branches: [main]
-    paths:
-      - "scripts.js"
-      - "common/*"
-      - "third_party/**"
-      - "*/grammar.js"
-      - "*/src/**"
-      - "bindings/**"
-      - "binding.gyp"
   pull_request:
-    paths:
-      - "scripts.js"
-      - "common/*"
-      - "third_party/**"
-      - "*/grammar.js"
-      - "*/src/**"
-      - "bindings/**"
-      - "binding.gyp"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{github.workflow}}-${{github.ref}}
   cancel-in-progress: true
 
 jobs:
+  abi:
+    name: ABI consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # The parsers are ABI 15; the CMake default must match so a CMake build never regenerates them with another ABI.
+      - name: Compare parser.c and CMake ABI
+        run: |-
+          grep -qx '#define LANGUAGE_VERSION 15' typescript/src/parser.c
+          grep -qx '#define LANGUAGE_VERSION 15' tsx/src/parser.c
+          grep -q 'set(TREE_SITTER_ABI_VERSION 15 CACHE' CMakeLists.txt
   test:
     name: Test parsers
     runs-on: ${{matrix.os}}
