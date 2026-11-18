@@ -193,22 +193,6 @@ func insideWellFormedPart(nodes []node, i, at int) bool {
 	return false
 }
 
-// assertedNodeHolds is the second way a syntax case can satisfy errorAt: an expect entry that asserts an exact problem
-// node ("s-e:ERROR" or "s-e:MISSING:kind"), when that node is in the tree and its range contains errorAt
-// (s <= errorAt <= e). The case author has then named the very node that carries the error, so the stricter rule of
-// errorAtHolds (no position inside a well-formed token of a wide ERROR) is not needed: it exists to refuse a wide ERROR
-// that nobody looked at. Without such an entry the stricter rule stays. (Unclosed JSX `<p>x`: tsc's first diagnostic is
-// the tag name at byte 1, which the grammar keeps as an identifier inside the one ERROR [0,4); the entry 0-4:ERROR says so.)
-func assertedNodeHolds(nodes []node, expect []string, at int) bool {
-	for _, e := range expect {
-		s, en, kind, err := parseExpect(e)
-		if err == nil && problemExpect(kind) && s <= at && at <= en && hasProblem(nodes, s, en, kind) {
-			return true
-		}
-	}
-	return false
-}
-
 // hasProblem reports whether the tree has the problem node a syntax case's expect entry names: "ERROR" is an ERROR node
 // with exactly the range, "MISSING:kind" a MISSING node of that kind with exactly the range.
 func hasProblem(nodes []node, start, end int, kind string) bool {
@@ -263,7 +247,7 @@ func check(c Case, verdict string, nodes []node, r Report) []string {
 		switch {
 		case !r.HasError():
 			diffs = append(diffs, "rejected by tsc as syntax but the tree is "+r.String())
-		case !errorAtHolds(nodes, []byte(c.Source), *c.ErrorAt) && !assertedNodeHolds(nodes, c.Expect, *c.ErrorAt):
+		case !errorAtHolds(nodes, []byte(c.Source), *c.ErrorAt):
 			diffs = append(diffs, fmt.Sprintf("no ERROR or MISSING node holds byte %d (first problem: %s)", *c.ErrorAt, r.First))
 		}
 		for _, e := range c.Expect {

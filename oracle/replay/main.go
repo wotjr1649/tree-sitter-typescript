@@ -18,9 +18,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	tree_sitter "github.com/tree-sitter/go-tree-sitter"
 	tree_sitter_typescript "github.com/wotjr1649/tree-sitter-typescript/bindings/go"
@@ -77,6 +79,10 @@ func sum(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:
 // source and grammar are strings and not null; source has no unpaired surrogate escape (Go would turn it into U+FFFD)
 // and no leading U+FEFF; expect is an array of strings, errorAt an integer, reason a string.
 func parseCases(b []byte) ([]Case, error) {
+	// Invalid UTF-8 would be turned into U+FFFD by the JSON decoder (and by run.mjs), changing the bytes that are judged.
+	if !utf8.Valid(b) {
+		return nil, fmt.Errorf("cases.jsonl is not valid UTF-8")
+	}
 	var cases []Case
 	for n, line := range strings.Split(string(b), "\n") {
 		if strings.Trim(line, " \t\r") == "" {
@@ -90,6 +96,8 @@ func parseCases(b []byte) ([]Case, error) {
 	}
 	return cases, nil
 }
+
+var plainInteger = regexp.MustCompile(`^-?(0|[1-9][0-9]*)$`)
 
 func parseCase(line string) (Case, error) {
 	var c Case
@@ -138,14 +146,24 @@ func parseCase(line string) (Case, error) {
 		}
 	}
 	if v, ok := raw["expect"]; ok {
-		if err := json.Unmarshal(v, &c.Expect); err != nil || c.Expect == nil {
+		var items []json.RawMessage // not []string: a null element would decode silently to ""
+		if err := json.Unmarshal(v, &items); err != nil || items == nil {
 			return c, fmt.Errorf("expect must be an array of strings")
+		}
+		c.Expect = []string{}
+		for _, item := range items {
+			var e string
+			if string(bytes.TrimSpace(item)) == "null" || json.Unmarshal(item, &e) != nil {
+				return c, fmt.Errorf("expect must be an array of strings")
+			}
+			c.Expect = append(c.Expect, e)
 		}
 	}
 	if v, ok := raw["errorAt"]; ok {
+		// null is refused, and so is every notation but plain integer digits (0.0 and 0e0 are refused, as in run.mjs).
 		var at int
-		if err := json.Unmarshal(v, &at); err != nil {
-			return c, fmt.Errorf("errorAt must be an integer")
+		if !plainInteger.Match(bytes.TrimSpace(v)) || json.Unmarshal(v, &at) != nil {
+			return c, fmt.Errorf("errorAt must be an integer written as plain digits")
 		}
 		c.ErrorAt = &at
 	}

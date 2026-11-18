@@ -296,44 +296,38 @@ func TestLoadRefusesInconsistentInputs(t *testing.T) {
 	}
 }
 
-func TestAssertedNodeSatisfiesErrorAt(t *testing.T) {
-	// Unclosed JSX: tsc's first diagnostic is TS17008 at the tag name (byte 1), the grammar keeps `p` as an identifier
-	// inside one ERROR [0,4).
-	src := "<p>x"
-	nodes, r := parse(t, "tsx", src)
-	if !r.HasError() {
-		t.Fatalf("want an error tree, got %s", r)
+func TestExactAssertionIsNeverASubstituteForErrorAt(t *testing.T) {
+	// `type A<in> =`: tsc reports TS1359 at the `in` (byte 7) and TS1110 at the end (byte 12). The grammar reads `in`
+	// normally inside one ERROR [0,12). Asserting that ERROR does not turn byte 7 into an agreement: the assertion shows
+	// the recovery node exists, not that `in` was read as an error.
+	src := "type A<in> ="
+	nodes, r := parse(t, "typescript", src)
+	seven := 7
+	c := Case{Source: src, ErrorAt: &seven, Expect: []string{"0-12:ERROR"}}
+	if d := check(c, "syntax", nodes, r); len(d) != 1 || !strings.Contains(d[0], "no ERROR or MISSING node holds byte 7") {
+		t.Errorf("an exact assertion must not rescue errorAt 7: %v", d)
 	}
-	at := 1
-	without := Case{Source: src, ErrorAt: &at}
-	if d := check(without, "syntax", nodes, r); len(d) != 1 {
-		t.Errorf("without an assertion the stricter rule must refuse byte 1: %v", d)
+	// the assertion is an additional check: with errorAt at the second diagnostic it passes, and a false one still differs
+	twelve := 12
+	c = Case{Source: src, ErrorAt: &twelve, Expect: []string{"0-12:ERROR"}}
+	if d := check(c, "syntax", nodes, r); len(d) != 0 {
+		t.Errorf("errorAt 12 with the true assertion must pass: %v", d)
 	}
-	with := Case{Source: src, ErrorAt: &at, Expect: []string{"0-4:ERROR"}}
-	if d := check(with, "syntax", nodes, r); len(d) != 0 {
-		t.Errorf("an exact ERROR [0,4) that contains byte 1 must satisfy errorAt: %v", d)
+	c.Expect = []string{"0-11:ERROR"}
+	if d := check(c, "syntax", nodes, r); len(d) != 1 {
+		t.Errorf("a false assertion must differ: %v", d)
 	}
-	// the assertion has to be true, and its range has to contain errorAt
-	wrongRange := Case{Source: src, ErrorAt: &at, Expect: []string{"0-3:ERROR"}}
-	if d := check(wrongRange, "syntax", nodes, r); len(d) == 0 {
-		t.Errorf("an assertion about a node the tree does not have must differ")
+	// Unclosed JSX `<p>x`: tsc's first diagnostic is the tag name (byte 1, TS17008), the later one is the end (byte 4,
+	// TS1005). The grammar keeps `p` inside one ERROR [0,4): errorAt 1 is refused (with or without an assertion); the case
+	// is registered with errorAt 4 (a later diagnostic) and a reason.
+	jsx := "<p>x"
+	jn, jr := parse(t, "tsx", jsx)
+	one, four := 1, 4
+	if d := check(Case{Source: jsx, ErrorAt: &one, Expect: []string{"0-4:ERROR"}}, "syntax", jn, jr); len(d) != 1 {
+		t.Errorf("errorAt 1 stays refused even with the exact ERROR [0,4): %v", d)
 	}
-	far := 4
-	if d := check(Case{Source: src, ErrorAt: &far, Expect: []string{"0-4:ERROR"}}, "syntax", nodes, r); len(d) != 0 {
-		t.Errorf("errorAt at the end of the asserted node holds: %v", d)
-	}
-	// a node that does not contain errorAt does not help: `let x = ; let y = ;` has ERRORs [6,7) and [16,17)
-	two := "let x = ; let y = ;"
-	tn, tr := parse(t, "typescript", two)
-	eight := 8
-	c := Case{Source: two, ErrorAt: &eight, Expect: []string{"16-17:ERROR"}}
-	if d := check(c, "syntax", tn, tr); len(d) != 0 {
-		// errorAt 8 is held by the first ERROR through the ordinary rule; the assertion is about the second one
-		t.Errorf("the ordinary rule still holds byte 8: %v", d)
-	}
-	nine := 9
-	if assertedNodeHolds(tn, []string{"16-17:ERROR"}, nine) {
-		t.Error("an asserted node that does not contain errorAt must not satisfy it")
+	if d := check(Case{Source: jsx, ErrorAt: &four, Reason: "tsc's first diagnostic (TS17008, the tag name) is inside the ERROR; the later one is the missing closing tag", Expect: []string{"0-4:ERROR"}}, "syntax", jn, jr); len(d) != 0 {
+		t.Errorf("errorAt 4 must pass: %v", d)
 	}
 }
 
@@ -393,5 +387,39 @@ func TestLoadRefusesInvalidDiagnosticCodes(t *testing.T) {
 		if err == nil && !strings.Contains(strings.Join(p, "\n"), "small positive integer") {
 			t.Errorf("%s: a diagnostic code of %s must be refused, got %v", name, repl, p)
 		}
+	}
+}
+
+func TestParseCasesNullsNotationAndUTF8(t *testing.T) {
+	base := func(extra string) string {
+		return `{"id":"a","sha256":"x","source":"1","grammar":"typescript"` + extra + "}\n"
+	}
+	for name, extra := range map[string]string{
+		"errorAt null":          `,"errorAt":null`,
+		"errorAt 0.0":           `,"errorAt":0.0`,
+		"errorAt 0e0":           `,"errorAt":0e0`,
+		"errorAt 1e1":           `,"errorAt":1e1`,
+		"errorAt 01":            `,"errorAt":01`,
+		"errorAt a string":      `,"errorAt":"0"`,
+		"expect with a null":    `,"expect":[null]`,
+		"expect a null element": `,"expect":["1-2:x",null]`,
+		"expect null":           `,"expect":null`,
+	} {
+		if _, err := parseCases([]byte(base(extra))); err == nil {
+			t.Errorf("%s must be refused", name)
+		}
+	}
+	for name, extra := range map[string]string{"errorAt 0": `,"errorAt":0`, "errorAt 12": `,"errorAt":12`, "empty expect": `,"expect":[]`} {
+		if cs, err := parseCases([]byte(base(extra))); err != nil || len(cs) != 1 {
+			t.Errorf("%s must be accepted: %v", name, err)
+		}
+	}
+	// a raw 0x80 byte inside a string is invalid UTF-8: refused, not turned into U+FFFD
+	if _, err := parseCases([]byte("{\"id\":\"a\",\"sha256\":\"x\",\"source\":\"void \x80;\",\"grammar\":\"typescript\"}\n")); err == nil || !strings.Contains(err.Error(), "UTF-8") {
+		t.Errorf("invalid UTF-8 must be refused, got %v", err)
+	}
+	// valid multi-byte text is fine
+	if _, err := parseCases([]byte("{\"id\":\"a\",\"sha256\":\"x\",\"source\":\"한글😀\",\"grammar\":\"typescript\"}\n")); err != nil {
+		t.Errorf("valid UTF-8 must be accepted: %v", err)
 	}
 }

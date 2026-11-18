@@ -44,6 +44,13 @@ const LINE_BREAK = new RegExp("\\r\\n|[\\n\\r" + String.fromCharCode(0x2028, 0x2
 // no leading U+FEFF, `expect` is an array of strings, `errorAt` an integer, `reason` a string.
 const BLANK = /^[ \t\r]*$/;
 const casesBytes = readFileSync(casesPath);
+// Invalid UTF-8 would be turned into U+FFFD by toString (and by the replay's JSON decoder), changing the bytes that are
+// judged; ignoreBOM keeps a leading U+FEFF visible so that it is refused as the invalid JSON it is.
+try {
+  new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(casesBytes);
+} catch {
+  fail(`${basename(casesPath)} is not valid UTF-8`);
+}
 const cases = casesBytes
   .toString("utf8")
   .split("\n")
@@ -52,7 +59,11 @@ const cases = casesBytes
     const where = `${basename(casesPath)}:${i + 1}`;
     let c;
     try {
-      c = JSON.parse(l);
+      // The reviver sees the source text of a number: errorAt must be plain digits (0.0 and 0e0 are refused, as in the replay).
+      c = JSON.parse(l, (k, v, ctx) => {
+        if (k === "errorAt" && typeof v === "number" && !/^-?(0|[1-9][0-9]*)$/.test(ctx.source)) throw new Error("errorAt must be an integer written as plain digits");
+        return v;
+      });
     } catch (e) {
       fail(`${where}: ${e.message}`);
     }
@@ -64,7 +75,7 @@ const cases = casesBytes
     if ("sha256" in c && typeof c.sha256 !== "string") fail(`${where}: sha256 must be a string`);
     if ("reason" in c && typeof c.reason !== "string") fail(`${where}: reason must be a string`);
     if ("expect" in c && !(Array.isArray(c.expect) && c.expect.every((e) => typeof e === "string"))) fail(`${where}: expect must be an array of strings`);
-    if ("errorAt" in c && !Number.isInteger(c.errorAt)) fail(`${where}: errorAt must be an integer`);
+    if ("errorAt" in c && !Number.isSafeInteger(c.errorAt)) fail(`${where}: errorAt must be an integer`);
     if (!c.source.isWellFormed()) fail(`${where}: source has an unpaired surrogate`);
     if (c.source.charCodeAt(0) === 0xfeff) fail(`${where}: source must not start with a BOM (tsc strips it and the offsets would shift)`);
     return [c];

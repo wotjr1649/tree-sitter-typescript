@@ -21,7 +21,7 @@
   "cases_file": "cases.jsonl",
   "cases_sha256": "e00dd0ceaffb477d27c29603eae48b544335d2ae8639bbad7ba437544ae11ec1",
   "runner": "run.mjs",
-  "runner_sha256": "be886adf3c2d40833ee6fda9a184506afe7df35256ac2fe2ee94d99b1d896a37"
+  "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
  "results": [
   {
