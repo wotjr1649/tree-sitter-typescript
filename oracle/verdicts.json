@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "a456a68018296dc5f1815084a794d42c19666f8ae074f0472bb54fb65047f4dc",
+  "cases_sha256": "b125119b769360ebb41d196daa366564cbba88f3d74754cc2e9ac81db3a6232a",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -1063,6 +1063,118 @@
   {
    "id": "s6/p112-jsx-trailing.tsx",
    "sha256": "7411c60de1b0c04889a6ba631eda93ffced7e1b8cc759305b8ed7b7aa991ebfa",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/nonascii-decimal-arabic-indic.tsx",
+   "sha256": "cfe1fd0c81453a751ef942c1e6e1fa7db299f7614ae809c5b9385165156162e7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/nonascii-decimal-fullwidth.tsx",
+   "sha256": "26894e510c86fff79159eb04645d45d94dfca1a58bb2b78f5707a964fdf5a12f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/nonascii-hex-fullwidth.tsx",
+   "sha256": "343a5c21ff6d1dcddf747edec96b9bd665fddb51f363caa98fb2b8abb345a9ab",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/nonascii-decimal-then-reference.tsx",
+   "sha256": "c4b7f800537686ce7ded3bfb1939c7296ddb35508de926d5a0115812760c6302",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/nonascii-decimal-no-semicolon.tsx",
+   "sha256": "4d2cf011e60db9fce669f4a4b8a43e9b883b6b8e9d12e8df0b7adae6e6201a79",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/nonascii-hex-arabic-indic.tsx",
+   "sha256": "e1b7c11ffd31c4e00c91328077b2aaf19539ea5ee03350af99ad8bf4b0b001c3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/ascii-decimal-reference.tsx",
+   "sha256": "01c5e6be9298afc8559ac89d81587739ee2ad4f6da8ce800d62944c710ac55aa",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/ascii-hex-reference.tsx",
+   "sha256": "23f5fc876341c53c7976aac2b36c8cbc09eedfeff15fbad0f078d6a466d3d1f3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/ascii-decimal-5-digits.tsx",
+   "sha256": "6d6e602a40800d7c21cb10f0e399bbfa85befcf03a06e3e5f55bb082ff00fe94",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/ascii-decimal-6-digits.tsx",
+   "sha256": "7d109aff31a7e885b93cf9249c2a0eb07786c77b22769252dae88084bc6c7279",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/ascii-hex-6-digits.tsx",
+   "sha256": "f3d59653e8aae1020b781f13af3891bf6607585f33cd21669dd2b9bed6b5ea2f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/ascii-hex-7-digits.tsx",
+   "sha256": "5e026fb83430172c86a7c3363f0f47af91a5f3c80be0514d85617b2b66f69f1b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/name-30-letters.tsx",
+   "sha256": "c35cb47b7d4d8afeb2558f54ecaf5e98b5831a75165a4bb2d0ce7052be3e3d9b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/name-31-letters.tsx",
+   "sha256": "661b15629024b4ed8e0f43f4620a6a5dcaf960e4f4270f9d70641ea507ba8584",
    "grammar": "tsx",
    "verdict": "accept",
    "codes": [],

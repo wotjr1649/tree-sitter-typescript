@@ -282,12 +282,15 @@ static bool scan_character_reference_tail(TSLexer *lexer) {
         advance(lexer);
         if (lexer->lookahead == 'x' || lexer->lookahead == 'X') {
             advance(lexer);
-            while (length < 6 && iswxdigit(lexer->lookahead)) {
+            // ASCII as in html_character_reference; isw*digit vary by platform (ours, on top of upstream #371).
+            while (length < 6 && ((lexer->lookahead >= '0' && lexer->lookahead <= '9') ||
+                                  (lexer->lookahead >= 'a' && lexer->lookahead <= 'f') ||
+                                  (lexer->lookahead >= 'A' && lexer->lookahead <= 'F'))) {
                 advance(lexer);
                 length++;
             }
         } else {
-            while (length < 5 && iswdigit(lexer->lookahead)) {
+            while (length < 5 && lexer->lookahead >= '0' && lexer->lookahead <= '9') {
                 advance(lexer);
                 length++;
             }

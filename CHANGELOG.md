@@ -5,9 +5,12 @@
 ### Fixed
 
 - TSX: a bare `&` in JSX text (`<p>Shipping & Handling</p>`, `<p>&</p>`, `<p>&foo</p>`, `<p>&한글</p>`) is part of the
-  `jsx_text` node instead of an `ERROR`. Only a complete character reference (`&amp;`, `&#38;`, `&#x26;`) still ends
-  the text and becomes an `html_character_reference` node, as before. The change is in the external scanner
-  (`common/scanner.h`); the generated parsers are unchanged, and the typescript grammar is not affected.
+  `jsx_text` node instead of an `ERROR`. Only a complete character reference still ends the text and becomes an
+  `html_character_reference` node, as before; "complete" means the shapes the existing `html_character_reference`
+  token accepts (`&name;` with 1 to 30 ASCII letters, `&#` 1 to 5 ASCII digits `;`, `&#x` 1 to 6 ASCII hex digits
+  `;`), so `&amp;`, `&#38;` and `&#x26;` are references while `&frac12;` (a digit in the name), `&#123456;` and
+  `&#١;` (a non-ASCII digit) are text. The change is in the external scanner (`common/scanner.h`); the generated
+  parsers are unchanged, and the typescript grammar is not affected.
   - Node kinds and fields added: none.
   - Error-free tree changes: none found (existing corpus inputs, the P112 JSX inputs and the P105 `&` inputs, both
     grammars).
@@ -16,4 +19,7 @@
     `app/test/unit/ui/structural-and-text-components-test.tsx` stays: its `&` is in a JSX attribute string
     (`text="E&xit"`), which this change does not cover.
   - Credit: upstream tree-sitter/tree-sitter-typescript PR #371 by @pmeredit, head commit
-    `f8637eb92272dd9c2c69ebc62e5f72c016e0b6b7` (scanner change and corpus test taken unchanged).
+    `f8637eb92272dd9c2c69ebc62e5f72c016e0b6b7` (scanner change and corpus test taken unchanged). Ours on top: the
+    reference check uses ASCII digit ranges instead of `iswdigit` / `iswxdigit`, which accept other digits on some
+    platforms (with MSYS2 gcc on Windows `<p>&#١;</p>` was an `ERROR`), and the corpus test has the non-ASCII digit
+    and length-limit inputs.
