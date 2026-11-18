@@ -1,0 +1,964 @@
+{
+ "meta": {
+  "format": 1,
+  "tool": "tsc",
+  "package": "typescript",
+  "version": "7.0.2",
+  "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+  "package_lock_sha256": "446a282d524562e236ada16143617f287e8997eb0f230ac6e922d7ec17ec9f2c",
+  "arguments": [
+   "--noEmit",
+   "--noCheck",
+   "--pretty",
+   "false",
+   "--target",
+   "esnext",
+   "--jsx",
+   "preserve"
+  ],
+  "encoding": "utf-8",
+  "offsets": "UTF-8 byte offsets",
+  "cases_file": "cases.jsonl",
+  "cases_sha256": "e00dd0ceaffb477d27c29603eae48b544335d2ae8639bbad7ba437544ae11ec1",
+  "runner": "run.mjs",
+  "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
+ },
+ "results": [
+  {
+   "id": "s1/out-param.ts",
+   "sha256": "246a12cd5bee4f8dfaf27c638ed6002e470b8ade9fd1d0d31c8b1ce122aac332",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-param.tsx",
+   "sha256": "246a12cd5bee4f8dfaf27c638ed6002e470b8ade9fd1d0d31c8b1ce122aac332",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-param-default.ts",
+   "sha256": "443c6659135b29d3f87737659b7dc326c45e1054185b45d3b3750a3f972bfb6d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-param-default.tsx",
+   "sha256": "443c6659135b29d3f87737659b7dc326c45e1054185b45d3b3750a3f972bfb6d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-param-list.ts",
+   "sha256": "82440d97820061da4a5ace27f8422f1818857d6de3f56722d7552a34d9ad2f12",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-param-list.tsx",
+   "sha256": "82440d97820061da4a5ace27f8422f1818857d6de3f56722d7552a34d9ad2f12",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-identifier.ts",
+   "sha256": "4db1c5a65e6d59e9ef21741675f237408c0b72b48899e1c4d7764054e9ff0155",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-identifier.tsx",
+   "sha256": "4db1c5a65e6d59e9ef21741675f237408c0b72b48899e1c4d7764054e9ff0155",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-type-reference.ts",
+   "sha256": "6bf11efea7d7b4fbbd4dd2b675d94615c7f624f66ff29ba9bac43a71a2e96454",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-type-reference.tsx",
+   "sha256": "6bf11efea7d7b4fbbd4dd2b675d94615c7f624f66ff29ba9bac43a71a2e96454",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-member.ts",
+   "sha256": "90594fa31d7d88b7d75027cdeea0dae73a57c584a53bec621dc7c5b53c638ab7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-member.tsx",
+   "sha256": "90594fa31d7d88b7d75027cdeea0dae73a57c584a53bec621dc7c5b53c638ab7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-type-argument.ts",
+   "sha256": "d95e943536c009c59b0ba583dda03e0c2ce5c86d1f40126f6d9633cb210e51e0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/out-type-argument.tsx",
+   "sha256": "d95e943536c009c59b0ba583dda03e0c2ce5c86d1f40126f6d9633cb210e51e0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/plain-generics.ts",
+   "sha256": "24d8b406b975978c11b6b1098dcb2aed3984c5dc9def7033f76e83e51595b170",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/plain-generics.tsx",
+   "sha256": "24d8b406b975978c11b6b1098dcb2aed3984c5dc9def7033f76e83e51595b170",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/generic-class-interface.ts",
+   "sha256": "e2db7c5516a0592e6b2a13039f76a5a4337b83b6d3f15b40bcc849c696b51948",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/generic-class-interface.tsx",
+   "sha256": "e2db7c5516a0592e6b2a13039f76a5a4337b83b6d3f15b40bcc849c696b51948",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/const-type-parameter.ts",
+   "sha256": "1c7306709af45b8972880f2667ac25cd438cb34ed1e40042a9737b808a3fba41",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/const-type-parameter.tsx",
+   "sha256": "1c7306709af45b8972880f2667ac25cd438cb34ed1e40042a9737b808a3fba41",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s1/type-parameter-no-name.ts",
+   "sha256": "c2445c6e6bdbb2c464d1b7f4275c5b94035c29abc0fbb34923b2ebf1d0bc8c83",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1139
+   ],
+   "at": 9
+  },
+  {
+   "id": "s1/type-parameter-no-name.tsx",
+   "sha256": "c2445c6e6bdbb2c464d1b7f4275c5b94035c29abc0fbb34923b2ebf1d0bc8c83",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1139
+   ],
+   "at": 9
+  },
+  {
+   "id": "s1/extends-missing.ts",
+   "sha256": "a7b4195b98c17ea3df237a7edb62ac04c077f3f5d03163c44d51b3b3819065d1",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 16
+  },
+  {
+   "id": "s1/extends-missing.tsx",
+   "sha256": "a7b4195b98c17ea3df237a7edb62ac04c077f3f5d03163c44d51b3b3819065d1",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 16
+  },
+  {
+   "id": "s2/export-type-from.ts",
+   "sha256": "f68d240ea742aa6f2ab998d9e9d29972c09fd86616a1364f68ed86795b7d7015",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-type-from.tsx",
+   "sha256": "f68d240ea742aa6f2ab998d9e9d29972c09fd86616a1364f68ed86795b7d7015",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-type-local.ts",
+   "sha256": "091e714e7f9e8f0930a61ea80c1ae5cae8febbbfa792bc77679b68189ae1b8d0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-type-local.tsx",
+   "sha256": "091e714e7f9e8f0930a61ea80c1ae5cae8febbbfa792bc77679b68189ae1b8d0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-type-alias.ts",
+   "sha256": "45712c73105045f6536e0730f375e7816f8e43fa381bc0a68e4ce1363687f306",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-type-alias.tsx",
+   "sha256": "45712c73105045f6536e0730f375e7816f8e43fa381bc0a68e4ce1363687f306",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-inline-type.ts",
+   "sha256": "b5dca66bf32f4daa022fc4879189dc338837048e052f96c5abdd50562518779f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-inline-type.tsx",
+   "sha256": "b5dca66bf32f4daa022fc4879189dc338837048e052f96c5abdd50562518779f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-star.ts",
+   "sha256": "88ac280dbe3aad0a5ce8497ce3bafee0a540b7ed12d65f6b3e152f3ee4d948ab",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-star.tsx",
+   "sha256": "88ac280dbe3aad0a5ce8497ce3bafee0a540b7ed12d65f6b3e152f3ee4d948ab",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s2/export-type-star-no-from.ts",
+   "sha256": "363fe55c8254cddb00431eac81ef11a27eefddb4830b794b3ad9716324cc6dd4",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 13
+  },
+  {
+   "id": "s2/export-type-star-no-from.tsx",
+   "sha256": "363fe55c8254cddb00431eac81ef11a27eefddb4830b794b3ad9716324cc6dd4",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 13
+  },
+  {
+   "id": "s2/export-type-star-as-no-from.ts",
+   "sha256": "d246dede13c7eeb21632b982ea74d303c7d928f9feac03474927b071497c6cff",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 19
+  },
+  {
+   "id": "s2/export-type-star-as-no-from.tsx",
+   "sha256": "d246dede13c7eeb21632b982ea74d303c7d928f9feac03474927b071497c6cff",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 19
+  },
+  {
+   "id": "s2/export-type-star-no-source.ts",
+   "sha256": "d7f8cfb02893451f6058e47403593141ffc5753316d17aeb8ccdee02263d45a8",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 18
+  },
+  {
+   "id": "s2/export-type-star-no-source.tsx",
+   "sha256": "d7f8cfb02893451f6058e47403593141ffc5753316d17aeb8ccdee02263d45a8",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 18
+  },
+  {
+   "id": "s2/export-type-star-as-missing-name.ts",
+   "sha256": "6d1ed8cf2c8380bb7e4ab7d0b6e5d1ac46496752c7de811b645c0ce61d91efb9",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 22
+  },
+  {
+   "id": "s2/export-type-star-as-missing-name.tsx",
+   "sha256": "6d1ed8cf2c8380bb7e4ab7d0b6e5d1ac46496752c7de811b645c0ce61d91efb9",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 22
+  },
+  {
+   "id": "s2/export-type-from-missing-source.ts",
+   "sha256": "e06f708740b99a52777ef6cb30b804ac98162c4223b5480ef7830cef4ae7ccae",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 22
+  },
+  {
+   "id": "s2/export-type-from-missing-source.tsx",
+   "sha256": "e06f708740b99a52777ef6cb30b804ac98162c4223b5480ef7830cef4ae7ccae",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 22
+  },
+  {
+   "id": "s3/accessor-plain.ts",
+   "sha256": "d4dd64e79a7526a5232c409ca65858ba4c4c8d41b7e79268f323e03d7be917c5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-plain.tsx",
+   "sha256": "d4dd64e79a7526a5232c409ca65858ba4c4c8d41b7e79268f323e03d7be917c5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-identifier.ts",
+   "sha256": "ea6409efed2686cb2f0a4eb2d84241028ad779566eaf51698732e29740c9463b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-identifier.tsx",
+   "sha256": "ea6409efed2686cb2f0a4eb2d84241028ad779566eaf51698732e29740c9463b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-static-field.ts",
+   "sha256": "ba8d969fa1e8cd544ec949855d66de29f721f6ff7a46539d7170817cd41f2282",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-static-field.tsx",
+   "sha256": "ba8d969fa1e8cd544ec949855d66de29f721f6ff7a46539d7170817cd41f2282",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-declare.ts",
+   "sha256": "c37fc50fdae7a36fe015783ead7c954c608fd3fa0deeca1eec5ece08921cd999",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-declare.tsx",
+   "sha256": "c37fc50fdae7a36fe015783ead7c954c608fd3fa0deeca1eec5ece08921cd999",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-static-method-named.ts",
+   "sha256": "7f1e745427ff2763d0c651c7cfe8116600c1213424f45b1d0968cfb68eec194d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-static-method-named.tsx",
+   "sha256": "7f1e745427ff2763d0c651c7cfe8116600c1213424f45b1d0968cfb68eec194d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-newline.ts",
+   "sha256": "b685cb1a4cfa32922253089cc89ff421077655a85fb61fa995f093782cd8ce35",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-newline.tsx",
+   "sha256": "b685cb1a4cfa32922253089cc89ff421077655a85fb61fa995f093782cd8ce35",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/accessor-value-missing.ts",
+   "sha256": "157b900bc35adba807d1ad40b932a36f8a4bb5cf03773f2b4b8e78c5ece973c8",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 23
+  },
+  {
+   "id": "s3/accessor-value-missing.tsx",
+   "sha256": "157b900bc35adba807d1ad40b932a36f8a4bb5cf03773f2b4b8e78c5ece973c8",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 23
+  },
+  {
+   "id": "s3/accessor-type-missing.ts",
+   "sha256": "91efb6f9ba98fb0e5a04f8ae00bc7ae5b6e650ebe608477e2ab7406e897ddb97",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 22
+  },
+  {
+   "id": "s3/accessor-type-missing.tsx",
+   "sha256": "91efb6f9ba98fb0e5a04f8ae00bc7ae5b6e650ebe608477e2ab7406e897ddb97",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 22
+  },
+  {
+   "id": "s4/import-type.ts",
+   "sha256": "35fb927d953a854f1e907b8af0b6204104c389d963f801333af828ef3fab75f1",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/import-type.tsx",
+   "sha256": "35fb927d953a854f1e907b8af0b6204104c389d963f801333af828ef3fab75f1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/generic-reference.ts",
+   "sha256": "d9c8fd9dfd8ee58c2efbc7e4f2dcdd175edb54648f30b8de1ac00c14205ad8c7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/generic-reference.tsx",
+   "sha256": "d9c8fd9dfd8ee58c2efbc7e4f2dcdd175edb54648f30b8de1ac00c14205ad8c7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-instantiation.ts",
+   "sha256": "6a9ed272a9973e40a31f6b6d4984440d4ff9b2d5fbe0b181bfe19b24237bd42b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-instantiation.tsx",
+   "sha256": "6a9ed272a9973e40a31f6b6d4984440d4ff9b2d5fbe0b181bfe19b24237bd42b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-member.ts",
+   "sha256": "64456ad929927bbc8b66de3a8f551987a4a1eab9a07862c47a62a79251f846d8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-member.tsx",
+   "sha256": "64456ad929927bbc8b66de3a8f551987a4a1eab9a07862c47a62a79251f846d8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/instantiation-expression.ts",
+   "sha256": "02cea971095f9f4d60f01676e994c5f3c907fb516ec293f8d88fa346d71e7386",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/instantiation-expression.tsx",
+   "sha256": "02cea971095f9f4d60f01676e994c5f3c907fb516ec293f8d88fa346d71e7386",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-member-targs.ts",
+   "sha256": "b7e33afc682945cc2b33494af19a67718df02b57c63bd04bfa3fd8a9118e3a2c",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-member-targs.tsx",
+   "sha256": "b7e33afc682945cc2b33494af19a67718df02b57c63bd04bfa3fd8a9118e3a2c",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/typeof-lt-no-args.ts",
+   "sha256": "49fd809781d5e829d5d8b92ffb4ceb3c69a5f1077527c24233f76f35b59fa376",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 20
+  },
+  {
+   "id": "s4/typeof-lt-no-args.tsx",
+   "sha256": "49fd809781d5e829d5d8b92ffb4ceb3c69a5f1077527c24233f76f35b59fa376",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 20
+  },
+  {
+   "id": "s4/import-type-open.ts",
+   "sha256": "090e78f1a6f2fab9f41f2d4b9267802a0b995d0626d033c7d461de6b577f8744",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 16
+  },
+  {
+   "id": "s4/import-type-open.tsx",
+   "sha256": "090e78f1a6f2fab9f41f2d4b9267802a0b995d0626d033c7d461de6b577f8744",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 16
+  },
+  {
+   "id": "s4/import-type-member-missing.ts",
+   "sha256": "595a07b7b580a507f6d357649ffee850badbd89cec6bab891a0a40626b968f90",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 21
+  },
+  {
+   "id": "s4/import-type-member-missing.tsx",
+   "sha256": "595a07b7b580a507f6d357649ffee850badbd89cec6bab891a0a40626b968f90",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 21
+  },
+  {
+   "id": "s5/call-and-template-arg.ts",
+   "sha256": "a77bfa57e76614eb4fb3f04807076a4243e97416cec3c85159f3c063335de3d7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/call-and-template-arg.tsx",
+   "sha256": "a77bfa57e76614eb4fb3f04807076a4243e97416cec3c85159f3c063335de3d7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/comparison.ts",
+   "sha256": "3883858fe19c423928a95d4fd16984cf20a811c49ac6f70b881c29865a6e20f2",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/comparison.tsx",
+   "sha256": "3883858fe19c423928a95d4fd16984cf20a811c49ac6f70b881c29865a6e20f2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/comparison-paren.ts",
+   "sha256": "22c0e5edf704f311db87a5f788f9241322f20d9a23e35cfa661d7b4a356d6271",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/comparison-paren.tsx",
+   "sha256": "22c0e5edf704f311db87a5f788f9241322f20d9a23e35cfa661d7b4a356d6271",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/comparison-template.ts",
+   "sha256": "d0c560af3dac55c35135449a0d38e59249a58bbe5d771d7056b8f91dd7796908",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/comparison-template.tsx",
+   "sha256": "d0c560af3dac55c35135449a0d38e59249a58bbe5d771d7056b8f91dd7796908",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/binary-lt-gt.ts",
+   "sha256": "0557bf1379d53f6bb40632d1b71eee57ec457eb51cdc54f4c459837edc65aefb",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/binary-lt-gt.tsx",
+   "sha256": "0557bf1379d53f6bb40632d1b71eee57ec457eb51cdc54f4c459837edc65aefb",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/function-type-argument.ts",
+   "sha256": "8e9a78a9270074e671b4fa22e9593e2db3c676fd7e82607e5596d961ad7eb817",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/function-type-argument.tsx",
+   "sha256": "8e9a78a9270074e671b4fa22e9593e2db3c676fd7e82607e5596d961ad7eb817",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/optional-chain.ts",
+   "sha256": "5ee6520eec7691b73680be93b05ec835ef4c37f1e4d9d28c6e12c2db3c4a091c",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/optional-chain.tsx",
+   "sha256": "5ee6520eec7691b73680be93b05ec835ef4c37f1e4d9d28c6e12c2db3c4a091c",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/ternary-call.ts",
+   "sha256": "ccd9dd0d510b6e355ba194981043ea28c526afe2089860835d36bbaf5c811a27",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/ternary-call.tsx",
+   "sha256": "ccd9dd0d510b6e355ba194981043ea28c526afe2089860835d36bbaf5c811a27",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/untagged-templates.ts",
+   "sha256": "be30a88aab7908e22600e3b7b23559586bc00a0270e59ad47842b4497d018f9b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/untagged-templates.tsx",
+   "sha256": "be30a88aab7908e22600e3b7b23559586bc00a0270e59ad47842b4497d018f9b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s5/type-arguments-open.ts",
+   "sha256": "007ee92afc789d9a27aa8e51214c6e4d66e989bcfae5ef9fe07d2ee5e594dc40",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 11
+  },
+  {
+   "id": "s5/type-arguments-open.tsx",
+   "sha256": "007ee92afc789d9a27aa8e51214c6e4d66e989bcfae5ef9fe07d2ee5e594dc40",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 11
+  },
+  {
+   "id": "s6/entity-named.tsx",
+   "sha256": "9d01a2f4885095a9a22c368c3ba93f990016ffbcebc803ea4a242c0b0aee005a",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/entity-decimal.tsx",
+   "sha256": "307b9589fdad14de7e3d6e7af0c58cd7c93baf78d630d8480f3f5e5686c60066",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/entity-hex.tsx",
+   "sha256": "70096b390b9ec579286f5e6b7fab8feeab6ecc1bf94cc283dd026398a3f51e8f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/entities-text.tsx",
+   "sha256": "3a9b5b25e3675379c2df412099435868d1da9b879c210c90ade01922fed6548a",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/expression-child.tsx",
+   "sha256": "23a39046f31dc7b43c0aab5860a8cbe0531d0373cf55476343844351444619d9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/plain-text.tsx",
+   "sha256": "8286230721b68e5d0e15dabf39d5938611b053c320f95ed8a4fa556fd41e7457",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/amp-in-attribute.tsx",
+   "sha256": "f8b5861a27ea5d6b6583497959c086bfd0d6a52cb42ce1f43c9015e27fc2b425",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/entities-attribute-and-expression.tsx",
+   "sha256": "f8b18176001fad46359bdb7c1c343b1ea7ae21fbc447f885afe8699cc866168b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/intersection-and-bitand.ts",
+   "sha256": "69cafd78fe09983947dc5224ff7e2628502e24fdd4a63784e285d1942611c97d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/intersection-and-bitand.tsx",
+   "sha256": "69cafd78fe09983947dc5224ff7e2628502e24fdd4a63784e285d1942611c97d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s6/gt-in-text.tsx",
+   "sha256": "4b1ba3d47112636b45514af6f656dd117b93a09267e918d06e967a753d5c2ead",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1382
+   ],
+   "at": 3
+  },
+  {
+   "id": "s6/expression-open.tsx",
+   "sha256": "d30c56d0d8a06f4bb1b16a3c716dd44128b2c25d2090337efb8cd3efd8e05295",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 9
+  }
+ ]
+}

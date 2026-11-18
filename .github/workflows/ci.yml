@@ -95,3 +95,46 @@ jobs:
       - name: Parse examples
         shell: bash
         run: node test/examples/parse-examples.mjs
+  # tsc 7.0.2 (oracle/package.json) says which inputs are syntax; the replay checks both grammars agree through the
+  # tree-sitter API. Needs only Node and Go (cgo with the runner's gcc); see oracle/README.md.
+  oracle:
+    name: Oracle replay
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache-dependency-path: oracle/replay/go.sum
+      - name: Install tsc
+        working-directory: oracle
+        run: npm ci --ignore-scripts
+      - name: Self-test the runner
+        run: node oracle/run.mjs --self-test
+      - name: Regenerate verdicts
+        shell: bash
+        run: |-
+          # git diff alone passes for a file that is not in the commit: require it to be tracked first.
+          git ls-files --error-unmatch -- oracle/verdicts.json
+          node oracle/run.mjs
+          git diff --exit-code -- oracle/verdicts.json
+      - name: Self-test the replay
+        working-directory: oracle/replay
+        run: go test -count=1 .
+      - name: Replay verdicts against both grammars
+        working-directory: oracle/replay
+        run: go run . -oracle ..
+      # Node kinds (named and anonymous) and field names are a public contract; a change shows up as a diff here.
+      - name: Check the node-kind snapshot
+        shell: bash
+        run: |-
+          git ls-files --error-unmatch -- test/node-kinds/typescript.txt test/node-kinds/tsx.txt
+          node test/node-kinds/generate.mjs
+          git diff --exit-code -- test/node-kinds
+          test -z "$(git status --porcelain --untracked-files=all -- test/node-kinds)"
