@@ -67,7 +67,18 @@ jobs:
           test-node: true
           test-python: true
           test-go: true
-          test-swift: true
+      # Same commands as parser-test-action's Swift step, but with a serial build: on Windows, swift-build's parallel
+      # tasks for the two resource bundles (TypeScript and TSX share queries/) failed with "Touch
+      # ...TreeSitterTypeScript_TreeSitterTSX.bundle ... being used by another process" depending on task order.
+      - name: Set up Swift
+        uses: SwiftyLab/setup-swift@v1
+        with:
+          swift-version: "6.4"
+      - name: Run Swift tests
+        shell: sh
+        run: |-
+          swift build --build-tests -j 1
+          swift test --skip-build -q
       # Every .ts/.tsx file must parse unless listed in test/examples/known-failures.txt; listed files must still fail.
       - name: Parse examples
         shell: bash
