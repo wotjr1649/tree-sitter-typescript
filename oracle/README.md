@@ -105,6 +105,7 @@ Changing the `typescript` version means changing `package.json`, `package-lock.j
 
 ## Known limits
 
+- The Go bindings `#include` `typescript/src/parser.c` and `tsx/src/parser.c` from outside their package, so Go's build cache does not see a regenerated parser at the same path: CI runs the replay without a restored cache, and a local run after `tree-sitter generate` needs `go clean -cache` or its own `GOCACHE`.
 - The node-kind snapshot follows `node-types.json`. The TypeScript runtime also exposes `jsx_text` as a visible named kind (id 163) that is absent from `typescript/src/node-types.json` and so from `typescript.txt` (the TSX snapshot has it); losing that symbol would not show up as a snapshot difference.
 - The `checkout@v4`, `setup-node@v4` and `setup-go@v5` actions of the `oracle` job declare Node 20 and run on Node 24 with a runner warning, like the existing jobs (same generation); moving all of them is a separate change.
 - The platform binary packages (`@typescript/typescript-*`) are pinned by version only: the runner and the replay check that the installed one and every one in the lock are 7.0.2, but their integrity is not compared with a value of its own; `npm ci` verifies it against the lockfile in CI. Whether the native file on disk is the one npm unpacked is not checked.
