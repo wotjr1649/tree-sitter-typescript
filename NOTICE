@@ -11,6 +11,7 @@ from tree-sitter/tree-sitter-javascript
 Brunsfeld and licensed under the MIT License; see
 third_party/tree-sitter-javascript/LICENSE. SHA-256:
 
+2e0110e07abef7c2548b26ec9d6969775617ca539a0dc8dbeeb14d6452c711d1  LICENSE
 230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc  grammar.js
 0cad1712acaf40804bc5dc7c8476858752c1f549cdf7d8c63c747317be0f8fa6  queries/highlights-jsx.scm
 bbe7a58cacfb1c954cb0eab44779fd80421ed59b762b975723447207635de50d  queries/highlights-params.scm
