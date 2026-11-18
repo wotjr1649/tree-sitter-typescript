@@ -12,7 +12,7 @@ history, kept as `refs/upstream/v0.23.2`, and later upstream changes are adopted
   hand-written `*/src/scanner.c`. `*/src/parser.c`, `*/src/grammar.json`, `*/src/node-types.json` and
   `*/src/tree_sitter/*` are generated: edit the grammar, run `tree-sitter generate --abi 15 --js-runtime native` with
   CLI 0.27.2 in `typescript/` and `tsx/`, commit both.
-- `vendor/tree-sitter-javascript/grammar.js` is a generation input copied unchanged from a named
+- `third_party/tree-sitter-javascript/grammar.js` is a generation input copied unchanged from a named
   tree-sitter-javascript tag. Never edit it; replacing it changes its source and SHA-256 in `NOTICE` and the CI check together.
 - Node kinds and field names are a public contract: removing or renaming one is breaking (major version, CHANGELOG);
   adding one is not. Keep the grammar names `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and

@@ -6,7 +6,7 @@ on:
     paths:
       - "scripts.js"
       - "common/*"
-      - "vendor/**"
+      - "third_party/**"
       - "*/grammar.js"
       - "*/src/**"
       - "bindings/**"
@@ -15,7 +15,7 @@ on:
     paths:
       - "scripts.js"
       - "common/*"
-      - "vendor/**"
+      - "third_party/**"
       - "*/grammar.js"
       - "*/src/**"
       - "bindings/**"
@@ -40,7 +40,7 @@ jobs:
         uses: tree-sitter/setup-action/cli@v1
         with:
           tree-sitter-ref: v0.27.2
-      # Generate only the two grammars; vendor/ holds an input, not a grammar to build.
+      # Generate only the two grammars; third_party/ holds an input, not a grammar to build.
       - name: Verify generated parsers
         shell: bash
         run: |-

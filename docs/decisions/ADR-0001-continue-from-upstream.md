@@ -18,7 +18,7 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
    change at a time, never synchronized automatically. Upstream tags stay out of `refs/tags`; v0.23.2 is kept as
    `refs/upstream/v0.23.2`.
 2. The JavaScript grammar that `common/define-grammar.js` extends is vendored as
-   `vendor/tree-sitter-javascript/grammar.js`, copied unchanged from tree-sitter-javascript v0.23.1 (`3a837b6`,
+   `third_party/tree-sitter-javascript/grammar.js`, copied unchanged from tree-sitter-javascript v0.23.1 (`3a837b6`,
    SHA-256 `230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc`), in place of the npm dependency.
    `NOTICE` records the source and CI checks the hash. A later release may switch it to a named tag of the
    owner-maintained JavaScript grammar.

@@ -30,7 +30,7 @@
     "typescript/src/**",
     "tsx/src/**",
     "common/**",
-    "vendor/**",
+    "third_party/**",
     "*.wasm"
   ],
   "dependencies": {

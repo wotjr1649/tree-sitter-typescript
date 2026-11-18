@@ -1,4 +1,4 @@
-const JavaScript = require('../vendor/tree-sitter-javascript/grammar');
+const JavaScript = require('../third_party/tree-sitter-javascript/grammar');
 
 module.exports = function defineGrammar(dialect) {
   return grammar(JavaScript, {
