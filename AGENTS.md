@@ -18,8 +18,9 @@ history, kept as `refs/upstream/v0.23.2`, and later upstream changes are adopted
 - `third_party/tree-sitter-javascript/` (`grammar.js`, the generation input, and `queries/`) is copied unchanged from a
   named tree-sitter-javascript tag. Never edit it; replacing it changes its source and SHA-256s in `NOTICE` and the
   CI check together.
-- The parsers are ABI 15; binding runtime lower bounds are the 0.25 line (CMake default ABI 15). Do not lower them
-  without the owner's approval.
+- The parsers are ABI 15; binding runtime lower bounds are the 0.25 line (CMake default ABI 15). py-tree-sitter 0.25
+  needs Python 3.10, so `requires-python`, the `cp310` abi3 wheel tag and `Py_LIMITED_API` (`setup.py`) say 3.10.
+  Do not lower them without the owner's approval.
 - `tree-sitter test` runs `test/corpus` with the `typescript` grammar only; `tsx` has no corpus of its own.
 - CI parses every `.ts`/`.tsx` file of the example repositories pinned in `test/examples/repos.txt`
   (`test/examples/parse-examples.mjs`). `test/examples/known-failures.txt` lists the files that fail and why; it may

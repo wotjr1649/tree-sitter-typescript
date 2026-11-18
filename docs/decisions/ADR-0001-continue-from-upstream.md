@@ -32,7 +32,9 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 5. Node kinds and field names stay a public contract: removing or renaming one is breaking. The grammar names
    `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and `tree_sitter_tsx` stay.
 6. The parsers are ABI 15 (upstream v0.23.2 committed ABI 14). Binding runtime lower bounds move to the first
-   ABI 15-capable line, 0.25 (Rust, Node, Python, Go, Swift), and the CMake default ABI to 15.
+   ABI 15-capable line, 0.25 (Rust, Node, Python, Go, Swift), and the CMake default ABI to 15. py-tree-sitter 0.25
+   needs Python 3.10, so the Python package's minimum moves from 3.9 to 3.10 (`requires-python`, abi3 tag `cp310`,
+   `Py_LIMITED_API` 0x030A0000).
 7. The planned oracle for later fixes is the TypeScript compiler (`tsc`) parser: a fix that changes which inputs
    parse cites tsc's verdict. It is not set up yet.
 
@@ -41,7 +43,8 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 - Pinned commits stay reachable because this repository does not rewrite its history.
 - The inherited publication workflow is gone; test, lint and fuzz CI stay. The test workflow uses CLI 0.27.2 and
   checks that the committed parsers match it.
-- Binding consumers need tree-sitter runtime 0.25 or later.
+- Binding consumers need tree-sitter runtime 0.25 or later, and Python consumers Python 3.10 or later.
+- The Go module path is `github.com/wotjr1649/tree-sitter-typescript` (owner decision, 2026-11-18).
 - CI parses example repositories at pinned commits; the files the baseline grammar cannot parse are listed in
   `test/examples/known-failures.txt`, which may only shrink as the v1.1 grammar fixes land (owner decision, 2026-11-18).
 - One maintainer owns the grammars; the dependency moves from upstream's maintainers to this repository's owner.
