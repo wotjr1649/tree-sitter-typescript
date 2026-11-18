@@ -1,0 +1,24 @@
+# AGENTS.md — tree-sitter-typescript
+
+Owner-maintained tree-sitter grammars for TypeScript and TSX, continued from `tree-sitter/tree-sitter-typescript`
+v0.23.2 (`f975a62`) to keep them correct and fix defects fast. Intended consumer: `go-treesitter`, which pins a
+commit here under its ADR-0024 rule 7 and regenerates `src/parser.c` with tree-sitter CLI 0.27.2. The repository is
+independent (`docs/decisions/ADR-0001-continue-from-upstream.md`): upstream v0.23.2 is commit `f975a62` in this
+history, kept as `refs/upstream/v0.23.2`, and later upstream changes are adopted only deliberately.
+
+## Rules
+
+- Source is `common/define-grammar.js`, `typescript/grammar.js`, `tsx/grammar.js`, `common/scanner.h` and the
+  hand-written `*/src/scanner.c`. `*/src/parser.c`, `*/src/grammar.json`, `*/src/node-types.json` and
+  `*/src/tree_sitter/*` are generated: edit the grammar, run `tree-sitter generate --abi 15 --js-runtime native` with
+  CLI 0.27.2 in `typescript/` and `tsx/`, commit both.
+- `vendor/tree-sitter-javascript/grammar.js` is a generation input copied unchanged from a named
+  tree-sitter-javascript tag. Never edit it; replacing it changes its source and SHA-256 in `NOTICE` and the CI check together.
+- Node kinds and field names are a public contract: removing or renaming one is breaking (major version, CHANGELOG);
+  adding one is not. Keep the grammar names `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and
+  `tree_sitter_tsx`.
+- A fix starts from a failing case (corpus test or oracle case) and cites its evidence. Existing corpus tests keep
+  passing unless the change alters them on purpose and says why.
+- Keep every copyright line in `LICENSE` and the attribution in `NOTICE` (MIT).
+- Agents prepare branches, commits and pull requests. Every merge, tag, release, publication, repository-setting
+  change and deletion needs the owner's separate approval. No registry publishing (npm, crates.io, PyPI).
