@@ -67,6 +67,8 @@ mod tests {
         parser
             .set_language(&super::LANGUAGE_TYPESCRIPT.into())
             .expect("Error loading TypeScript parser");
+        let tree = parser.parse("let x: number = 1;", None).unwrap();
+        assert!(!tree.root_node().has_error());
     }
 
     #[test]
@@ -75,5 +77,7 @@ mod tests {
         parser
             .set_language(&super::LANGUAGE_TSX.into())
             .expect("Error loading TSX parser");
+        let tree = parser.parse("const a = <div />;", None).unwrap();
+        assert!(!tree.root_node().has_error());
     }
 }

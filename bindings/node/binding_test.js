@@ -6,9 +6,11 @@ const Parser = require('tree-sitter');
 test('can load TypeScript grammar', () => {
   const parser = new Parser();
   assert.doesNotThrow(() => parser.setLanguage(require('./typescript')));
+  assert.strictEqual(parser.parse('let x: number = 1;').rootNode.hasError, false);
 });
 
 test('can load TSX grammar', () => {
   const parser = new Parser();
   assert.doesNotThrow(() => parser.setLanguage(require('./tsx')));
+  assert.strictEqual(parser.parse('const a = <div />;').rootNode.hasError, false);
 });
