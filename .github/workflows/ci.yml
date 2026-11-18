@@ -26,6 +26,18 @@ jobs:
           grep -qx '#define LANGUAGE_VERSION 15' typescript/src/parser.c
           grep -qx '#define LANGUAGE_VERSION 15' tsx/src/parser.c
           grep -q 'set(TREE_SITTER_ABI_VERSION 15 CACHE' CMakeLists.txt
+  known-failures:
+    name: Known failures only shrink
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # On pull_request the checkout is the merge commit; its first parent is the base branch.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Compare known-failures.txt with the base branch
+        run: bash test/examples/check-known-failures-shrink.sh HEAD^1
   test:
     name: Test parsers
     runs-on: ${{matrix.os}}

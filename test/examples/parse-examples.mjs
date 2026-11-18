@@ -1,6 +1,7 @@
 // Parses every .ts and .tsx file under examples/ (this repository's examples/*.ts{,x} and the pinned clones listed in
 // repos.txt) and compares the files that fail with known-failures.txt exactly. A new failure fails, and so does a
-// listed file that now parses: remove it from the list in the same change. The list may only shrink.
+// listed file that now parses: remove it from the list in the same change. The list may only shrink;
+// check-known-failures-shrink.sh fails a pull request that adds a path without changing repos.txt.
 // Usage: node test/examples/parse-examples.mjs [extra tree-sitter parse arguments]
 import { execFileSync, spawnSync } from 'node:child_process';
 import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';

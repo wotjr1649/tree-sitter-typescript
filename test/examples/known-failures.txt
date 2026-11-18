@@ -1,5 +1,6 @@
 # Files in the pinned examples (repos.txt) that the grammar fails to parse, with the unsupported construct.
 # Format: path<TAB>construct. The list may only shrink: CI fails on a new failure and on a listed file that parses.
+# A pull request that adds a path fails CI unless it also changes repos.txt (check-known-failures-shrink.sh).
 examples/desktop/app/test/unit/ui/structural-and-text-components-test.tsx	v1.1: bare & in JSX text, e.g. E&xit or "a && b"
 examples/redux/src/types/store.ts	v1.1: interface call signature starting with < on the line after a member without ;
 examples/redux/website/plugins/remark-typescript-tools/linkDocblocks/plugin.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
