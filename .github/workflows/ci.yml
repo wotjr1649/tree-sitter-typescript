@@ -48,11 +48,17 @@ jobs:
             (cd "$grammar" && tree-sitter generate --abi 15 --js-runtime native)
           done
           git diff --exit-code -- typescript/src tsx/src
+      # Example repositories at the commits pinned in test/examples/repos.txt.
       - name: Set up examples
+        shell: bash
         run: |-
-          git clone https://github.com/desktop/desktop examples/desktop --single-branch --depth=1 --filter=blob:none
-          git clone https://github.com/reduxjs/redux examples/redux --single-branch --depth=1 --filter=blob:none
-          git clone https://github.com/microsoft/vscode examples/vscode --single-branch --depth=1 --filter=blob:none
+          grep -v '^#' test/examples/repos.txt | while read -r name url commit; do
+            [ -n "$name" ] || continue
+            git init -q "examples/$name"
+            git -C "examples/$name" fetch -q --depth=1 --filter=blob:none "$url" "$commit"
+            git -C "examples/$name" -c advice.detachedHead=false checkout -q FETCH_HEAD
+            test "$(git -C "examples/$name" rev-parse HEAD)" = "$commit"
+          done
       - name: Run tests
         uses: tree-sitter/parser-test-action@v3
         with:
@@ -62,12 +68,7 @@ jobs:
           test-python: true
           test-go: true
           test-swift: true
+      # Every .ts/.tsx file must parse unless listed in test/examples/known-failures.txt; listed files must still fail.
       - name: Parse examples
-        id: test
-        uses: tree-sitter/parse-action@v4
-        with:
-          files: |
-            examples/**/*.ts
-            examples/**/*.tsx
-            !examples/redux/src/types/store.ts
-            !examples/vscode/src/bootstrap-window.ts
+        shell: bash
+        run: node test/examples/parse-examples.mjs
