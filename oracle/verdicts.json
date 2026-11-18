@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "e00dd0ceaffb477d27c29603eae48b544335d2ae8639bbad7ba437544ae11ec1",
+  "cases_sha256": "c8b2a1668178e8588dbaec7228f711789f714aebbfbcd848899a90eb65e655d7",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -959,6 +959,430 @@
     1109
    ],
    "at": 9
+  },
+  {
+   "id": "s3/corpus-accessor-plain.ts",
+   "sha256": "f74a7b5555a5a487eb44cb636b702f2bc80f49e8ccbe4b976f91517db5c608b6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-accessor-plain.tsx",
+   "sha256": "f74a7b5555a5a487eb44cb636b702f2bc80f49e8ccbe4b976f91517db5c608b6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-public-accessor.ts",
+   "sha256": "f409186f3b06043793b243cc390bc0739a800cee19934f071363be8ff78f43ec",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-public-accessor.tsx",
+   "sha256": "f409186f3b06043793b243cc390bc0739a800cee19934f071363be8ff78f43ec",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-static-accessor.ts",
+   "sha256": "14729a8836a35280989b1c2b2c68fc572f93509c8a98d401598b7fbeb0caa8fe",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-static-accessor.tsx",
+   "sha256": "14729a8836a35280989b1c2b2c68fc572f93509c8a98d401598b7fbeb0caa8fe",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-public-static-accessor.ts",
+   "sha256": "bab11dedd96a8522a848293fd3bd79f53c18772d9bd2052be845d3a40e597248",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-public-static-accessor.tsx",
+   "sha256": "bab11dedd96a8522a848293fd3bd79f53c18772d9bd2052be845d3a40e597248",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-static-accessor-private-name.ts",
+   "sha256": "48291c2b1e71a5eae628148960edcc7b366579958094860b1083019d69ee7881",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-static-accessor-private-name.tsx",
+   "sha256": "48291c2b1e71a5eae628148960edcc7b366579958094860b1083019d69ee7881",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-override-accessor.ts",
+   "sha256": "a627ff379bc74a3ed47459080e4e807e7ba3720899c9f43f8bcbe37932de25c0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-override-accessor.tsx",
+   "sha256": "a627ff379bc74a3ed47459080e4e807e7ba3720899c9f43f8bcbe37932de25c0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-abstract-accessor.ts",
+   "sha256": "0b0ad981be172ef8bb80a51ae68f09c5a03b280e60e08f87213580a4bae3c36f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-abstract-accessor.tsx",
+   "sha256": "0b0ad981be172ef8bb80a51ae68f09c5a03b280e60e08f87213580a4bae3c36f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-method-named-accessor.ts",
+   "sha256": "587d816069d93d966ce65bb122cc1fe0bca32e27b0fcb2d6e2eb88560379d645",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-method-named-accessor.tsx",
+   "sha256": "587d816069d93d966ce65bb122cc1fe0bca32e27b0fcb2d6e2eb88560379d645",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-field-named-accessor.ts",
+   "sha256": "dc4c943b1aa17fb393038903af6d0ea453414902e78823d9d5397146ea3cff21",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-field-named-accessor.tsx",
+   "sha256": "dc4c943b1aa17fb393038903af6d0ea453414902e78823d9d5397146ea3cff21",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-field-named-accessor-init.ts",
+   "sha256": "f3648ce75acbf4391e39cbc6f499c2bd6fec834df639925b1620d8696cec63cf",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-field-named-accessor-init.tsx",
+   "sha256": "f3648ce75acbf4391e39cbc6f499c2bd6fec834df639925b1620d8696cec63cf",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-field-named-accessor-typed.ts",
+   "sha256": "4f7830b29976ddfc9af8482fa11e54f870bd8e60f10ab4408d961d02b10eafb1",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-field-named-accessor-typed.tsx",
+   "sha256": "4f7830b29976ddfc9af8482fa11e54f870bd8e60f10ab4408d961d02b10eafb1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-static-field-named-accessor.ts",
+   "sha256": "e88ef792ebaa64d61294a86d2bc480efc4e241060288b0957241a7550e83ce51",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-static-field-named-accessor.tsx",
+   "sha256": "e88ef792ebaa64d61294a86d2bc480efc4e241060288b0957241a7550e83ce51",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-getter-named-accessor.ts",
+   "sha256": "b5934bef7a881e31d9f5d0b01a5a18c3b11ae4fd6c0c3eb785b2f49f3caf9ccb",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-getter-named-accessor.tsx",
+   "sha256": "b5934bef7a881e31d9f5d0b01a5a18c3b11ae4fd6c0c3eb785b2f49f3caf9ccb",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-accessor-newline.ts",
+   "sha256": "ae4f00bcbcb225e9d062ae3f545ec62a254af1c61a8118e19ff80a02b70beed5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/corpus-accessor-newline.tsx",
+   "sha256": "ae4f00bcbcb225e9d062ae3f545ec62a254af1c61a8118e19ff80a02b70beed5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/neg-accessor-no-name.ts",
+   "sha256": "dc6486c7122ab6a532495fdc30e6dde062f7a92f58ee567e60323faafa737aa7",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 28
+  },
+  {
+   "id": "s3/neg-accessor-no-name.tsx",
+   "sha256": "dc6486c7122ab6a532495fdc30e6dde062f7a92f58ee567e60323faafa737aa7",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 28
+  },
+  {
+   "id": "s3/neg-accessor-method-missing-body.ts",
+   "sha256": "a0c7df46ac5690c1e055bb4cd63bdb9e20e4c37e0447463136e4a3a8fd9f5a8e",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1138
+   ],
+   "at": 29
+  },
+  {
+   "id": "s3/neg-accessor-method-missing-body.tsx",
+   "sha256": "a0c7df46ac5690c1e055bb4cd63bdb9e20e4c37e0447463136e4a3a8fd9f5a8e",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1138
+   ],
+   "at": 29
+  },
+  {
+   "id": "s3/p112-accessor-abstract.ts",
+   "sha256": "d4803400f90ba13f8f7c004bc7da630ed12bbe650627acc42f90c49aed664d35",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-abstract.tsx",
+   "sha256": "d4803400f90ba13f8f7c004bc7da630ed12bbe650627acc42f90c49aed664d35",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-decorator-static.ts",
+   "sha256": "ee85c2424df3623db14c2268eb811e68cf6825e9ebdf2ed909a9706a2bea4731",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-decorator-static.tsx",
+   "sha256": "ee85c2424df3623db14c2268eb811e68cf6825e9ebdf2ed909a9706a2bea4731",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-field-named-typed.ts",
+   "sha256": "763d09ef3fe6b7cdd1b02d547f8296d3a90c818ebcbdc9f79b9651af6f845496",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-field-named-typed.tsx",
+   "sha256": "763d09ef3fe6b7cdd1b02d547f8296d3a90c818ebcbdc9f79b9651af6f845496",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-field-named.ts",
+   "sha256": "f40f6e52627d7d892ee6884788d7cbddccdbb1c013bf5679f41e8029eb695276",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-field-named.tsx",
+   "sha256": "f40f6e52627d7d892ee6884788d7cbddccdbb1c013bf5679f41e8029eb695276",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-method-named.ts",
+   "sha256": "b88f43abfbfed02856c45acb3460c95eddfb836a3a3628d0c55a5986e000eb32",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-method-named.tsx",
+   "sha256": "b88f43abfbfed02856c45acb3460c95eddfb836a3a3628d0c55a5986e000eb32",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-override.ts",
+   "sha256": "e3a2d078e87be3750679b09a47ea4b4e30fff7f49f254e5c7ab041cb26eedf28",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-override.tsx",
+   "sha256": "e3a2d078e87be3750679b09a47ea4b4e30fff7f49f254e5c7ab041cb26eedf28",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-private-static.ts",
+   "sha256": "33114900493d5b47965aa0b5fd780428ae1737ba687c14bbd81854295c99e786",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-private-static.tsx",
+   "sha256": "33114900493d5b47965aa0b5fd780428ae1737ba687c14bbd81854295c99e786",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-readonly.ts",
+   "sha256": "199a5be35090a4c39492282b27bcae32d96fc4bb087e291781f4e9798d5bd7a8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-readonly.tsx",
+   "sha256": "199a5be35090a4c39492282b27bcae32d96fc4bb087e291781f4e9798d5bd7a8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-static-override.ts",
+   "sha256": "0f74395c594972c022090a46c2e89760e51dbd9fe7a933c83cef8babcabbd8a6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-static-override.tsx",
+   "sha256": "0f74395c594972c022090a46c2e89760e51dbd9fe7a933c83cef8babcabbd8a6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-static.ts",
+   "sha256": "7b9b506e04448575cbeabf7dbb0b84d0c9b5431da8e5514ab21fd2fbbe088075",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s3/p112-accessor-static.tsx",
+   "sha256": "7b9b506e04448575cbeabf7dbb0b84d0c9b5431da8e5514ab21fd2fbbe088075",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
   }
  ]
 }
