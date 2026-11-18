@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts.js"
       - "common/*"
+      - "vendor/**"
       - "*/grammar.js"
       - "*/src/**"
       - "bindings/**"
@@ -14,6 +15,7 @@ on:
     paths:
       - "scripts.js"
       - "common/*"
+      - "vendor/**"
       - "*/grammar.js"
       - "*/src/**"
       - "bindings/**"

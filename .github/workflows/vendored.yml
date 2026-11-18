@@ -1,0 +1,21 @@
+name: Vendored inputs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  javascript-grammar:
+    name: Check vendored JavaScript grammar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # tree-sitter/tree-sitter-javascript v0.23.1 (3a837b6) grammar.js; see NOTICE.
+      - name: Verify SHA-256
+        run: |-
+          echo "230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc  vendor/tree-sitter-javascript/grammar.js" | sha256sum -c -

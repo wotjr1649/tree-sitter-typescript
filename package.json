@@ -30,12 +30,12 @@
     "typescript/src/**",
     "tsx/src/**",
     "common/**",
+    "vendor/**",
     "*.wasm"
   ],
   "dependencies": {
     "node-addon-api": "^8.2.2",
-    "node-gyp-build": "^4.8.2",
-    "tree-sitter-javascript": "^0.23.1"
+    "node-gyp-build": "^4.8.2"
   },
   "peerDependencies": {
     "tree-sitter": "^0.21.0"
