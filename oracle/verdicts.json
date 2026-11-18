@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "e00dd0ceaffb477d27c29603eae48b544335d2ae8639bbad7ba437544ae11ec1",
+  "cases_sha256": "76aa43366c1a0604c00c07f126a387bddcd727598a730730e455920ab9247d32",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -959,6 +959,142 @@
     1109
    ],
    "at": 9
+  },
+  {
+   "id": "s4/corpus-alias-member-targs.ts",
+   "sha256": "df5e3e186dbd77d8cc635becca3861691b510dd75f024529b3f66c373c8f1334",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/corpus-alias-member-targs.tsx",
+   "sha256": "df5e3e186dbd77d8cc635becca3861691b510dd75f024529b3f66c373c8f1334",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/corpus-annotation-member-targs.ts",
+   "sha256": "6650fce2ce7c08a33d2bca99dd3a5413c184c147a4ac3e5fd353a01c17b1bfe7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/corpus-annotation-member-targs.tsx",
+   "sha256": "6650fce2ce7c08a33d2bca99dd3a5413c184c147a4ac3e5fd353a01c17b1bfe7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/neg-member-targs-unclosed.ts",
+   "sha256": "03f00c6bc8b5e4032885224355c0f93adbc24aa30a49d5c876dc84c45032824d",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-member-targs-unclosed.tsx",
+   "sha256": "03f00c6bc8b5e4032885224355c0f93adbc24aa30a49d5c876dc84c45032824d",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-member-dot-targs.ts",
+   "sha256": "0d0bd8a582b84ce97f99268450ebbcfe5a5c55c036defd23ed84548d253578a2",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 25
+  },
+  {
+   "id": "s4/neg-member-dot-targs.tsx",
+   "sha256": "0d0bd8a582b84ce97f99268450ebbcfe5a5c55c036defd23ed84548d253578a2",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 25
+  },
+  {
+   "id": "s4/probe-typeof-import-in-generic.ts",
+   "sha256": "225388f167f443620e2628788a2bca36287880cfdb38da449532049ee36a2da5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/probe-typeof-import-in-generic.tsx",
+   "sha256": "225388f167f443620e2628788a2bca36287880cfdb38da449532049ee36a2da5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/p112-importtype-member-targs-two.ts",
+   "sha256": "48c196c4f60f4bd590c67a4e556501f975c16a0a48b74effe7d8640d2d5a7b9e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/p112-importtype-member-targs-two.tsx",
+   "sha256": "48c196c4f60f4bd590c67a4e556501f975c16a0a48b74effe7d8640d2d5a7b9e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/p112-importtype-nested-member-targs.ts",
+   "sha256": "b6486d5401a76a96726fb34802e7f85dddc8d17d2d2488b02039e4ddce4c5bf9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/p112-importtype-nested-member-targs.tsx",
+   "sha256": "b6486d5401a76a96726fb34802e7f85dddc8d17d2d2488b02039e4ddce4c5bf9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/p112-importtype-typeof-import-targs.ts",
+   "sha256": "551f2e1f556bc7aae0ae46479d8e11cf63624f046b882db772d93fcaa90eb332",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/p112-importtype-typeof-import-targs.tsx",
+   "sha256": "551f2e1f556bc7aae0ae46479d8e11cf63624f046b882db772d93fcaa90eb332",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
   }
  ]
 }
