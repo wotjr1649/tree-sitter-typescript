@@ -26,7 +26,8 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 3. Own versions start at v1.0.0, which equals the v0.23.2 baseline behaviour: regenerated with tree-sitter CLI 0.27.2,
    `parser.c`, `grammar.json`, `node-types.json` and the headers of both grammars are byte-identical to what
    go-treesitter generates from the old source. `tree-sitter.json` keeps `metadata.version` `0.23.2` because
-   `tree-sitter generate` embeds it in `parser.c`; the other manifests say `1.0.0`.
+   `tree-sitter generate` embeds it in `parser.c`; the other manifests say `1.0.0`. It takes the real version from the
+   first behaviour-changing release (v1.1+) (owner decision, 2026-11-18).
 4. No registry publishing (npm, crates.io, PyPI) and no automated tagging or releases. Consumers pin commits.
 5. Node kinds and field names stay a public contract: removing or renaming one is breaking. The grammar names
    `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and `tree_sitter_tsx` stay.
