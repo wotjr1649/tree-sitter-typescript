@@ -14,6 +14,10 @@
   - Error-free tree changes: none found (existing corpus inputs and the P112 variance inputs, both grammars).
   - Intended new errors (tsc rejects them, TS1359): `type D<in> = number;` and `type L<in, T> = T;` parsed without
     error before and now report an error.
+  - Kept as they are (owner decision, 2026-11-19): `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
+    `<in const T>` still report an error, although tsc's parser accepts them (it rejects them only in the checker,
+    TS1030 / TS1029); `type E<out extends string> = out;` still parses without error (a parameter named `out` with a
+    constraint), although tsc rejects it (TS1359).
   - `test/examples/known-failures.txt`: no entry cleared (no listed file uses variance annotations).
   - Credit: upstream tree-sitter/tree-sitter-typescript PR #364 by @tomerwave, head commit
     `465aa162d077093dc5ad4f46a9463bde6274425e` (grammar hunk and corpus test taken unchanged). Keeping `out` usable
