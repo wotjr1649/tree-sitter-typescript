@@ -2,7 +2,7 @@ name: Lint
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - common/define-grammar.js
   pull_request:

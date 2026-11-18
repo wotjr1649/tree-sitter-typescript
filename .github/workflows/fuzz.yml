@@ -2,7 +2,7 @@ name: Fuzz Parser
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - typescript/src/scanner.c
       - tsx/src/scanner.c
