@@ -1,0 +1,13 @@
+{
+  "name": "tree-sitter-typescript-oracle",
+  "private": true,
+  "type": "module",
+  "description": "tsc oracle for tree-sitter-typescript (not published)",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "dependencies": {
+    "typescript": "7.0.2"
+  }
+}
