@@ -1,0 +1,5 @@
+This repository continues tree-sitter-typescript from tree-sitter/tree-sitter-typescript
+(https://github.com/tree-sitter/tree-sitter-typescript) at v0.23.2, commit f975a62
+(f975a621f4e7f532fe322e13c4f79495e0a7b2e7), from 2026-11-18 onward, with the
+upstream history preserved. That work is copyright (c) 2017 Max Brunsfeld and
+licensed under the MIT License; see LICENSE.
