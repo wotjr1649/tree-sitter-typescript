@@ -42,4 +42,6 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 - The inherited publication workflow is gone; test, lint and fuzz CI stay. The test workflow uses CLI 0.27.2 and
   checks that the committed parsers match it.
 - Binding consumers need tree-sitter runtime 0.25 or later.
+- CI parses example repositories at pinned commits; the files the baseline grammar cannot parse are listed in
+  `test/examples/known-failures.txt`, which may only shrink as the v1.1 grammar fixes land (owner decision, 2026-11-18).
 - One maintainer owns the grammars; the dependency moves from upstream's maintainers to this repository's owner.

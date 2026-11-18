@@ -21,6 +21,14 @@ history, kept as `refs/upstream/v0.23.2`, and later upstream changes are adopted
 - The parsers are ABI 15; binding runtime lower bounds are the 0.25 line (CMake default ABI 15). Do not lower them
   without the owner's approval.
 - `tree-sitter test` runs `test/corpus` with the `typescript` grammar only; `tsx` has no corpus of its own.
+- CI parses every `.ts`/`.tsx` file of the example repositories pinned in `test/examples/repos.txt`
+  (`test/examples/parse-examples.mjs`). `test/examples/known-failures.txt` lists the files that fail and why; it may
+  only shrink. A new failure fails CI; a listed file that starts parsing is removed in the same change. Entries marked
+  `v1.1:` are the planned v1.1 grammar fixes: `typeof import(...)` as a type argument, `import(...)` types followed by
+  a member, type arguments, index or `[]`, bare `&` in JSX text, `unique` after `<`, `symbol` as a tuple label,
+  `abstract` as an object-type property, `\u` without hex digits in templates, and a call signature starting with `<`
+  on a new line. Entries marked `not complete TypeScript` are fixture inputs, not grammar gaps. Moving a pin updates
+  the list in the same change.
 - Node kinds and field names are a public contract: removing or renaming one is breaking (major version, CHANGELOG;
   create `CHANGELOG.md` when the first entry is needed); adding one is not. Keep the grammar names `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and
   `tree_sitter_tsx`.
