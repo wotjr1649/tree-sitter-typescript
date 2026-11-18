@@ -140,24 +140,105 @@ func TestParseExpect(t *testing.T) {
 	}
 }
 
-// TestLoadRefusesInconsistentInputs runs load on a copy of the committed oracle with one thing broken at a time.
-func TestLoadRefusesInconsistentInputs(t *testing.T) {
-	files := []string{"cases.jsonl", "verdicts.json", "run.mjs", "package-lock.json"}
-	copyTo := func(edit func(name, text string) string) string {
-		dir := t.TempDir()
-		for _, f := range files {
-			b, err := os.ReadFile(filepath.Join("..", f))
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err := os.WriteFile(filepath.Join(dir, f), []byte(edit(f, string(b))), 0o644); err != nil {
-				t.Fatal(err)
-			}
-		}
-		return dir
+func TestWideErrorDoesNotHoldAWellFormedToken(t *testing.T) {
+	// tsc: TS1359 at byte 7 (the `in`), then TS1110 at the end. The grammar keeps `in` as a type_identifier inside one
+	// wide ERROR [0,12): that ERROR must not make a complaint about `in` agree.
+	src := "type A<in> ="
+	nodes, r := parse(t, "typescript", src)
+	if !r.HasError() {
+		t.Fatalf("want an error tree, got %s", r)
 	}
+	at := func(n int) bool { return errorAtHolds(nodes, []byte(src), n) }
+	if at(7) {
+		t.Error("errorAt 7 lies inside the well-formed token `in` of a wide ERROR: must not hold")
+	}
+	if !at(12) {
+		t.Error("errorAt 12 (the end, where the right-hand side is missing) must hold")
+	}
+	// An ERROR that is exactly the offending token is still the error at that token.
+	nodes, r = parse(t, "tsx", "<p>></p>")
+	if !errorAtHolds(nodes, []byte("<p>></p>"), 3) {
+		t.Errorf("an ERROR that is the token itself must hold (%s)", r)
+	}
+}
+
+func TestExactProblemNode(t *testing.T) {
+	src := "let x: Foo<;"
+	nodes, r := parse(t, "typescript", src)
+	n := 11
+	c := Case{Source: src, ErrorAt: &n, Expect: []string{"10-11:ERROR"}}
+	if d := check(c, "syntax", nodes, r); len(d) != 0 {
+		t.Errorf("the exact ERROR [10,11) must hold: %v", d)
+	}
+	c.Expect = []string{"0-11:ERROR"}
+	if d := check(c, "syntax", nodes, r); len(d) != 1 {
+		t.Errorf("another range must differ: %v", d)
+	}
+	tn, tr := parse(t, "tsx", "<p>{a && }</p>")
+	m := 9
+	c = Case{Source: "<p>{a && }</p>", ErrorAt: &m, Expect: []string{"8-8:MISSING:identifier"}}
+	if d := check(c, "syntax", tn, tr); len(d) != 0 {
+		t.Errorf("the MISSING identifier must hold: %v", d)
+	}
+	c.Expect = []string{"8-8:MISSING:expression"}
+	if d := check(c, "syntax", tn, tr); len(d) != 1 {
+		t.Errorf("another MISSING kind must differ: %v", d)
+	}
+	if !problemExpect("ERROR") || !problemExpect("MISSING:)") || problemExpect("MISSING:") || problemExpect("identifier") {
+		t.Error("problemExpect: ERROR and MISSING:kind only")
+	}
+}
+
+func TestParseCasesRefusesMalformedLines(t *testing.T) {
+	ok := `{"id":"a","sha256":"x","source":"1","grammar":"typescript"}`
+	if cs, err := parseCases([]byte(ok + "\n\n" + ok + "\n")); err != nil || len(cs) != 2 {
+		t.Fatalf("two records and a blank line: %v %d", err, len(cs))
+	}
+	for name, in := range map[string]string{
+		"null":             "null\n",
+		"stray bracket":    ok + "\n]\n",
+		"trailing garbage": ok + " x\n",
+		"two on one line":  ok + ok + "\n",
+		"an array":         "[]\n",
+		"unknown field":    `{"id":"a","foo":1}` + "\n",
+		"not json":         "{\n",
+	} {
+		if _, err := parseCases([]byte(in)); err == nil {
+			t.Errorf("%s must be refused", name)
+		}
+	}
+}
+
+// copyOracle copies the committed oracle files into a temporary directory, passing each through edit.
+func copyOracle(t *testing.T, edit func(name, text string) string) string {
+	t.Helper()
+	dir := t.TempDir()
+	for _, f := range []string{"cases.jsonl", "verdicts.json", "run.mjs", "package.json", "package-lock.json"} {
+		b, err := os.ReadFile(filepath.Join("..", f))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, f), []byte(edit(f, string(b))), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return dir
+}
+
+func onlyIn(file string, edit func(string) string) func(string, string) string {
+	return func(name, s string) string {
+		if name == file {
+			return edit(s)
+		}
+		return s
+	}
+}
+
+// TestLoadRefusesInconsistentInputs runs load on a copy of the committed oracle with one thing broken at a time; every
+// problem must be named (the substring) so that a mutation cannot be caught by an unrelated check.
+func TestLoadRefusesInconsistentInputs(t *testing.T) {
 	same := func(_, s string) string { return s }
-	if _, _, p, err := load(copyTo(same)); err != nil || len(p) != 0 {
+	if _, _, p, err := load(copyOracle(t, same)); err != nil || len(p) != 0 {
 		t.Fatalf("the committed oracle must be consistent: %v %v", err, p)
 	}
 	firstHash := func() string { // the sha256 of the first case record
@@ -166,41 +247,51 @@ func TestLoadRefusesInconsistentInputs(t *testing.T) {
 		h, _, _ := strings.Cut(rest, `"`)
 		return h
 	}()
-	broken := map[string]func(name, text string) string{
-		"a sha256 corrupted": func(n, s string) string {
-			if n == "cases.jsonl" {
-				return strings.Replace(s, firstHash, strings.Repeat("0", 64), 1)
+	replaceFirst := func(a, b string) func(string) string {
+		return func(s string) string {
+			if !strings.Contains(s, a) {
+				t.Fatalf("test setup: %q not found", a)
 			}
-			return s
-		},
-		"another runner": func(n, s string) string {
-			if n == "run.mjs" {
-				return s + "// changed\n"
-			}
-			return s
-		},
-		"tool version drift": func(n, s string) string {
-			if n == "package-lock.json" {
-				return strings.Replace(s, "\"node_modules/typescript\": {\n      \"version\": \"7.0.2\"", "\"node_modules/typescript\": {\n      \"version\": \"7.0.3\"", 1)
-			}
-			return s
-		},
-		"integrity drift": func(n, s string) string {
-			if n == "package-lock.json" {
-				return strings.Replace(s, "sha512-8FYau96o", "sha512-8FYau96p", 1)
-			}
-			return s
-		},
-		"a verdict of another case set": func(n, s string) string {
-			if n == "cases.jsonl" {
-				return s + "\n"
-			}
-			return s
-		},
+			return strings.Replace(s, a, b, 1)
+		}
 	}
-	for name, edit := range broken {
-		if _, _, p, err := load(copyTo(edit)); err != nil || len(p) == 0 {
-			t.Errorf("%s: want inconsistent-input problems, got %v %v", name, p, err)
+	// the same wrong integrity in the lock and in the verdicts, as a consistent-looking drift
+	const wrong = "sha512-8FYau96p"
+	agreed := func(name, s string) string {
+		if name == "package-lock.json" || name == "verdicts.json" {
+			return strings.ReplaceAll(s, "sha512-8FYau96o", wrong)
+		}
+		return s
+	}
+	cases := []struct {
+		name string
+		edit func(name, text string) string
+		want string
+	}{
+		{"a sha256 corrupted", onlyIn("cases.jsonl", replaceFirst(firstHash, strings.Repeat("0", 64))), "sha256 does not match source"},
+		{"another runner", onlyIn("run.mjs", func(s string) string { return s + "// changed\n" }), "another runner"},
+		{"another case set", onlyIn("cases.jsonl", func(s string) string { return s + "\n" }), "other cases"},
+		{"lock says another version", onlyIn("package-lock.json", replaceFirst("\"node_modules/typescript\": {\n      \"version\": \"7.0.2\"", "\"node_modules/typescript\": {\n      \"version\": \"7.0.3\"")), "tool drift"},
+		{"manifest is a range, not the exact pin", onlyIn("package.json", replaceFirst(`"typescript": "7.0.2"`, `"typescript": ">=7.0.2 <7.0.3"`)), "package.json pins"},
+		{"manifest says another version", onlyIn("package.json", replaceFirst(`"typescript": "7.0.2"`, `"typescript": "7.0.3"`)), "package.json pins"},
+		{"integrity changed in lock and verdicts alike", agreed, "integrity drift"},
+		{"verdicts made without --noCheck", onlyIn("verdicts.json", replaceFirst(`"--noCheck",`, ``)), "tsc arguments"},
+		{"no cases", onlyIn("cases.jsonl", func(string) string { return "" }), "no cases"},
+	}
+	for _, c := range cases {
+		_, _, p, err := load(copyOracle(t, c.edit))
+		if err != nil {
+			t.Errorf("%s: want a named problem, got the error %v", c.name, err)
+			continue
+		}
+		if !strings.Contains(strings.Join(p, "\n"), c.want) {
+			t.Errorf("%s: want a problem containing %q, got %v", c.name, c.want, p)
+		}
+	}
+	// malformed records are errors (exit 2), not silently ignored
+	for name, tail := range map[string]string{"null": "null\n", "stray bracket": "]\n", "trailing garbage": `{"id":"z"} x` + "\n"} {
+		if _, _, _, err := load(copyOracle(t, onlyIn("cases.jsonl", func(s string) string { return s + tail }))); err == nil {
+			t.Errorf("%s: a malformed record must be an error", name)
 		}
 	}
 }

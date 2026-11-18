@@ -34,6 +34,8 @@ const TOOL = {
 const TSC_ARGS = ["--noEmit", "--noCheck", "--pretty", "false", "--target", "esnext", "--jsx", "preserve"];
 const KEYS = ["id", "sha256", "source", "grammar", "expect", "errorAt", "reason"];
 const EXT = { typescript: "ts", tsx: "tsx" };
+// tsc's line terminators: \n, \r\n, \r, U+2028, U+2029 (built from code points so the source stays plain ASCII).
+const LINE_BREAK = new RegExp("\\r\\n|[\\n\\r" + String.fromCharCode(0x2028, 0x2029) + "]");
 
 // ---- cases ---------------------------------------------------------------------------------------------------------
 const casesBytes = readFileSync(casesPath);
@@ -48,6 +50,7 @@ const cases = casesBytes
     } catch (e) {
       fail(`${basename(casesPath)}:${n + 1}: ${e.message}`);
     }
+    if (c === null || typeof c !== "object" || Array.isArray(c)) fail(`${basename(casesPath)}:${n + 1}: a record must be a JSON object`);
     for (const k of Object.keys(c)) if (!KEYS.includes(k)) fail(`${basename(casesPath)}:${n + 1}: unknown field ${k}`);
     return c;
   });
@@ -64,27 +67,62 @@ if (args.includes("--rehash")) {
 }
 
 // ---- one tsc run -----------------------------------------------------------------------------------------------------
-// tsc counts lines at \n, \r\n, \r, U+2028 and U+2029 and columns in UTF-16 code units (1-based both); the verdict
-// file records UTF-8 byte offsets, the tree-sitter unit. Returns the offset, or null when (line, col) is not a position.
+// tsc counts lines at its line terminators and columns in UTF-16 code units (1-based both); the verdict file records
+// UTF-8 byte offsets, the tree-sitter unit. Returns the offset, or null when (line, col) is not a position of the source:
+// the line must exist and the column must lie on it (one past its last unit is the end of the line).
 function byteOffset(src, line, col) {
-  let at = 0;
+  let start = 0;
   for (let l = 1; l < line; l++) {
-    const m = /\r\n|[\n\r\u2028\u2029]/.exec(src.slice(at));
+    const m = LINE_BREAK.exec(src.slice(start));
     if (!m) return null;
-    at += m.index + m[0].length;
+    start += m.index + m[0].length;
   }
-  const utf16 = at + col - 1;
-  if (col < 1 || utf16 > src.length) return null;
+  const m = LINE_BREAK.exec(src.slice(start));
+  const end = m ? start + m.index : src.length;
+  const utf16 = start + col - 1;
+  if (line < 1 || col < 1 || utf16 > end) return null;
   const unit = src.charCodeAt(utf16);
   if (utf16 > 0 && unit >= 0xdc00 && unit <= 0xdfff && (src.charCodeAt(utf16 - 1) & 0xfc00) === 0xd800) return null; // inside a surrogate pair
   return Buffer.byteLength(src.slice(0, utf16), "utf8");
 }
 
 const TSC_JS = join(here, "node_modules", "typescript", "bin", "tsc");
-const DIAG = /^case\.tsx?\((\d+),(\d+)\): error TS(\d+): /;
+// The shape of a diagnostic line, indented or not; the file name is compared separately and exactly.
+const DIAG = /^(\s*)(\S.*?)\((\d+),(\d+)\): error TS(\d+): /;
 
-// Runs tsc on one source and returns { verdict, codes, at }. Anything that does not fit (spawn failure, stderr, a line
-// that is no diagnostic of the case file, an exit status that disagrees with the output) is an inconsistent run.
+class Inconsistent extends Error {}
+const bad = (msg) => {
+  throw new Inconsistent(msg);
+};
+
+// Turns tsc's output for `source` into { verdict, codes, at }; `at` is the first diagnostic. Anything that does not fit
+// is an inconsistent run (Inconsistent): output on stderr; a line that is not a diagnostic (an indented line is the
+// continuation of a chained message only when it is not itself shaped like a diagnostic); a diagnostic for another file
+// than `case.ts`/`case.tsx`; a position that is not on the source (every diagnostic is checked); an exit status that
+// disagrees with the output (0 exactly when there is no diagnostic).
+function parseOutput(source, grammar, stdout, stderr, status) {
+  const file = `case.${EXT[grammar]}`;
+  if (stderr !== "") bad(`tsc wrote to stderr: ${stderr.trim()}`);
+  const codes = [];
+  let at = null;
+  for (const line of stdout.split(/\r?\n/)) {
+    if (line === "") continue;
+    const m = DIAG.exec(line);
+    if (!m) {
+      if (/^\s/.test(line) && codes.length > 0) continue; // continuation of a chained message
+      bad(`unparseable output line: ${JSON.stringify(line)}`);
+    }
+    if (m[1] !== "" || m[2] !== file) bad(`diagnostic for ${JSON.stringify(m[2])}, not for ${file}: ${JSON.stringify(line)}`);
+    const pos = byteOffset(source, Number(m[3]), Number(m[4]));
+    if (pos === null) bad(`position ${m[3]},${m[4]} is not on the source: ${JSON.stringify(line)}`);
+    codes.push(Number(m[5]));
+    at ??= pos;
+  }
+  if ((codes.length === 0) !== (status === 0) || status > 2) bad(`exit status ${status} does not fit ${codes.length} diagnostics`);
+  return { verdict: codes.length ? "syntax" : "accept", codes, at };
+}
+
+// Runs tsc on one source (see parseOutput); a failed or timed-out process is inconsistent too.
 function tsc(source, grammar, extraArgs = TSC_ARGS) {
   const dir = mkdtempSync(join(tmpdir(), "oracle-tsc-"));
   const file = `case.${EXT[grammar]}`;
@@ -92,23 +130,11 @@ function tsc(source, grammar, extraArgs = TSC_ARGS) {
     writeFileSync(join(dir, file), Buffer.from(source, "utf8"));
     // Fresh directory, no tsconfig; node + tsc.js instead of the .bin shim so that Windows and Linux run the same thing.
     const r = spawnSync(process.execPath, [TSC_JS, ...extraArgs, file], { cwd: dir, encoding: "utf8", timeout: 120000 });
-    if (r.error || r.signal) fail(`tsc did not finish (${r.error?.message ?? r.signal})`);
-    if (r.stderr !== "") fail(`tsc wrote to stderr: ${r.stderr.trim()}`);
-    const codes = [];
-    let at = null;
-    for (const line of r.stdout.split(/\r?\n/)) {
-      if (line === "") continue;
-      if (/^\s/.test(line) && codes.length > 0) continue; // continuation of a chained message
-      const m = DIAG.exec(line);
-      if (!m) fail(`${file}: diagnostic not attributable to the case file or unparseable: ${JSON.stringify(line)}`);
-      codes.push(Number(m[3]));
-      if (at === null) {
-        at = byteOffset(source, Number(m[1]), Number(m[2]));
-        if (at === null) fail(`${file}: position ${m[1]},${m[2]} is outside the source`);
-      }
-    }
-    if ((codes.length === 0) !== (r.status === 0) || r.status > 2) fail(`${file}: exit status ${r.status} does not fit ${codes.length} diagnostics`);
-    return { verdict: codes.length ? "syntax" : "accept", codes, at };
+    if (r.error || r.signal) bad(`tsc did not finish (${r.error?.message ?? r.signal})`);
+    return parseOutput(source, grammar, r.stdout, r.stderr, r.status);
+  } catch (e) {
+    if (e instanceof Inconsistent) fail(`${file}: ${e.message}`);
+    throw e;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -124,13 +150,19 @@ for (const [pkg, version] of [[TOOL.package, installed(TOOL.package)], [platform
     fail(`${pkg}: installed ${version}, lock ${lock[`node_modules/${pkg}`]?.version}, pin ${TOOL.version}`);
   }
 }
+// The manifest must pin the version exactly (a range such as ">=7.0.2 <7.0.3" would let a new lock move the oracle).
+const manifest = JSON.parse(readFileSync(join(here, "package.json"), "utf8"));
+if (manifest.dependencies?.[TOOL.package] !== TOOL.version) {
+  fail(`package.json must pin ${TOOL.package} exactly to ${TOOL.version}, it says ${JSON.stringify(manifest.dependencies?.[TOOL.package])}`);
+}
 const entry = lock[`node_modules/${TOOL.package}`];
 if (entry.integrity !== TOOL.integrity || lock[""].dependencies?.[TOOL.package] !== TOOL.version) {
   fail(`${TOOL.package}: lock integrity ${entry.integrity} / package.json pin differ from ${TOOL.version} ${TOOL.integrity}`);
 }
 
 // ---- self-test -------------------------------------------------------------------------------------------------------
-// Proves the three kinds of answer the owner asked for, and the UTF-16 -> UTF-8 position conversion.
+// Proves the three kinds of answer the owner asked for, the UTF-16 -> UTF-8 position conversion, and that mocked
+// inconsistent output is refused.
 if (args.includes("--self-test")) {
   const noCheckless = TSC_ARGS.filter((a) => a !== "--noCheck");
   const wrong = [];
@@ -149,19 +181,40 @@ if (args.includes("--self-test")) {
   // Hangul (3 UTF-8 bytes, 1 UTF-16 unit) and an astral character (4 bytes, 2 units) before the error, and other line breaks.
   want("hangul", pick(tsc('let a = "한글"; let = ;', "typescript")), { verdict: "syntax", codes: [1109], at: 24 });
   want("astral", pick(tsc('let a = "한😀"; let = ;', "typescript")), { verdict: "syntax", codes: [1109], at: 25 });
-  want("line breaks", pick(tsc("let a = 1;\r\nlet b = 2;\rlet c = 3;\u2028let = ;", "typescript")), { verdict: "syntax", codes: [1109], at: 42 });
+  const ls = String.fromCharCode(0x2028);
+  want("line breaks", pick(tsc(`let a = 1;\r\nlet b = 2;\rlet c = 3;${ls}let = ;`, "typescript")), { verdict: "syntax", codes: [1109], at: 42 });
   want("tsx", pick(tsc("const a = <div>&amp;</div>;", "tsx")), { verdict: "accept", codes: [], at: null });
+  // Mocked tsc output that must be refused as an inconsistent run (none of it is a real tsc answer).
+  const refused = (name, source, grammar, stdout, status = 1) => {
+    let msg = null;
+    try {
+      parseOutput(source, grammar, stdout, "", status);
+    } catch (e) {
+      if (!(e instanceof Inconsistent)) throw e;
+      msg = e.message;
+    }
+    want(`refused, ${name}`, msg !== null, true);
+  };
+  const D = "error TS1109: Expression expected.";
+  refused("another file name (case.tsx for case.ts)", "let x = ;", "typescript", `case.tsx(1,9): ${D}\n`);
+  refused("an indented diagnostic of another file", "let x = ;", "typescript", `case.ts(1,9): ${D}\n  other.ts(1,9): ${D}\n`);
+  refused("a column beyond the line", "let x = ;\nlet y = ;", "typescript", `case.ts(1,12): ${D}\n`);
+  refused("a line beyond the source", "let x = ;", "typescript", `case.ts(1,9): ${D}\ncase.ts(99,1): ${D}\n`);
+  refused("an output line that is no diagnostic", "let x = ;", "typescript", `case.ts(1,9): ${D}\nsomething else\n`);
+  refused("an exit status that disagrees", "let x = ;", "typescript", `case.ts(1,9): ${D}\n`, 0);
+  want("a chained message is one diagnostic", parseOutput("let x = ;", "typescript", "case.ts(1,9): error TS2345: a.\n  b.\n", "", 1), { verdict: "syntax", codes: [2345], at: 8 });
   console.log(wrong.length ? `self-test: ${wrong.length} differ` : "self-test: all consistent");
   process.exit(wrong.length ? 1 : 0);
 }
 
 // ---- verdicts --------------------------------------------------------------------------------------------------------
+if (cases.length === 0) fail(`${basename(casesPath)} holds no cases: an empty oracle checks nothing`);
 const seen = new Set();
 for (const c of cases) {
   if (typeof c.id !== "string" || c.id === "" || seen.has(c.id)) fail(`bad or duplicate id ${JSON.stringify(c.id)}`);
   seen.add(c.id);
   if (typeof c.source !== "string" || !c.source.isWellFormed()) fail(`${c.id}: source must be a well-formed string`);
-  if (c.source.startsWith("﻿")) fail(`${c.id}: source must not start with a BOM (tsc strips it and the offsets would shift)`);
+  if (c.source.charCodeAt(0) === 0xfeff) fail(`${c.id}: source must not start with a BOM (tsc strips it and the offsets would shift)`);
   if (!(c.grammar in EXT)) fail(`${c.id}: grammar must be typescript or tsx`);
   if (c.sha256 !== sha256(Buffer.from(c.source, "utf8"))) fail(`${c.id}: sha256 does not match source (run --rehash)`);
 }

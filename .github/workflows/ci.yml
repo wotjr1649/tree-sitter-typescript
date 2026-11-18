@@ -120,6 +120,8 @@ jobs:
       - name: Regenerate verdicts
         shell: bash
         run: |-
+          # git diff alone passes for a file that is not in the commit: require it to be tracked first.
+          git ls-files --error-unmatch -- oracle/verdicts.json
           node oracle/run.mjs
           git diff --exit-code -- oracle/verdicts.json
       - name: Self-test the replay
@@ -132,5 +134,7 @@ jobs:
       - name: Check the node-kind snapshot
         shell: bash
         run: |-
+          git ls-files --error-unmatch -- test/node-kinds/typescript.txt test/node-kinds/tsx.txt
           node test/node-kinds/generate.mjs
           git diff --exit-code -- test/node-kinds
+          test -z "$(git status --porcelain --untracked-files=all -- test/node-kinds)"

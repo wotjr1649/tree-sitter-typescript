@@ -94,8 +94,8 @@
 {"id":"s5/ternary-call.tsx","sha256":"ccd9dd0d510b6e355ba194981043ea28c526afe2089860835d36bbaf5c811a27","source":"c ? f<R<S>>(d) : e;","grammar":"tsx"}
 {"id":"s5/untagged-templates.ts","sha256":"be30a88aab7908e22600e3b7b23559586bc00a0270e59ad47842b4497d018f9b","source":"f`x`; a.b`y`; new F`z`;","grammar":"typescript"}
 {"id":"s5/untagged-templates.tsx","sha256":"be30a88aab7908e22600e3b7b23559586bc00a0270e59ad47842b4497d018f9b","source":"f`x`; a.b`y`; new F`z`;","grammar":"tsx"}
-{"id":"s5/type-arguments-open.ts","sha256":"007ee92afc789d9a27aa8e51214c6e4d66e989bcfae5ef9fe07d2ee5e594dc40","source":"let x: Foo<;","grammar":"typescript","errorAt":11}
-{"id":"s5/type-arguments-open.tsx","sha256":"007ee92afc789d9a27aa8e51214c6e4d66e989bcfae5ef9fe07d2ee5e594dc40","source":"let x: Foo<;","grammar":"tsx","errorAt":11}
+{"id":"s5/type-arguments-open.ts","sha256":"007ee92afc789d9a27aa8e51214c6e4d66e989bcfae5ef9fe07d2ee5e594dc40","source":"let x: Foo<;","grammar":"typescript","expect":["10-11:ERROR"],"errorAt":11}
+{"id":"s5/type-arguments-open.tsx","sha256":"007ee92afc789d9a27aa8e51214c6e4d66e989bcfae5ef9fe07d2ee5e594dc40","source":"let x: Foo<;","grammar":"tsx","expect":["10-11:ERROR"],"errorAt":11}
 {"id":"s6/entity-named.tsx","sha256":"9d01a2f4885095a9a22c368c3ba93f990016ffbcebc803ea4a242c0b0aee005a","source":"<p>&amp;</p>","grammar":"tsx","expect":["3-8:html_character_reference"]}
 {"id":"s6/entity-decimal.tsx","sha256":"307b9589fdad14de7e3d6e7af0c58cd7c93baf78d630d8480f3f5e5686c60066","source":"<p>&#65;</p>","grammar":"tsx"}
 {"id":"s6/entity-hex.tsx","sha256":"70096b390b9ec579286f5e6b7fab8feeab6ecc1bf94cc283dd026398a3f51e8f","source":"<p>&#x41;</p>","grammar":"tsx"}
@@ -107,4 +107,4 @@
 {"id":"s6/intersection-and-bitand.ts","sha256":"69cafd78fe09983947dc5224ff7e2628502e24fdd4a63784e285d1942611c97d","source":"const x = a & b; type T = A & B;","grammar":"typescript","expect":["10-15:binary_expression","26-31:intersection_type"]}
 {"id":"s6/intersection-and-bitand.tsx","sha256":"69cafd78fe09983947dc5224ff7e2628502e24fdd4a63784e285d1942611c97d","source":"const x = a & b; type T = A & B;","grammar":"tsx","expect":["10-15:binary_expression","26-31:intersection_type"]}
 {"id":"s6/gt-in-text.tsx","sha256":"4b1ba3d47112636b45514af6f656dd117b93a09267e918d06e967a753d5c2ead","source":"<p>></p>","grammar":"tsx","errorAt":3}
-{"id":"s6/expression-open.tsx","sha256":"d30c56d0d8a06f4bb1b16a3c716dd44128b2c25d2090337efb8cd3efd8e05295","source":"<p>{a && }</p>","grammar":"tsx","errorAt":9}
+{"id":"s6/expression-open.tsx","sha256":"d30c56d0d8a06f4bb1b16a3c716dd44128b2c25d2090337efb8cd3efd8e05295","source":"<p>{a && }</p>","grammar":"tsx","expect":["8-8:MISSING:identifier"],"errorAt":9}

@@ -168,14 +168,50 @@ func deepest(nodes []node, start, end int) string {
 // errorAtHolds is the "decided position" rule for a syntax case. A problem node (ERROR or MISSING) holds the byte offset
 // at when it starts at or before at and either contains it (end >= at) or ends before it with only gap characters
 // (whitespace) in between: recovery often leaves the ERROR or MISSING node on the last good token while tsc names the
-// next token.
+// next token. A problem node does not hold at when at lies inside a token the parser read well (a non-problem leaf) that
+// is only a part of the node: a wide recovery ERROR around `in` in `type A<in> =` does not make a complaint about `in`
+// itself agree. An ERROR that is exactly the offending token (the one leaf it holds has its range) is fine.
 func errorAtHolds(nodes []node, src []byte, at int) bool {
-	for _, n := range nodes {
-		if (n.err || n.missing) && n.start <= at && (at <= n.end || onlyGap(src[n.end:at])) {
+	for i, n := range nodes {
+		if (n.err || n.missing) && n.start <= at && (at <= n.end || onlyGap(src[n.end:at])) && !insideWellFormedPart(nodes, i, at) {
 			return true
 		}
 	}
 	return false
+}
+
+// insideWellFormedPart reports whether the offset at lies inside a leaf below nodes[i] that is not a problem node and
+// does not span the whole of nodes[i].
+func insideWellFormedPart(nodes []node, i, at int) bool {
+	n := nodes[i]
+	for j := i + 1; j < len(nodes) && nodes[j].depth > n.depth; j++ {
+		d := nodes[j]
+		if d.leaf && !d.err && !d.missing && d.start <= at && at < d.end && (d.start != n.start || d.end != n.end) {
+			return true
+		}
+	}
+	return false
+}
+
+// hasProblem reports whether the tree has the problem node a syntax case's expect entry names: "ERROR" is an ERROR node
+// with exactly the range, "MISSING:kind" a MISSING node of that kind with exactly the range.
+func hasProblem(nodes []node, start, end int, kind string) bool {
+	missing, isMissing := strings.CutPrefix(kind, "MISSING:")
+	for _, n := range nodes {
+		if n.start != start || n.end != end {
+			continue
+		}
+		if kind == "ERROR" && n.err || isMissing && n.missing && n.kind == missing {
+			return true
+		}
+	}
+	return false
+}
+
+// problemExpect reports whether an expect entry's kind is a problem-node assertion ("ERROR" or "MISSING:kind").
+func problemExpect(kind string) bool {
+	rest, ok := strings.CutPrefix(kind, "MISSING:")
+	return kind == "ERROR" || ok && rest != ""
 }
 
 func onlyGap(b []byte) bool {
@@ -213,6 +249,12 @@ func check(c Case, verdict string, nodes []node, r Report) []string {
 			diffs = append(diffs, "rejected by tsc as syntax but the tree is "+r.String())
 		case !errorAtHolds(nodes, []byte(c.Source), *c.ErrorAt):
 			diffs = append(diffs, fmt.Sprintf("no ERROR or MISSING node holds byte %d (first problem: %s)", *c.ErrorAt, r.First))
+		}
+		for _, e := range c.Expect {
+			s, en, kind, _ := parseExpect(e)
+			if !hasProblem(nodes, s, en, kind) {
+				diffs = append(diffs, fmt.Sprintf("expect %s: the tree has no such problem node (first problem: %s)", e, r.First))
+			}
 		}
 	}
 	return diffs

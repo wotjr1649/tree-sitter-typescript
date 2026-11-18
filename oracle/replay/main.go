@@ -15,8 +15,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -24,11 +26,15 @@ import (
 	tree_sitter_typescript "github.com/wotjr1649/tree-sitter-typescript/bindings/go"
 )
 
-// toolPin is the oracle the replay accepts: the runner (run.mjs) pins the same values.
+// The oracle the replay accepts, written down here and not read back from the files under test: run.mjs pins the same
+// values, and changing the tool means changing both (see oracle/README.md).
 const (
-	toolPackage = "typescript"
-	toolVersion = "7.0.2"
+	toolPackage   = "typescript"
+	toolVersion   = "7.0.2"
+	toolIntegrity = "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="
 )
+
+var toolArguments = []string{"--noEmit", "--noCheck", "--pretty", "false", "--target", "esnext", "--jsx", "preserve"}
 
 type verdictFile struct {
 	Meta struct {
@@ -65,6 +71,32 @@ type lockFile struct {
 
 func sum(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
 
+// parseCases reads cases.jsonl line by line: every non-blank line must be exactly one JSON object with known fields
+// (run.mjs refuses the same inputs, so a malformed file is exit 2 in both tools).
+func parseCases(b []byte) ([]Case, error) {
+	var cases []Case
+	for n, line := range strings.Split(string(b), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, "{") {
+			return nil, fmt.Errorf("cases.jsonl line %d: a record must be a JSON object", n+1)
+		}
+		dec := json.NewDecoder(strings.NewReader(line))
+		dec.DisallowUnknownFields()
+		var c Case
+		if err := dec.Decode(&c); err != nil {
+			return nil, fmt.Errorf("cases.jsonl line %d: %w", n+1, err)
+		}
+		if _, err := dec.Token(); err != io.EOF {
+			return nil, fmt.Errorf("cases.jsonl line %d: data after the record", n+1)
+		}
+		cases = append(cases, c)
+	}
+	return cases, nil
+}
+
 func readJSON(path string, v any) error {
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -95,6 +127,16 @@ func load(dir string) (cases []Case, verdicts map[string]verdict, problems []str
 	if err != nil {
 		return nil, nil, nil, err
 	}
+	var manifest struct {
+		Dependencies map[string]string `json:"dependencies"`
+	}
+	if err = readJSON(filepath.Join(dir, "package.json"), &manifest); err != nil {
+		return nil, nil, nil, err
+	}
+	records, err := parseCases(casesBytes)
+	if err != nil {
+		return nil, nil, nil, err
+	}
 	bad := func(f string, a ...any) { problems = append(problems, fmt.Sprintf(f, a...)) }
 
 	m := vf.Meta
@@ -110,13 +152,21 @@ func load(dir string) (cases []Case, verdicts map[string]verdict, problems []str
 	if m.LockSHA256 != sum(lockBytes) {
 		bad("verdicts.json was made with another package-lock.json (package_lock_sha256 %s, file %s)", m.LockSHA256, sum(lockBytes))
 	}
-	// Tool drift: verdicts, lockfile and the exact pin in package.json must name the same version and integrity, and
-	// every platform binary package the lock holds must be that version too.
+	// Tool drift: the verdicts, the lockfile and the manifest are each compared with the values written down above, not
+	// only with each other: the version, its exact pin in package.json (and the lock's copy of it), the npm integrity
+	// and the tsc arguments. Every platform binary package the lock holds must be that version too.
 	e := lock.Packages["node_modules/"+toolPackage]
-	pin := lock.Packages[""].Dependencies[toolPackage]
-	if m.Package != toolPackage || m.Version != toolVersion || e.Version != toolVersion || pin != toolVersion || m.Integrity == "" || e.Integrity != m.Integrity {
-		bad("tool drift: verdicts have %s %s %s, package-lock.json has %q %q, package.json pins %q, the replay expects %s %s",
-			m.Package, m.Version, m.Integrity, e.Version, e.Integrity, pin, toolPackage, toolVersion)
+	if m.Package != toolPackage || m.Version != toolVersion || e.Version != toolVersion {
+		bad("tool drift: verdicts have %s %s, package-lock.json has %q, the replay expects %s %s", m.Package, m.Version, e.Version, toolPackage, toolVersion)
+	}
+	if pin := manifest.Dependencies[toolPackage]; pin != toolVersion || lock.Packages[""].Dependencies[toolPackage] != toolVersion {
+		bad("package.json pins %s %q and package-lock.json's root %q, the replay expects exactly %q", toolPackage, pin, lock.Packages[""].Dependencies[toolPackage], toolVersion)
+	}
+	if m.Integrity != toolIntegrity || e.Integrity != toolIntegrity {
+		bad("integrity drift: verdicts have %q, package-lock.json has %q, the replay expects %q", m.Integrity, e.Integrity, toolIntegrity)
+	}
+	if !slices.Equal(m.Arguments, toolArguments) {
+		bad("verdicts.json was made with the tsc arguments %q, the replay expects %q", m.Arguments, toolArguments)
 	}
 	for name, p := range lock.Packages {
 		if strings.HasPrefix(name, "node_modules/@typescript/typescript-") && p.Version != toolVersion {
@@ -132,14 +182,11 @@ func load(dir string) (cases []Case, verdicts map[string]verdict, problems []str
 		}
 		byID[r.ID] = r
 	}
-	dec := json.NewDecoder(bytes.NewReader(casesBytes))
-	dec.DisallowUnknownFields()
+	if len(records) == 0 {
+		bad("cases.jsonl holds no cases: an empty oracle checks nothing")
+	}
 	seen := map[string]bool{}
-	for n := 1; dec.More(); n++ {
-		var c Case
-		if err := dec.Decode(&c); err != nil {
-			return nil, nil, nil, fmt.Errorf("cases.jsonl record %d: %w", n, err)
-		}
+	for _, c := range records {
 		if seen[c.ID] || c.ID == "" {
 			bad("cases.jsonl: empty or duplicate id %q", c.ID)
 		}
@@ -176,8 +223,11 @@ func load(dir string) (cases []Case, verdicts map[string]verdict, problems []str
 			default:
 				bad("%s: unknown verdict %q", c.ID, v.Verdict)
 			}
-			if len(c.Expect) > 0 && v.Verdict != "accept" {
-				bad("%s: expect only fits an accept verdict (verdict %s)", c.ID, v.Verdict)
+			// accept: expect names the deepest node's kind; syntax: expect names the exact ERROR / MISSING node.
+			for _, e := range c.Expect {
+				if _, _, kind, err := parseExpect(e); err == nil && problemExpect(kind) != (v.Verdict == "syntax") {
+					bad("%s: expect %s does not fit a %s verdict (ERROR and MISSING:kind entries fit syntax cases only)", c.ID, e, v.Verdict)
+				}
 			}
 			if (c.ErrorAt != nil) != (v.Verdict == "syntax") {
 				bad("%s: errorAt is required for, and only fits, a syntax verdict (verdict %s)", c.ID, v.Verdict)

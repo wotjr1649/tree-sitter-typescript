@@ -26,7 +26,7 @@
 | `accept` | `tsc` reports nothing | `codes: []`, `at: null` |
 | `syntax` | `tsc` reports at least one diagnostic | `codes`: the TS codes in order, `at`: the first diagnostic's position as a **UTF-8 byte offset** (`tsc` prints a 1-based line and a UTF-16 column; the runner counts lines at `\n`, `\r\n`, `\r`, U+2028, U+2029 like `tsc`) |
 
-An **inconsistent run** (exit 2, nothing written) is: a diagnostic that is not for the case file, an output line that is no diagnostic, anything on stderr, a failed or timed-out process, an exit status that disagrees with the output (0 exactly when there is no diagnostic), a position outside the source, or an installed `typescript` or platform package that differs from the pin or the lockfile.
+An **inconsistent run** (exit 2, nothing written) is: a diagnostic for any file name other than the case file (compared exactly, indented or not), an output line that is no diagnostic (an indented line counts as the continuation of a chained message only when it is not itself shaped like a diagnostic), a diagnostic whose line and column are not on the source (every diagnostic is checked, not only the first), anything on stderr, a failed or timed-out process, an exit status that disagrees with the output (0 exactly when there is no diagnostic), or an installed `typescript` or platform package that differs from the pin or the lockfile, or a `package.json` that does not pin `typescript` to exactly `7.0.2`. The self-test feeds mocked output of each kind to the parser of `tsc`'s output and requires it to be refused.
 
 `node oracle/run.mjs --self-test` proves the three kinds of answer and the position conversion on fixed inputs (it writes nothing). Its result, with 7.0.2 (CI runs it too):
 
@@ -54,7 +54,9 @@ The replay parses each case with the grammar named by the case (`typescript` or 
 
 **`expect`** (accept cases): entries `s-e:kind`; the deepest node whose range covers bytes `[s,e)` has that kind (the first one in document order among equals), as in go-treesitter's `testdata/korean/manifest.csv`. Offsets are UTF-8 bytes. Anonymous nodes count: `7-10:out` names a keyword token, `7-10:type_identifier` the named node.
 
-**`errorAt`** (syntax cases): the decided error position, a UTF-8 byte offset. It equals `tsc`'s first diagnostic position (`at` in `verdicts.json`) unless the case has a `reason` saying why another position is the right one; the replay requires a `reason` exactly when the two differ. It holds when some `ERROR` or `MISSING` node starts at or before `errorAt` and either contains it (`start <= errorAt <= end`) or ends before it with only white space in between: recovery leaves the node on the last good token while `tsc` names the next one.
+**`errorAt`** (syntax cases): the decided error position, a UTF-8 byte offset. It equals `tsc`'s first diagnostic position (`at` in `verdicts.json`) unless the case has a `reason` saying why another position is the right one; the replay requires a `reason` exactly when the two differ. It holds when some `ERROR` or `MISSING` node starts at or before `errorAt` and either contains it (`start <= errorAt <= end`) or ends before it with only white space in between (recovery leaves the node on the last good token while `tsc` names the next one), **and** `errorAt` does not lie inside a token the parser read well that is only a part of that node. The second clause stops a wide recovery `ERROR` from agreeing with a complaint about a token it kept: for `type A<in> =` `tsc` reports TS1359 at the `in` (byte 7), the grammar reads `in` as a `type_identifier [7,9)` inside one `ERROR [0,12)`, so `errorAt` 7 does not hold (the grammar's error is the missing right-hand side, byte 12, which is a different error). An `ERROR` that is exactly the offending token (`<p>></p>`: `ERROR [3,4)` holding the one leaf `>`) holds.
+
+**`expect`** (syntax cases, optional): entries that pin the problem node itself, not only a position near it. `s-e:ERROR` asserts an `ERROR` node with exactly the byte range `[s,e)`; `s-e:MISSING:kind` asserts a `MISSING` node of that kind with exactly that range (`8-8:MISSING:identifier`). Use it when the case is meant to guard one specific error shape; a fix that moves the recovery changes the entry in the same pull request. Both kinds of `expect` entry are refused on the wrong verdict (exit 2).
 
 ## Case records
 
@@ -63,7 +65,7 @@ The replay parses each case with the grammar named by the case (`typescript` or 
 {"id":"s2/export-type-star-no-from.ts","sha256":"…","source":"export type *;","grammar":"typescript","errorAt":13}
 ```
 
-`id` is unique (the convention is `<defect class>/<name>.ts` or `.tsx`); `sha256` is the hash of the UTF-8 bytes of `source` (a source must be well-formed Unicode and must not start with U+FEFF, which `tsc` strips); `grammar` is `typescript` or `tsx`; `expect` only with an `accept` verdict; `errorAt` required for, and only with, a `syntax` verdict; `reason` only with an `errorAt` that differs from `tsc`'s. Any other field is refused. `verdicts.json` has `meta` and `results` (per case: `id`, `sha256`, `grammar`, `verdict`, `codes`, `at`).
+`id` is unique (the convention is `<defect class>/<name>.ts` or `.tsx`); `sha256` is the hash of the UTF-8 bytes of `source` (a source must be well-formed Unicode and must not start with U+FEFF, which `tsc` strips); `grammar` is `typescript` or `tsx`; `expect` (an `accept` case: deepest-node entries; a `syntax` case: `ERROR` / `MISSING:kind` entries); `errorAt` required for, and only with, a `syntax` verdict; `reason` only with an `errorAt` that differs from `tsc`'s. Every non-blank line must be exactly one JSON object (a `null`, a stray `]`, trailing text or an unknown field is exit 2 in both tools), and the file must hold at least one case: an empty set is exit 2 in both tools, so the oracle cannot pass by checking nothing. `verdicts.json` has `meta` and `results` (per case: `id`, `sha256`, `grammar`, `verdict`, `codes`, `at`).
 
 ## Run
 
@@ -84,9 +86,9 @@ Exit codes of the replay:
 
 - **0**: every case is consistent.
 - **1**: a result differs; the differences are listed. Registering such a case is not an option (rule: no mismatch in the committed set).
-- **2**: the inputs are inconsistent: a `sha256` that does not match its source, verdicts made from other cases (`cases_sha256`), another runner (`runner_sha256`) or another `package-lock.json`, a tool version or integrity that differs between the verdicts, `package-lock.json`, the exact pin in `package.json` and the replay (7.0.2; also every `@typescript/typescript-*` package of the lock), a case that does not fit its verdict, or a grammar that cannot be loaded. Nothing is judged.
+- **2**: the inputs are inconsistent: a `sha256` that does not match its source, verdicts made from other cases (`cases_sha256`), another runner (`runner_sha256`) or another `package-lock.json`, a tool version, an npm integrity or a `tsc` argument list (`meta.arguments`) that differs from the values written into the replay (7.0.2, `sha512-8FYau96o…`, `--noEmit --noCheck --pretty false --target esnext --jsx preserve`) in the verdicts or the lock, a `package.json` whose pin is not exactly 7.0.2, any `@typescript/typescript-*` package of the lock at another version, no cases, a case that does not fit its verdict, or a grammar that cannot be loaded. Nothing is judged.
 
-CI (`oracle` job of `.github/workflows/ci.yml`, `ubuntu-24.04`): `npm ci --ignore-scripts`, the runner self-test, regenerate `verdicts.json` and fail on any difference from the committed file, the replay self-test, the replay, and the node-kind snapshot check.
+CI (`oracle` job of `.github/workflows/ci.yml`, `ubuntu-24.04`): `npm ci --ignore-scripts`, the runner self-test, regenerate `verdicts.json` and fail on any difference from the committed file (the file must be tracked: `git ls-files --error-unmatch` runs first, because `git diff` passes for an untracked file), the replay self-test, the replay, and the node-kind snapshot check.
 
 ## Adding cases in a fix pull request (rule (b))
 
@@ -95,8 +97,13 @@ CI (`oracle` job of `.github/workflows/ci.yml`, `ubuntu-24.04`): `npm ci --ignor
 3. After the fix, `go run . -oracle .. -tree` in `oracle/replay` shows the trees. For an `accept` case add `expect` entries for the nodes the fix is about; for a `syntax` case add `errorAt` (equal to `at`).
 4. `node oracle/run.mjs` again; the replay must exit 0. Commit `cases.jsonl` and `verdicts.json` together. A case the grammar does not yet get right is not committed: it enters in the pull request that fixes it.
 
-Changing the `typescript` version means changing `package.json`, `package-lock.json`, the pin in `run.mjs` and in `replay/main.go`, and regenerating `verdicts.json` in the same pull request; review every verdict that moves.
+Changing the `typescript` version means changing `package.json`, `package-lock.json`, the pin and integrity in `run.mjs` and the version, integrity and arguments written into `replay/main.go`, and regenerating `verdicts.json` in the same pull request; review every verdict that moves.
 
 ## Node-kind snapshot
 
 `node test/node-kinds/generate.mjs` writes `test/node-kinds/typescript.txt` and `test/node-kinds/tsx.txt` from `typescript/src/node-types.json` and `tsx/src/node-types.json`: one sorted line per kind; a named kind is bare or with its field names (`call_expression{arguments,function,type_arguments}`), an anonymous kind (keyword or punctuation token) is a JSON string (`"out"`). Node kinds and field names are a public contract (`AGENTS.md`): CI regenerates the files and fails on `git diff --exit-code -- test/node-kinds`, so a removal or rename shows up as a deleted line, an addition as an added line, and a grammar change that forgets to refresh the snapshot fails. A fix pull request that adds a kind runs the script and commits the result.
+
+## Known limits
+
+- The node-kind snapshot follows `node-types.json`. The TypeScript runtime also exposes `jsx_text` as a visible named kind (id 163) that is absent from `typescript/src/node-types.json` and so from `typescript.txt` (the TSX snapshot has it); losing that symbol would not show up as a snapshot difference.
+- The `checkout@v4`, `setup-node@v4` and `setup-go@v5` actions of the `oracle` job declare Node 20 and run on Node 24 with a runner warning, like the existing jobs (same generation); moving all of them is a separate change.
