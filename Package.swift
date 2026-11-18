@@ -7,7 +7,7 @@ let package = Package(
     .library(name: "TreeSitterTypeScript", targets: ["TreeSitterTypeScript", "TreeSitterTSX"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.8.0"),
+    .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.25.0"),
   ],
   targets: [
     .target(
@@ -45,5 +45,6 @@ let package = Package(
       ],
       path: "bindings/swift/TreeSitterTypeScriptTests"
     )
-  ]
+  ],
+  cLanguageStandard: .c11
 )

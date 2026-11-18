@@ -36,4 +36,5 @@ tree-sitter-language = "0.1"
 cc = "1.1"
 
 [dev-dependencies]
-tree-sitter = "0.24"
+# ABI 15 needs tree-sitter 0.25+; Cargo treats "0.25" as <0.26, so a range keeps 0.25 as the floor and allows the locked 0.27.
+tree-sitter = ">=0.25, <0.28"
