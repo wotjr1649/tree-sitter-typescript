@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "76aa43366c1a0604c00c07f126a387bddcd727598a730730e455920ab9247d32",
+  "cases_sha256": "78347417c0e299a325fd83174c6e7ab0f2d0fd9d1298ac7e887dfd2d89a89e95",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -1091,6 +1091,170 @@
   {
    "id": "s4/p112-importtype-typeof-import-targs.tsx",
    "sha256": "551f2e1f556bc7aae0ae46479d8e11cf63624f046b882db772d93fcaa90eb332",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/neg-targs-on-object.ts",
+   "sha256": "497be0495622d640d7a3266aaa5c5af00adbb13e0c470e1ef30e467e3681a1dc",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-object.tsx",
+   "sha256": "497be0495622d640d7a3266aaa5c5af00adbb13e0c470e1ef30e467e3681a1dc",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-object-and-member.ts",
+   "sha256": "1230822b00a792e3dfefca8d060c01e639f41b677c6ce76fb5e9be5cefe98246",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-object-and-member.tsx",
+   "sha256": "1230822b00a792e3dfefca8d060c01e639f41b677c6ce76fb5e9be5cefe98246",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-callee.ts",
+   "sha256": "d5bc0c8d0a77fc6697ca396b7f6a4ec1b001d8c8b68890386cbf036b83844fa0",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-callee.tsx",
+   "sha256": "d5bc0c8d0a77fc6697ca396b7f6a4ec1b001d8c8b68890386cbf036b83844fa0",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-callee-then-member.ts",
+   "sha256": "4124f15f4bd56e2731d57e168f8cbcf20f3c652e0bd68963e7ae46dd968e4cff",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/neg-targs-on-callee-then-member.tsx",
+   "sha256": "4124f15f4bd56e2731d57e168f8cbcf20f3c652e0bd68963e7ae46dd968e4cff",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 30
+  },
+  {
+   "id": "s4/member-member-member-targs.ts",
+   "sha256": "e559fee8e782d7a107e10f9d57ed11b2deecd7b4be25a0a99d423d3f3318f3cc",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-member-member-targs.tsx",
+   "sha256": "e559fee8e782d7a107e10f9d57ed11b2deecd7b4be25a0a99d423d3f3318f3cc",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-targs-nested.ts",
+   "sha256": "d4520398b7d4504d30b5b4fec0939a0000607b2a3788bf2e2c440d8557ece573",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-targs-nested.tsx",
+   "sha256": "d4520398b7d4504d30b5b4fec0939a0000607b2a3788bf2e2c440d8557ece573",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-member-targs-nested.ts",
+   "sha256": "ee36a8b109246a6b551fb417432233f7394ceb7a9f848a7638dc9b17765c2a60",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-member-targs-nested.tsx",
+   "sha256": "ee36a8b109246a6b551fb417432233f7394ceb7a9f848a7638dc9b17765c2a60",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-targs-import-arg.ts",
+   "sha256": "55a2e714e2fc68f0641554be569d12510cff36d0e8ac32a720ccc5da412cd58b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/member-targs-import-arg.tsx",
+   "sha256": "55a2e714e2fc68f0641554be569d12510cff36d0e8ac32a720ccc5da412cd58b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/return-member-targs.ts",
+   "sha256": "870ab8fb6be9e9334b4d7917ba7e7d2aaa80ef9832cf2e45bf7c95bcfeacc955",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "s4/return-member-targs.tsx",
+   "sha256": "870ab8fb6be9e9334b4d7917ba7e7d2aaa80ef9832cf2e45bf7c95bcfeacc955",
    "grammar": "tsx",
    "verdict": "accept",
    "codes": [],

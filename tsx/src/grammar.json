@@ -8985,18 +8985,19 @@
               }
             ]
           }
+        }
+      ]
+    },
+    "_type_query_instantiated_member_expression_in_type_annotation": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_type_query_member_expression_in_type_annotation"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "type_arguments"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "type_arguments"
         }
       ]
     },
@@ -9110,6 +9111,19 @@
             "content": {
               "type": "SYMBOL",
               "name": "_type_query_member_expression_in_type_annotation"
+            },
+            "named": true,
+            "value": "member_expression"
+          }
+        },
+        {
+          "type": "PREC",
+          "value": -1,
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_type_query_instantiated_member_expression_in_type_annotation"
             },
             "named": true,
             "value": "member_expression"
@@ -11195,9 +11209,6 @@
     ],
     [
       "class"
-    ],
-    [
-      "_type_query_member_expression_in_type_annotation"
     ],
     [
       "nested_identifier",
