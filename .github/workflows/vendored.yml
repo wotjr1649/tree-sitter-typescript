@@ -1,0 +1,36 @@
+name: Vendored inputs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  javascript-grammar:
+    name: Check vendored JavaScript grammar and queries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # tree-sitter/tree-sitter-javascript v0.23.1 (3a837b6); the same hashes are in NOTICE.
+      - name: Verify SHA-256 and the file set
+        working-directory: third_party/tree-sitter-javascript
+        run: |-
+          cat > "$RUNNER_TEMP/sums" <<'EOF'
+          2e0110e07abef7c2548b26ec9d6969775617ca539a0dc8dbeeb14d6452c711d1  LICENSE
+          230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc  grammar.js
+          0cad1712acaf40804bc5dc7c8476858752c1f549cdf7d8c63c747317be0f8fa6  queries/highlights-jsx.scm
+          bbe7a58cacfb1c954cb0eab44779fd80421ed59b762b975723447207635de50d  queries/highlights-params.scm
+          d3630ae6dc9b2b27b230b5f8bb92b05cd491fb12bff353dae62a0a6d780461ee  queries/highlights.scm
+          bea345407ce1f24bccf2b3c1a128acc14e19301327074285368586e793dcb86d  queries/injections.scm
+          c1dd2cfa1400d397fa974208fc9edfe817be4a3c8b42bb99af5c8d193b1bb753  queries/locals.scm
+          6ef988cce5a428a15b5460e3ee96f1478705f965fc6e848a91a18bfa6c6f0212  queries/tags.scm
+          EOF
+          sha256sum -c "$RUNNER_TEMP/sums"
+          # Every file under third_party/ must be one of the listed files.
+          diff <(sed 's|^[0-9a-f]*  |third_party/tree-sitter-javascript/|' "$RUNNER_TEMP/sums" | LC_ALL=C sort) \
+            <(cd ../.. && find third_party -type f | LC_ALL=C sort)

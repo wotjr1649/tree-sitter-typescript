@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  abi:
+    name: ABI consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # The parsers are ABI 15; the CMake default must match so a CMake build never regenerates them with another ABI.
+      - name: Compare parser.c and CMake ABI
+        run: |-
+          grep -qx '#define LANGUAGE_VERSION 15' typescript/src/parser.c
+          grep -qx '#define LANGUAGE_VERSION 15' tsx/src/parser.c
+          grep -q 'set(TREE_SITTER_ABI_VERSION 15 CACHE' CMakeLists.txt
+  known-failures:
+    name: Known failures only shrink
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # On pull_request the checkout is the merge commit; its first parent is the base branch.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Compare known-failures.txt with the base branch
+        run: bash test/examples/check-known-failures-shrink.sh HEAD^1
+  test:
+    name: Test parsers
+    runs-on: ${{matrix.os}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+        with:
+          tree-sitter-ref: v0.27.2
+      # Generate only the two grammars; third_party/ holds an input, not a grammar to build.
+      - name: Verify generated parsers
+        shell: bash
+        run: |-
+          for grammar in typescript tsx; do
+            (cd "$grammar" && tree-sitter generate --abi 15 --js-runtime native)
+          done
+          git diff --exit-code -- typescript/src tsx/src
+      # Example repositories at the commits pinned in test/examples/repos.txt.
+      - name: Set up examples
+        shell: bash
+        run: |-
+          grep -v '^#' test/examples/repos.txt | while read -r name url commit; do
+            [ -n "$name" ] || continue
+            git init -q "examples/$name"
+            git -C "examples/$name" fetch -q --depth=1 --filter=blob:none "$url" "$commit"
+            git -C "examples/$name" -c advice.detachedHead=false checkout -q FETCH_HEAD
+            test "$(git -C "examples/$name" rev-parse HEAD)" = "$commit"
+          done
+      - name: Run tests
+        uses: tree-sitter/parser-test-action@v3
+        with:
+          generate: false
+          test-rust: true
+          test-node: true
+          test-python: true
+          test-go: true
+      # Same commands as parser-test-action's Swift step, but with a serial build: on Windows, swift-build's parallel
+      # tasks for the two resource bundles (TypeScript and TSX share queries/) failed with "Touch
+      # ...TreeSitterTypeScript_TreeSitterTSX.bundle ... being used by another process" depending on task order.
+      - name: Set up Swift
+        uses: SwiftyLab/setup-swift@v1
+        with:
+          swift-version: "6.4"
+      - name: Run Swift tests
+        shell: sh
+        run: |-
+          swift build --build-tests -j 1
+          swift test --skip-build -q
+      # Every .ts/.tsx file must parse unless listed in test/examples/known-failures.txt; listed files must still fail.
+      - name: Parse examples
+        shell: bash
+        run: node test/examples/parse-examples.mjs

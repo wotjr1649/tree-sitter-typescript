@@ -1,0 +1,37 @@
+name: Fuzz Parser
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - typescript/src/scanner.c
+      - tsx/src/scanner.c
+      - common/scanner.h
+      - "*/src/**"
+      - .github/workflows/fuzz.yml
+  pull_request:
+    paths:
+      - typescript/src/scanner.c
+      - tsx/src/scanner.c
+      - common/scanner.h
+      - "*/src/**"
+      - .github/workflows/fuzz.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [typescript, tsx]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Fuzz ${{matrix.language}} parser
+        uses: tree-sitter/fuzz-action@v4
+        with:
+          directory: ${{matrix.language}}

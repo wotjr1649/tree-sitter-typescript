@@ -1,0 +1,6 @@
+# Example repositories parsed by CI (test/examples/parse-examples.mjs), cloned into examples/<name>.
+# Pinned to full commits so the input is reproducible; moving a pin updates known-failures.txt in the same change.
+# name     url                                    commit
+desktop    https://github.com/desktop/desktop     01cde4fd4d7bb07e642bcbf330e3f1bf3180ef38
+redux      https://github.com/reduxjs/redux       67a2f96073a21ce0366b673ff0372daf6ee409c3
+vscode     https://github.com/microsoft/vscode    36e8c0289a5f29eae15a933263220d9895302ff6
