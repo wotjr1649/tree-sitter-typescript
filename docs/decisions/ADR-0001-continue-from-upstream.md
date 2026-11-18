@@ -21,8 +21,9 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
    `third_party/tree-sitter-javascript/grammar.js`, copied unchanged from tree-sitter-javascript v0.23.1 (`3a837b6`,
    SHA-256 `230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc`), in place of the npm dependency. The
    JavaScript queries that `tree-sitter.json` combines with this repository's are vendored from the same tag under
-   `third_party/tree-sitter-javascript/queries/`. `NOTICE` records the source and CI checks every file's hash. A later release may switch it to a named tag of the
-   owner-maintained JavaScript grammar.
+   `third_party/tree-sitter-javascript/queries/`, with the tag's `LICENSE`. `NOTICE` records the source and the
+   SHA-256 of every file there; CI checks each hash and that `third_party/` holds no other file. A later release may
+   switch it to a named tag of the owner-maintained JavaScript grammar.
 3. Own versions start at v1.0.0, which equals the v0.23.2 baseline behaviour: regenerated with tree-sitter CLI 0.27.2,
    `parser.c`, `grammar.json`, `node-types.json` and the headers of both grammars are byte-identical to what
    go-treesitter generates from the old source. `tree-sitter.json` keeps `metadata.version` `0.23.2` because
@@ -46,5 +47,6 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 - Binding consumers need tree-sitter runtime 0.25 or later, and Python consumers Python 3.10 or later.
 - The Go module path is `github.com/wotjr1649/tree-sitter-typescript` (owner decision, 2026-11-18).
 - CI parses example repositories at pinned commits; the files the baseline grammar cannot parse are listed in
-  `test/examples/known-failures.txt`, which may only shrink as the v1.1 grammar fixes land (owner decision, 2026-11-18).
+  `test/examples/known-failures.txt`, which may only shrink as the v1.1 grammar fixes land (owner decision,
+  2026-11-18). CI fails a pull request that adds a path to it without changing the pins in `test/examples/repos.txt`.
 - One maintainer owns the grammars; the dependency moves from upstream's maintainers to this repository's owner.
