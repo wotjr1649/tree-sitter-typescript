@@ -71,30 +71,126 @@ type lockFile struct {
 
 func sum(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
 
-// parseCases reads cases.jsonl line by line: every non-blank line must be exactly one JSON object with known fields
-// (run.mjs refuses the same inputs, so a malformed file is exit 2 in both tools).
+// parseCases reads cases.jsonl with the same rules as run.mjs (a malformed file is exit 2 in both tools): lines are split
+// at \n only; a line of only space, tab and CR is blank; line numbers count every physical line; every other line is
+// exactly one JSON object; field names are exact (case-sensitive, Go's own decoder would ignore case); id, sha256,
+// source and grammar are strings and not null; source has no unpaired surrogate escape (Go would turn it into U+FFFD)
+// and no leading U+FEFF; expect is an array of strings, errorAt an integer, reason a string.
 func parseCases(b []byte) ([]Case, error) {
 	var cases []Case
 	for n, line := range strings.Split(string(b), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" {
+		if strings.Trim(line, " \t\r") == "" {
 			continue
 		}
-		if !strings.HasPrefix(line, "{") {
-			return nil, fmt.Errorf("cases.jsonl line %d: a record must be a JSON object", n+1)
-		}
-		dec := json.NewDecoder(strings.NewReader(line))
-		dec.DisallowUnknownFields()
-		var c Case
-		if err := dec.Decode(&c); err != nil {
+		c, err := parseCase(line)
+		if err != nil {
 			return nil, fmt.Errorf("cases.jsonl line %d: %w", n+1, err)
-		}
-		if _, err := dec.Token(); err != io.EOF {
-			return nil, fmt.Errorf("cases.jsonl line %d: data after the record", n+1)
 		}
 		cases = append(cases, c)
 	}
 	return cases, nil
+}
+
+func parseCase(line string) (Case, error) {
+	var c Case
+	if !strings.HasPrefix(strings.Trim(line, " \t\r"), "{") {
+		return c, fmt.Errorf("a record must be a JSON object")
+	}
+	dec := json.NewDecoder(strings.NewReader(line))
+	var raw map[string]json.RawMessage
+	if err := dec.Decode(&raw); err != nil {
+		return c, err
+	}
+	if _, err := dec.Token(); err != io.EOF {
+		return c, fmt.Errorf("data after the record")
+	}
+	str := func(key string, dst *string) error {
+		v, ok := raw[key]
+		if !ok {
+			return fmt.Errorf("%s must be a string (missing)", key)
+		}
+		if err := json.Unmarshal(v, dst); err != nil || string(bytes.TrimSpace(v)) == "null" {
+			return fmt.Errorf("%s must be a string", key)
+		}
+		return nil
+	}
+	for k := range raw {
+		switch k {
+		case "id", "sha256", "source", "grammar", "expect", "errorAt", "reason":
+		default:
+			return c, fmt.Errorf("unknown field %s", k)
+		}
+	}
+	for key, dst := range map[string]*string{"id": &c.ID, "sha256": &c.SHA256, "source": &c.Source, "grammar": &c.Grammar} {
+		if err := str(key, dst); err != nil {
+			return c, err
+		}
+	}
+	if hasUnpairedSurrogate(raw["source"]) {
+		return c, fmt.Errorf("source has an unpaired surrogate")
+	}
+	if strings.HasPrefix(c.Source, "\xef\xbb\xbf") {
+		return c, fmt.Errorf("source must not start with a BOM (tsc strips it and the offsets would shift)")
+	}
+	if v, ok := raw["reason"]; ok {
+		if err := str("reason", &c.Reason); err != nil || len(v) == 0 {
+			return c, fmt.Errorf("reason must be a string")
+		}
+	}
+	if v, ok := raw["expect"]; ok {
+		if err := json.Unmarshal(v, &c.Expect); err != nil || c.Expect == nil {
+			return c, fmt.Errorf("expect must be an array of strings")
+		}
+	}
+	if v, ok := raw["errorAt"]; ok {
+		var at int
+		if err := json.Unmarshal(v, &at); err != nil {
+			return c, fmt.Errorf("errorAt must be an integer")
+		}
+		c.ErrorAt = &at
+	}
+	return c, nil
+}
+
+// hasUnpairedSurrogate scans the raw JSON text of a string for \uD800-\uDFFF escapes that are not a high surrogate
+// followed by a low one.
+func hasUnpairedSurrogate(raw json.RawMessage) bool {
+	hex4 := func(i int) (rune, bool) {
+		if i+6 > len(raw) || raw[i] != '\\' || raw[i+1] != 'u' {
+			return 0, false
+		}
+		var r rune
+		for _, c := range raw[i+2 : i+6] {
+			switch {
+			case c >= '0' && c <= '9':
+				r = r<<4 | rune(c-'0')
+			case c >= 'a' && c <= 'f':
+				r = r<<4 | rune(c-'a'+10)
+			case c >= 'A' && c <= 'F':
+				r = r<<4 | rune(c-'A'+10)
+			default:
+				return 0, false
+			}
+		}
+		return r, true
+	}
+	for i := 0; i < len(raw); i++ {
+		if raw[i] != '\\' {
+			continue
+		}
+		if r, ok := hex4(i); ok && r >= 0xD800 && r <= 0xDFFF {
+			if r >= 0xDC00 {
+				return true
+			}
+			if low, ok := hex4(i + 6); !ok || low < 0xDC00 || low > 0xDFFF {
+				return true
+			}
+			i += 11
+			continue
+		}
+		i++ // skip the escaped character
+	}
+	return false
 }
 
 func readJSON(path string, v any) error {
@@ -219,6 +315,11 @@ func load(dir string) (cases []Case, verdicts map[string]verdict, problems []str
 			case "syntax":
 				if len(v.Codes) == 0 || v.At == nil || *v.At < 0 || *v.At > len(c.Source) {
 					bad("%s: a syntax verdict needs diagnostics and a position inside the source", c.ID)
+				}
+				for _, code := range v.Codes { // the runner accepts 1..99999 only (a JSON null decodes to 0)
+					if code < 1 || code > 99999 {
+						bad("%s: diagnostic code %d is not a small positive integer", c.ID, code)
+					}
 				}
 			default:
 				bad("%s: unknown verdict %q", c.ID, v.Verdict)

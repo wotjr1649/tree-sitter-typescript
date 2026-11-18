@@ -38,21 +38,36 @@ const EXT = { typescript: "ts", tsx: "tsx" };
 const LINE_BREAK = new RegExp("\\r\\n|[\\n\\r" + String.fromCharCode(0x2028, 0x2029) + "]");
 
 // ---- cases ---------------------------------------------------------------------------------------------------------
+// The replay (replay/main.go, parseCases) applies the same rules: lines are split at \n only, a line of only space, tab
+// and CR is blank, line numbers count every physical line, field names are exact (case-sensitive), `id`, `sha256`,
+// `source` and `grammar` are strings (`sha256` may be missing only for --rehash), `source` has no unpaired surrogate and
+// no leading U+FEFF, `expect` is an array of strings, `errorAt` an integer, `reason` a string.
+const BLANK = /^[ \t\r]*$/;
 const casesBytes = readFileSync(casesPath);
 const cases = casesBytes
   .toString("utf8")
   .split("\n")
-  .filter((l) => l.trim() !== "")
-  .map((l, n) => {
+  .flatMap((l, i) => {
+    if (BLANK.test(l)) return [];
+    const where = `${basename(casesPath)}:${i + 1}`;
     let c;
     try {
       c = JSON.parse(l);
     } catch (e) {
-      fail(`${basename(casesPath)}:${n + 1}: ${e.message}`);
+      fail(`${where}: ${e.message}`);
     }
-    if (c === null || typeof c !== "object" || Array.isArray(c)) fail(`${basename(casesPath)}:${n + 1}: a record must be a JSON object`);
-    for (const k of Object.keys(c)) if (!KEYS.includes(k)) fail(`${basename(casesPath)}:${n + 1}: unknown field ${k}`);
-    return c;
+    if (c === null || typeof c !== "object" || Array.isArray(c)) fail(`${where}: a record must be a JSON object`);
+    for (const k of Object.keys(c)) if (!KEYS.includes(k)) fail(`${where}: unknown field ${k}`);
+    for (const k of ["id", "source", "grammar", ...(args.includes("--rehash") ? [] : ["sha256"])]) {
+      if (typeof c[k] !== "string") fail(`${where}: ${k} must be a string`);
+    }
+    if ("sha256" in c && typeof c.sha256 !== "string") fail(`${where}: sha256 must be a string`);
+    if ("reason" in c && typeof c.reason !== "string") fail(`${where}: reason must be a string`);
+    if ("expect" in c && !(Array.isArray(c.expect) && c.expect.every((e) => typeof e === "string"))) fail(`${where}: expect must be an array of strings`);
+    if ("errorAt" in c && !Number.isInteger(c.errorAt)) fail(`${where}: errorAt must be an integer`);
+    if (!c.source.isWellFormed()) fail(`${where}: source has an unpaired surrogate`);
+    if (c.source.charCodeAt(0) === 0xfeff) fail(`${where}: source must not start with a BOM (tsc strips it and the offsets would shift)`);
+    return [c];
   });
 
 if (args.includes("--rehash")) {
@@ -109,9 +124,13 @@ function parseOutput(source, grammar, stdout, stderr, status) {
     if (line === "") continue;
     const m = DIAG.exec(line);
     if (!m) {
+      // A line that says `error TSnnnn:` but has no file position is a diagnostic that cannot be attributed, never a
+      // continuation (for example an indented `error TS6053: File not found.`).
+      if (/\berror\s+TS\d+\s*:/.test(line)) bad(`diagnostic without a file position: ${JSON.stringify(line)}`);
       if (/^\s/.test(line) && codes.length > 0) continue; // continuation of a chained message
       bad(`unparseable output line: ${JSON.stringify(line)}`);
     }
+    if (!/^[1-9]\d{0,4}$/.test(m[5])) bad(`diagnostic code TS${m[5].slice(0, 12)} is not a small positive integer: ${JSON.stringify(line.slice(0, 120))}`);
     if (m[1] !== "" || m[2] !== file) bad(`diagnostic for ${JSON.stringify(m[2])}, not for ${file}: ${JSON.stringify(line)}`);
     const pos = byteOffset(source, Number(m[3]), Number(m[4]));
     if (pos === null) bad(`position ${m[3]},${m[4]} is not on the source: ${JSON.stringify(line)}`);
@@ -126,18 +145,23 @@ function parseOutput(source, grammar, stdout, stderr, status) {
 function tsc(source, grammar, extraArgs = TSC_ARGS) {
   const dir = mkdtempSync(join(tmpdir(), "oracle-tsc-"));
   const file = `case.${EXT[grammar]}`;
+  let result;
+  let inconsistent = null;
   try {
     writeFileSync(join(dir, file), Buffer.from(source, "utf8"));
     // Fresh directory, no tsconfig; node + tsc.js instead of the .bin shim so that Windows and Linux run the same thing.
     const r = spawnSync(process.execPath, [TSC_JS, ...extraArgs, file], { cwd: dir, encoding: "utf8", timeout: 120000 });
     if (r.error || r.signal) bad(`tsc did not finish (${r.error?.message ?? r.signal})`);
-    return parseOutput(source, grammar, r.stdout, r.stderr, r.status);
+    result = parseOutput(source, grammar, r.stdout, r.stderr, r.status);
   } catch (e) {
-    if (e instanceof Inconsistent) fail(`${file}: ${e.message}`);
-    throw e;
+    if (!(e instanceof Inconsistent)) throw e;
+    inconsistent = e.message;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+  // fail() exits the process, so it runs only after the temporary directory is gone.
+  if (inconsistent !== null) fail(`${file}: ${inconsistent}`);
+  return result;
 }
 
 // ---- tool: installed version must equal the pin and the lockfile -------------------------------------------------------
@@ -202,6 +226,9 @@ if (args.includes("--self-test")) {
   refused("a line beyond the source", "let x = ;", "typescript", `case.ts(1,9): ${D}\ncase.ts(99,1): ${D}\n`);
   refused("an output line that is no diagnostic", "let x = ;", "typescript", `case.ts(1,9): ${D}\nsomething else\n`);
   refused("an exit status that disagrees", "let x = ;", "typescript", `case.ts(1,9): ${D}\n`, 0);
+  refused("an indented diagnostic-like line without a position", "let x = ;", "typescript", `case.ts(1,9): ${D}\n  error TS6053: File not found.\n`);
+  refused("a diagnostic code with 400 digits", "let x = ;", "typescript", `case.ts(1,9): error TS${"9".repeat(400)}: x.\n`);
+  refused("a diagnostic code of 0", "let x = ;", "typescript", "case.ts(1,9): error TS0: x.\n");
   want("a chained message is one diagnostic", parseOutput("let x = ;", "typescript", "case.ts(1,9): error TS2345: a.\n  b.\n", "", 1), { verdict: "syntax", codes: [2345], at: 8 });
   console.log(wrong.length ? `self-test: ${wrong.length} differ` : "self-test: all consistent");
   process.exit(wrong.length ? 1 : 0);

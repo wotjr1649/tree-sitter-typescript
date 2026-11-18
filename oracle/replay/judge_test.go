@@ -295,3 +295,103 @@ func TestLoadRefusesInconsistentInputs(t *testing.T) {
 		}
 	}
 }
+
+func TestAssertedNodeSatisfiesErrorAt(t *testing.T) {
+	// Unclosed JSX: tsc's first diagnostic is TS17008 at the tag name (byte 1), the grammar keeps `p` as an identifier
+	// inside one ERROR [0,4).
+	src := "<p>x"
+	nodes, r := parse(t, "tsx", src)
+	if !r.HasError() {
+		t.Fatalf("want an error tree, got %s", r)
+	}
+	at := 1
+	without := Case{Source: src, ErrorAt: &at}
+	if d := check(without, "syntax", nodes, r); len(d) != 1 {
+		t.Errorf("without an assertion the stricter rule must refuse byte 1: %v", d)
+	}
+	with := Case{Source: src, ErrorAt: &at, Expect: []string{"0-4:ERROR"}}
+	if d := check(with, "syntax", nodes, r); len(d) != 0 {
+		t.Errorf("an exact ERROR [0,4) that contains byte 1 must satisfy errorAt: %v", d)
+	}
+	// the assertion has to be true, and its range has to contain errorAt
+	wrongRange := Case{Source: src, ErrorAt: &at, Expect: []string{"0-3:ERROR"}}
+	if d := check(wrongRange, "syntax", nodes, r); len(d) == 0 {
+		t.Errorf("an assertion about a node the tree does not have must differ")
+	}
+	far := 4
+	if d := check(Case{Source: src, ErrorAt: &far, Expect: []string{"0-4:ERROR"}}, "syntax", nodes, r); len(d) != 0 {
+		t.Errorf("errorAt at the end of the asserted node holds: %v", d)
+	}
+	// a node that does not contain errorAt does not help: `let x = ; let y = ;` has ERRORs [6,7) and [16,17)
+	two := "let x = ; let y = ;"
+	tn, tr := parse(t, "typescript", two)
+	eight := 8
+	c := Case{Source: two, ErrorAt: &eight, Expect: []string{"16-17:ERROR"}}
+	if d := check(c, "syntax", tn, tr); len(d) != 0 {
+		// errorAt 8 is held by the first ERROR through the ordinary rule; the assertion is about the second one
+		t.Errorf("the ordinary rule still holds byte 8: %v", d)
+	}
+	nine := 9
+	if assertedNodeHolds(tn, []string{"16-17:ERROR"}, nine) {
+		t.Error("an asserted node that does not contain errorAt must not satisfy it")
+	}
+}
+
+func TestParseCasesRulesMatchRunner(t *testing.T) {
+	esc := func(hex string) string { return "\\" + "u" + hex }
+	rec := func(source string) string {
+		return `{"id":"a","sha256":"x","source":"` + source + `","grammar":"typescript"}`
+	}
+	ok := func(name, in string) {
+		t.Helper()
+		if _, err := parseCases([]byte(in)); err != nil {
+			t.Errorf("%s must be accepted: %v", name, err)
+		}
+	}
+	refused := func(name, in string) {
+		t.Helper()
+		if _, err := parseCases([]byte(in)); err == nil {
+			t.Errorf("%s must be refused", name)
+		}
+	}
+	ok("a record", rec("x")+"\n")
+	ok("a valid surrogate pair", rec(esc("d83d")+esc("de00"))+"\n")
+	ok("an escaped backslash before text that looks like an escape", rec("\\\\"+"ud800")+"\n")
+	refused("an unpaired high surrogate", rec(esc("d800"))+"\n")
+	refused("an unpaired low surrogate", rec(esc("DC00"))+"\n")
+	refused("a high surrogate followed by a non-surrogate", rec(esc("d800")+esc("0041"))+"\n")
+	refused("a leading BOM written as an escape", rec(esc("feff")+"x")+"\n")
+	refused("a leading BOM as bytes", rec("\xef\xbb\xbfx")+"\n")
+	refused("source null", `{"id":"a","sha256":"x","source":null,"grammar":"typescript"}`+"\n")
+	refused("source missing", `{"id":"a","sha256":"x","grammar":"typescript"}`+"\n")
+	refused("source a number", `{"id":"a","sha256":"x","source":1,"grammar":"typescript"}`+"\n")
+	refused("a field name in another case", `{"id":"a","sha256":"x","SOURCE":"1","grammar":"typescript"}`+"\n")
+	refused("sha256 null", `{"id":"a","sha256":null,"source":"1","grammar":"typescript"}`+"\n")
+	refused("expect null", `{"id":"a","sha256":"x","source":"1","grammar":"typescript","expect":null}`+"\n")
+	refused("expect with a number", `{"id":"a","sha256":"x","source":"1","grammar":"typescript","expect":[1]}`+"\n")
+	refused("errorAt a string", `{"id":"a","sha256":"x","source":"1","grammar":"typescript","errorAt":"1"}`+"\n")
+	refused("reason null", `{"id":"a","sha256":"x","source":"1","grammar":"typescript","reason":null}`+"\n")
+	// blank lines: space, tab and CR only (the runner's rule); NEL and U+FEFF lines are not blank
+	ok("blank lines of space, tab, CR", " \t\r\n\r\n"+rec("x")+"\n \n")
+	refused("a NEL line", "\xc2\x85\n"+rec("x")+"\n")
+	refused("a BOM line", "\xef\xbb\xbf\n"+rec("x")+"\n")
+	// line numbers count every physical line, blank ones included
+	if _, err := parseCases([]byte("\n\nnull\n")); err == nil || !strings.Contains(err.Error(), "line 3") {
+		t.Errorf("the malformed record is on line 3, got %v", err)
+	}
+}
+
+func TestLoadRefusesInvalidDiagnosticCodes(t *testing.T) {
+	for name, repl := range map[string]string{"zero": "0", "null": "null", "too large": "100000", "negative": "-5"} {
+		edit := onlyIn("verdicts.json", func(s string) string {
+			if !strings.Contains(s, "\n    1139\n") {
+				t.Fatal("test setup: code 1139 not found")
+			}
+			return strings.Replace(s, "\n    1139\n", "\n    "+repl+"\n", 1)
+		})
+		_, _, p, err := load(copyOracle(t, edit))
+		if err == nil && !strings.Contains(strings.Join(p, "\n"), "small positive integer") {
+			t.Errorf("%s: a diagnostic code of %s must be refused, got %v", name, repl, p)
+		}
+	}
+}
