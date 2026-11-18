@@ -5842,6 +5842,10 @@
     "named": false
   },
   {
+    "type": "out",
+    "named": false
+  },
+  {
     "type": "override",
     "named": false
   },

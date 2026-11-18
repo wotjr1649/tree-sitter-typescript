@@ -1004,7 +1004,9 @@ module.exports = function defineGrammar(dialect) {
 
       type_parameter: $ => seq(
         optional('const'),
-        field('name', $._type_identifier),
+        optional(choice('in', seq(optional('in'), 'out'))),
+        // `out` is contextual: `type A<out> = out` names a type parameter `out` (tsc accepts it).
+        field('name', choice($._type_identifier, alias('out', $.type_identifier))),
         field('constraint', optional($.constraint)),
         field('value', optional($.default_type)),
       ),
