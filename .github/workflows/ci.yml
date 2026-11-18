@@ -32,12 +32,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up tree-sitter
-        uses: tree-sitter/setup-action/cli@v1
+        uses: tree-sitter/setup-action/cli@v2
         with:
           tree-sitter-ref: v0.27.2
       # Generate only the two grammars; third_party/ holds an input, not a grammar to build.
@@ -54,7 +54,7 @@ jobs:
           git clone https://github.com/reduxjs/redux examples/redux --single-branch --depth=1 --filter=blob:none
           git clone https://github.com/microsoft/vscode examples/vscode --single-branch --depth=1 --filter=blob:none
       - name: Run tests
-        uses: tree-sitter/parser-test-action@v2
+        uses: tree-sitter/parser-test-action@v3
         with:
           generate: false
           test-rust: true
