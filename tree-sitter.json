@@ -13,16 +13,16 @@
       ],
       "highlights": [
         "queries/highlights.scm",
-        "node_modules/tree-sitter-javascript/queries/highlights.scm"
+        "third_party/tree-sitter-javascript/queries/highlights.scm"
       ],
-      "injections": "node_modules/tree-sitter-javascript/queries/injections.scm",
+      "injections": "third_party/tree-sitter-javascript/queries/injections.scm",
       "locals": [
         "queries/locals.scm",
-        "node_modules/tree-sitter-javascript/queries/locals.scm"
+        "third_party/tree-sitter-javascript/queries/locals.scm"
       ],
       "tags": [
         "queries/tags.scm",
-        "node_modules/tree-sitter-javascript/queries/tags.scm"
+        "third_party/tree-sitter-javascript/queries/tags.scm"
       ],
       "injection-regex": "^(ts|typescript)$"
     },
@@ -39,14 +39,14 @@
       ],
       "highlights": [
         "queries/highlights.scm",
-        "node_modules/tree-sitter-javascript/queries/highlights-jsx.scm",
-        "node_modules/tree-sitter-javascript/queries/highlights.scm"
+        "third_party/tree-sitter-javascript/queries/highlights-jsx.scm",
+        "third_party/tree-sitter-javascript/queries/highlights.scm"
       ],
-      "injections": "node_modules/tree-sitter-javascript/queries/injections.scm",
-      "locals": "node_modules/tree-sitter-javascript/queries/locals.scm",
+      "injections": "third_party/tree-sitter-javascript/queries/injections.scm",
+      "locals": "third_party/tree-sitter-javascript/queries/locals.scm",
       "tags": [
         "queries/tags.scm",
-        "node_modules/tree-sitter-javascript/queries/tags.scm"
+        "third_party/tree-sitter-javascript/queries/tags.scm"
       ],
       "injection-regex": "^(ts|typescript)$"
     },
@@ -63,14 +63,14 @@
       ],
       "highlights": [
         "queries/highlights.scm",
-        "node_modules/tree-sitter-javascript/queries/highlights-jsx.scm",
-        "node_modules/tree-sitter-javascript/queries/highlights.scm"
+        "third_party/tree-sitter-javascript/queries/highlights-jsx.scm",
+        "third_party/tree-sitter-javascript/queries/highlights.scm"
       ],
-      "injections": "node_modules/tree-sitter-javascript/queries/injections.scm",
-      "locals": "node_modules/tree-sitter-javascript/queries/locals.scm",
+      "injections": "third_party/tree-sitter-javascript/queries/injections.scm",
+      "locals": "third_party/tree-sitter-javascript/queries/locals.scm",
       "tags": [
         "queries/tags.scm",
-        "node_modules/tree-sitter-javascript/queries/tags.scm"
+        "third_party/tree-sitter-javascript/queries/tags.scm"
       ],
       "content-regex": "@flow"
     }
