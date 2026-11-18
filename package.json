@@ -5,9 +5,6 @@
   "repository": "https://github.com/wotjr1649/tree-sitter-typescript",
   "license": "MIT",
   "author": "Max Brunsfeld <maxbrunsfeld@gmail.com>",
-  "maintainers": [
-    "Amaan Qureshi <amaanq12@gmail.com>"
-  ],
   "main": "bindings/node",
   "types": "bindings/node",
   "keywords": [
