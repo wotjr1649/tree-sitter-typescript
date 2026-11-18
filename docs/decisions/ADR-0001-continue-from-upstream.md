@@ -19,22 +19,26 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
    `refs/upstream/v0.23.2`.
 2. The JavaScript grammar that `common/define-grammar.js` extends is vendored as
    `third_party/tree-sitter-javascript/grammar.js`, copied unchanged from tree-sitter-javascript v0.23.1 (`3a837b6`,
-   SHA-256 `230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc`), in place of the npm dependency.
-   `NOTICE` records the source and CI checks the hash. A later release may switch it to a named tag of the
+   SHA-256 `230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc`), in place of the npm dependency. The
+   JavaScript queries that `tree-sitter.json` combines with this repository's are vendored from the same tag under
+   `third_party/tree-sitter-javascript/queries/`. `NOTICE` records the source and CI checks every file's hash. A later release may switch it to a named tag of the
    owner-maintained JavaScript grammar.
 3. Own versions start at v1.0.0, which equals the v0.23.2 baseline behaviour: regenerated with tree-sitter CLI 0.27.2,
    `parser.c`, `grammar.json`, `node-types.json` and the headers of both grammars are byte-identical to what
-   go-treesitter generates from the old source.
+   go-treesitter generates from the old source. `tree-sitter.json` keeps `metadata.version` `0.23.2` because
+   `tree-sitter generate` embeds it in `parser.c`; the other manifests say `1.0.0`.
 4. No registry publishing (npm, crates.io, PyPI) and no automated tagging or releases. Consumers pin commits.
 5. Node kinds and field names stay a public contract: removing or renaming one is breaking. The grammar names
    `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and `tree_sitter_tsx` stay.
-6. The planned oracle for later fixes is the TypeScript compiler (`tsc`) parser: a fix that changes which inputs
+6. The parsers are ABI 15 (upstream v0.23.2 committed ABI 14). Binding runtime lower bounds move to the first
+   ABI 15-capable line, 0.25 (Rust, Node, Python, Go, Swift), and the CMake default ABI to 15.
+7. The planned oracle for later fixes is the TypeScript compiler (`tsc`) parser: a fix that changes which inputs
    parse cites tsc's verdict. It is not set up yet.
 
 ## Consequences
 
 - Pinned commits stay reachable because this repository does not rewrite its history.
-- The inherited publication workflow is gone; test, lint and fuzz CI stay, pinned to CLI 0.27.2.
-- `tree-sitter.json` still names JavaScript queries under `node_modules/tree-sitter-javascript/`, which is no longer
-  installed. Query tooling that follows those paths needs them supplied until the queries are vendored or rewritten.
+- The inherited publication workflow is gone; test, lint and fuzz CI stay. The test workflow uses CLI 0.27.2 and
+  checks that the committed parsers match it.
+- Binding consumers need tree-sitter runtime 0.25 or later.
 - One maintainer owns the grammars; the dependency moves from upstream's maintainers to this repository's owner.
