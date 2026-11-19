@@ -159,7 +159,8 @@
   - Error-free tree changes: valid inputs of this shape gain the `comment` node they lacked; nothing else in their
     trees changes. Among the pinned example files exactly one has this shape,
     `examples/vscode/src/vs/platform/userDataSync/common/abstractSynchronizer.ts` (line 575), and it gains one
-    `comment` node (the only difference in the full CST of the pinned examples, `[574, 5] - [574, 54]`). Queries:
+    `comment` node (`[574, 5] - [574, 54]`; measured by parsing all 17,665 pinned example files and comparing the full
+    CST of the one candidate file the scanner path can reach). Queries:
     `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
   - Error-flag changes (error-free before, an error now, in both grammars; intended): a block comment before an
     operator that is directly followed by `?`: `a⏎/* c */ +? b : c;` and the same with `-?`, `/?`, `in?` and
