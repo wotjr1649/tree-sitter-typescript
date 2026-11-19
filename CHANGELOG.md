@@ -202,24 +202,66 @@
   does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
   scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or
   `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
-  not count as a line break either. Also, after a line break, `in` or `instanceof` followed by `=`, `:`, `?`, `;` or
-  `}` where no binary operator may follow now starts the next class or type member (`class A { x⏎in = 1; }`,
-  `interface I { a: string⏎in: number }`) instead of giving `ERROR`; `a⏎in b` and `for (var x⏎in y)` are unchanged.
-  `tsc` 7.0.2 accepts all these inputs.
+  not count as a line break either (the scanner read on to the next LF). After a line break, `in` or `instanceof`
+  where no binary operator may follow now starts the next class or type member when `=`, `:`, `?`, `;`, `}`, a
+  same-line block comment and then one of these, or a parameter list and then `{`, `:`, `;` or `}` follows
+  (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `interface I { a: string⏎in(): void }`), and so does a word that
+  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)` and `for (var x⏎in (y))` are
+  unchanged. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
+  its object pattern, as on one line) and before import attributes (`import x from "x"⏎with { type: "json" };`).
+  `tsc` 7.0.2 accepts all these inputs. The scanner classifies white space and word characters by code point on these
+  paths (the grammar's extras; U+0085 is an identifier character there, as in the lexer), so the result does not
+  depend on the C library; with `ucrtbase.dll` and `msvcrt.dll` it is the same. Each call scans at most one block
+  comment that holds no line terminator, so a run of N comments costs O(N), not O(N²).
   - Node kinds and fields added: none (no generated file changes).
-  - Error-free tree changes: an input whose line break has one of these forms now gets the tree the same input gets
-    with LF. Where that tree differs from the old one: `return`, `break`, `continue`, `readonly`, `async` (class
-    member), `type` and `declare` followed by such a line break end there (`return;` then `x;`, as `tsc` reads them;
-    before, `return /*⏎*/ x` returned `x`). `static`, `get` and `set` followed by such a line break now also give two
-    members, like the LF form; `tsc` reads one member there (see the known difference below). A
-    block comment holding the line break now follows the inserted semicolon (a sibling of the statement or member)
-    instead of sitting inside it. Queries follow these trees (for example `@keyword` -> `@property` for `static`, and
-    in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`). None of the 17,665 pinned example files
-    changes its tree.
+  - Error-free tree changes. An input whose line break has one of these forms now gets the tree the same input gets
+    with LF; queries follow the trees. Where that tree differs from the old one (`⏎` here is a block comment holding a
+    line terminator, a lone CR, U+2028 or U+2029):
+    - Toward `tsc` (it reads two statements or two members):
+      - `return`, `break`, `continue` + `⏎` + operand or label: `return /*⏎*/ x` was `return x`, now `return;` then
+        `x;` (also `[x]`, `(x)`, `{x: 1}`, a tagged template, a ternary, and inside an arrow function or a JSX
+        expression). A label becomes an expression (`@variable`, `local.reference`).
+      - `yield` + `⏎` + `x`: one `yield_expression` with an operand, now `yield` then `x;`.
+      - `type` + `⏎` + `A = number;`: a type alias, now `type;` then an assignment. `declare` + `⏎` +
+        `const a: T;`: an `ambient_declaration`, now `declare;` then the declaration. `async` + `⏎` +
+        `function f() {}`: an async function, now `async;` then the function. The keyword gets `@variable` instead of
+        `@keyword`.
+      - Class members: `readonly`, `accessor`, `public`, `private`, `protected`, `declare`, `override` or `async` +
+        `⏎` + member: one member with that modifier, now a field named by the keyword and then the member (the
+        modifier node, such as `accessibility_modifier` or `override_modifier`, goes away). The keyword gets
+        `@property` (JavaScript highlights) instead of `@keyword` (TypeScript highlights); for `async`/`override` +
+        method the `definition.method` tag and `local.scope` start at the method name.
+      - `type T = A ⏎ [B];`: a `lookup_type`, now `type T = A;` then the array `[B]`.
+    - Same as the LF form, which `tsc` reads differently (recorded known differences, unchanged for LF):
+      - `static`, `get`, `set` + `⏎` + member: one static member or accessor, now two members (a field named
+        `static`, `get` or `set`, then the member); `tsc` reads one member (owner decision 12). `@keyword` ->
+        `@property`; in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`.
+    - A line comment ended by U+2028, U+2029 or a lone CR after an LF (`a⏎// c<U+2028>…`): before, the scanner read
+      the comment on to the next LF and decided there. Now the text after the comment decides, as with LF:
+      `a⏎// c<U+2028>+b`, `-b`, `(b)`, `[b]`, `` `x` ``, `<T>(x)` and `function f(): U⏎// c<U+2028>{ … }`
+      continue the expression or declaration (as `tsc` reads them; before, two statements or a `function_signature` and a block;
+      the callee or tag now gets `@function`, and `function f` its `definition.function` from the JavaScript tags).
+      `return⏎// c<U+2028>+x`, `return⏎// c<U+2028>/r/.test(s)`, `yield⏎// c<U+2028>(x)` and
+      `yield⏎// c<U+2028>/r/.test(s)` now attach the operand and `class A { async⏎// c<U+2028>*x() {} }` is one
+      async generator method, as their LF forms; `tsc` splits all five. `const f = async⏎// c<U+2028>(x) => x;` is
+      an async arrow function, as its LF form; `tsc` rejects it (TS1005).
+    - Unchanged, as their LF forms: `return /*⏎*/ +x`, `return /*⏎*/ /r/.test(s)`, `yield /*⏎*/ (x)` keep the
+      operand; `tsc` splits them.
+    - Comment placement: a block comment that holds the line break now follows the inserted semicolon (a sibling of
+      the statement or member) instead of sitting inside it; a line comment after such a comment likewise
+      (`a /* a␍*/ /* c */<U+2029>/* d */ ⏎// line<U+2028>b;`).
+    None of the 17,665 pinned example files changes its tree.
   - `test/examples/known-failures.txt`: no entry cleared.
   - Known difference kept: `static`, `get` or `set` followed by a line break (any form, LF included) and a member name
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known difference kept: `in()` or `in<T>()` as a method name after a line break still gives `ERROR` (the scanner
-    cannot tell it from `for (var x⏎in (y))`).
+  - Known differences kept: `in<T>()` as a method name after a line break still gives `ERROR`. Four inputs that parsed
+    without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
+    did before: `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line,
+    the known v1.1 gap) and `a as T⏎// c<U+2028>[b + c];` (a type cannot take `[` after a line break), both
+    grammars; `tsc` accepts both. The scanner cannot tell these from `class A { a⏎<T>() {} }` and `a⏎[b]`; fixing
+    them needs a grammar change. In a `(...)` after `in`, a parenthesis inside a string or template is counted.
+  - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
+    `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
+    automatic semicolon after a Flow-style ambient module type annotation.

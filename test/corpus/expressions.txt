@@ -1245,3 +1245,48 @@ in o) {}
     left: (identifier)
     right: (identifier)
     body: (statement_block)))
+
+==========================================================
+Line breaks before import attributes, a typed object pattern brace and a for-in operand
+==========================================================
+
+import x from "x"
+with { type: "json" };
+type F = ({ a
+}: { a: number }) => number;
+for (var x
+in (y)) {}
+
+---
+
+(program
+  (import_statement
+    (import_clause
+      (identifier))
+    source: (string
+      (string_fragment))
+    (import_attribute
+      (object
+        (pair
+          key: (property_identifier)
+          value: (string
+            (string_fragment))))))
+  (type_alias_declaration
+    name: (type_identifier)
+    value: (function_type
+      parameters: (formal_parameters
+        (required_parameter
+          pattern: (object_pattern
+            (shorthand_property_identifier_pattern))
+          type: (type_annotation
+            (object_type
+              (property_signature
+                name: (property_identifier)
+                type: (type_annotation
+                  (predefined_type)))))))
+      return_type: (predefined_type)))
+  (for_in_statement
+    left: (identifier)
+    right: (parenthesized_expression
+      (identifier))
+    body: (statement_block)))
