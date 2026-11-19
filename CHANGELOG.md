@@ -305,15 +305,22 @@
   `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
   not count as a line break either (the scanner read on to the next LF). After a line break, `in` or `instanceof`
   where no binary operator may follow now starts the next class or type member when `=`, `:`, `?`, `;`, `}`, a
-  same-line block comment and then one of these, or a parameter list and then `{`, `:`, `;` or `}` follows
-  (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `interface I { a: string⏎in(): void }`), and so does a word that
-  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)` and `for (var x⏎in (y))` are
-  unchanged. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
-  its object pattern, as on one line) and before import attributes (`import x from "x"⏎with { type: "json" };`).
+  same-line block comment and then one of these, or an optional type-parameter list and a parameter list and then `{`,
+  `:`, `;` or `}` follows (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`,
+  `interface I { a: string⏎in(): void }`), and so does a word that
+  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)`, `for (var x⏎in (y))` and
+  `for (var x⏎in ("a);"))` are unchanged: a bracket inside a string, template, regular expression or comment of the
+  parameter list is not counted, and where a literal cannot be skipped (a template with `${`) the scanner answers
+  as before. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
+  its object pattern, as on one line) and before import attributes, also with comments between `with` and `{`
+  (`import x from "x"⏎with { type: "json" };`, `import x from "x"<CR>with /* c */ { type: "json" };`).
   `tsc` 7.0.2 accepts all these inputs. The scanner classifies white space and word characters by code point on these
   paths (the grammar's extras; U+0085 is an identifier character there, as in the lexer), so the result does not
   depend on the C library; with `ucrtbase.dll` and `msvcrt.dll` it is the same. Each call scans at most one block
-  comment that holds no line terminator, so a run of N comments costs O(N), not O(N²).
+  comment that holds no line terminator, so a run of N such comments (`x/*c*/…;`, or adjacent comments that hold a
+  line terminator) costs O(N), not O(N²). A run of comments that each start on a line after a line break
+  (`x⏎/*c*/⏎/*c*/…;`) is still rescanned per comment, as at the base (N=4/8/16/32: 20/72/272/1056 slash skips in
+  base and now).
   - Node kinds and fields added: none (no generated file changes).
   - Error-free tree changes. An input whose line break has one of these forms now gets the tree the same input gets
     with LF; queries follow the trees. Where that tree differs from the old one (`⏎` here is a block comment holding a
@@ -357,12 +364,12 @@
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known differences kept: `in<T>()` as a method name after a line break still gives `ERROR`. Four inputs that parsed
-    without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
+  - Known differences kept: four inputs that parsed without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
     did before: `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line,
     the known v1.1 gap) and `a as T⏎// c<U+2028>[b + c];` (a type cannot take `[` after a line break), both
     grammars; `tsc` accepts both. The scanner cannot tell these from `class A { a⏎<T>() {} }` and `a⏎[b]`; fixing
-    them needs a grammar change. In a `(...)` after `in`, a parenthesis inside a string or template is counted.
+    them needs a grammar change (owner decision 20). A regular expression after a keyword (`return /)/`) in the `(...)`
+    after `in` reads as a division there, so its brackets are counted.
   - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
     `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
     automatic semicolon after a Flow-style ambient module type annotation.
