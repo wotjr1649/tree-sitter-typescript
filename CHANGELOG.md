@@ -109,8 +109,24 @@
   (`import('x').A()`, `import.A`) stay `type`s, so `import('x').A()[]` and `import.A[]` stay errors, as in tsc.
   - Node kinds and fields added: none. The `primary_type` supertype lists `call_expression` and `member_expression` as
     subtypes (`node-types.json`, both grammars); `test/node-kinds` is unchanged.
-  - Error-free tree changes: none (the 114 corpus inputs, the 199 earlier oracle sources and the probe inputs, both
-    grammars; every changed tree was an `ERROR` tree before).
+  - Error-free tree change: an `as` or `satisfies` expression whose type is an `import(...)` member chain or a bare
+    `import(...)`, followed on the same line by an index: `const x = v as import('x').Y['k'];`,
+    `v satisfies import('x')['k']`, `v as import('x').Y[0]`, `v as import('x').Y[a.b]` (tsc 7.0.2 accepts all of them
+    and reads the index as part of the type: it erases it from the emit). At the base the index was read as an
+    expression: a `subscript_expression` around the `as_expression` (or `satisfies_expression`); now it is a
+    `lookup_type` inside the type, as tsc reads it. A consumer that matched `subscript_expression` over an `as`
+    expression on such input must match `lookup_type` instead. Same change in both grammars; the oracle record
+    `n1/lookup-string` covers `let x: import('x').Y['k']`, the corpus test `Import type with an index after as or
+    satisfies, on one line` (and its TSX copy) pins the `as` / `satisfies` form. No query in `queries/` or in the
+    inherited JavaScript queries names `subscript_expression`, `lookup_type`, `as_expression` or `array_type`; the
+    `string` / `number` index is a `literal_type` around the same `string` / `number` node, so the highlight captures
+    on it are unchanged.
+  - Same input, index on the next line: `const x = v as import('x').Y` + line break + `[a + b];` (also `satisfies`,
+    `[f()]`, `[a?.b]`) is an `ERROR` since this change, a `subscript_expression` at the base; tsc accepts it (a type
+    index must start on the same line) and reads two statements. The base already reads every other type the same
+    way (`v as Foo` + line break + `[a + b];` is an `ERROR` at the base, and `['k']`, `[0]` or `[a.b]` on the next line is
+    silently absorbed into the type), so this change extends that existing limitation to `import(...)` types and
+    adds no new kind of difference. Not fixed here; a separate change for all types.
   - `test/examples/known-failures.txt`: 8 entries cleared (`v1.1: import(...) type followed by a member, type
     arguments, index or []`).
   - Not fixed, still errors although tsc accepts them (they were errors at the base too): an `import(...)` member

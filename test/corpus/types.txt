@@ -2471,3 +2471,86 @@ let c: import('x')[];
             (arguments
               (string
                 (string_fragment)))))))))
+
+============================================================
+Import type with an index after as or satisfies, on one line
+============================================================
+
+const x = v as import('x').Y['k'];
+const y = v satisfies import('x')['k'];
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (identifier)
+        (lookup_type
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (satisfies_expression
+        (identifier)
+        (lookup_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (literal_type
+            (string
+              (string_fragment))))))))
+
+==================================================================
+Import type with an index after as or satisfies, on one line (TSX)
+:language(tsx)
+==================================================================
+
+const x = v as import('x').Y['k'];
+const y = v satisfies import('x')['k'];
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (identifier)
+        (lookup_type
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (satisfies_expression
+        (identifier)
+        (lookup_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (literal_type
+            (string
+              (string_fragment))))))))
