@@ -1079,6 +1079,135 @@ let x: false
           (false))))))
 
 =======================================
+Variance annotations on type parameters
+=======================================
+
+interface A<in T> { f: (x: T) => void }
+
+type B<out T> = () => T
+
+class C<in out T> { m(x: T): T { return x } }
+
+class D<const in T> { m(x: T) {} }
+
+---
+
+(program
+  (interface_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)))
+    body: (interface_body
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (function_type
+            parameters: (formal_parameters
+              (required_parameter
+                pattern: (identifier)
+                type: (type_annotation
+                  (type_identifier))))
+            return_type: (predefined_type))))))
+  (type_alias_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)))
+    value: (function_type
+      parameters: (formal_parameters)
+      return_type: (type_identifier)))
+  (class_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)))
+    body: (class_body
+      (method_definition
+        name: (property_identifier)
+        parameters: (formal_parameters
+          (required_parameter
+            pattern: (identifier)
+            type: (type_annotation
+              (type_identifier))))
+        return_type: (type_annotation
+          (type_identifier))
+        body: (statement_block
+          (return_statement
+            (identifier))))))
+  (class_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)))
+    body: (class_body
+      (method_definition
+        name: (property_identifier)
+        parameters: (formal_parameters
+          (required_parameter
+            pattern: (identifier)
+            type: (type_annotation
+              (type_identifier))))
+        body: (statement_block)))))
+
+=======================================
+Type parameters named out
+=======================================
+
+type A<out> = out;
+
+type B<out = string> = out;
+
+type C<T, out> = out;
+
+type E<in out> = number;
+
+const out = 1;
+
+let x: out;
+
+---
+
+(program
+  (type_alias_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)))
+    value: (type_identifier))
+  (type_alias_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)
+        value: (default_type
+          (predefined_type))))
+    value: (type_identifier))
+  (type_alias_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier))
+      (type_parameter
+        name: (type_identifier)))
+    value: (type_identifier))
+  (type_alias_declaration
+    name: (type_identifier)
+    type_parameters: (type_parameters
+      (type_parameter
+        name: (type_identifier)))
+    value: (predefined_type))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (number)))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier)))))
+
+=======================================
 Flow type parameter constraint syntax
 =======================================
 
@@ -2248,3 +2377,40 @@ import something from 'foo.css' assert { type: 'css' }
           (property_identifier)
           (string
             (string_fragment)))))))
+=========================
+Import type with type arguments
+=========================
+
+type Foo = import('foo').Foo<F>;
+
+const foo: import('bar').Bar<string> = 'baz';
+
+---
+
+(program
+  (type_alias_declaration
+    (type_identifier)
+    (member_expression
+      (call_expression
+        (import)
+        (arguments
+          (string
+            (string_fragment))))
+      (property_identifier)
+      (type_arguments
+        (type_identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (member_expression
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (property_identifier)
+          (type_arguments
+            (predefined_type))))
+      (string
+        (string_fragment)))))
