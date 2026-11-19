@@ -2684,6 +2684,43 @@ const y = v satisfies import('x')['k'];
             (string
               (string_fragment))))))))
 
+=========================
+Empty type parameter list
+=========================
+
+type A<> = number;
+class C<> {}
+interface I<> {}
+function f<>() {}
+type F = <>() => void;
+
+---
+
+(program
+  (type_alias_declaration
+    (type_identifier)
+    (type_parameters)
+    (predefined_type))
+  (class_declaration
+    (type_identifier)
+    (type_parameters)
+    (class_body))
+  (interface_declaration
+    (type_identifier)
+    (type_parameters)
+    (interface_body))
+  (function_declaration
+    (identifier)
+    (type_parameters)
+    (formal_parameters)
+    (statement_block))
+  (type_alias_declaration
+    (type_identifier)
+    (function_type
+      (type_parameters)
+      (formal_parameters)
+      (predefined_type))))
+
 ============================================
 typeof import() as a type argument of a call
 ============================================
