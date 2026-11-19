@@ -52,7 +52,8 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_type_identifier, $.generic_type, $.primary_type, $.lookup_type, $.index_type_query, $.type],
       [$.as_expression, $.satisfies_expression, $.primary_type],
       [$._type_query_member_expression, $.member_expression],
-      [$.member_expression, $._type_query_member_expression_in_type_annotation],
+      [$.member_expression, $._type_query_import_member_expression_in_type_annotation],
+      [$.member_expression, $._type_query_other_member_expression_in_type_annotation],
       [$._type_query_member_expression, $.primary_expression],
       [$._type_query_subscript_expression, $.subscript_expression],
       [$._type_query_subscript_expression, $.primary_expression],
@@ -64,7 +65,8 @@ module.exports = function defineGrammar(dialect) {
       [$.literal_type, $.pattern],
       [$.predefined_type, $.pattern],
       [$.call_expression, $._type_query_call_expression],
-      [$.call_expression, $._type_query_call_expression_in_type_annotation],
+      [$.call_expression, $._type_query_import_call_expression_in_type_annotation],
+      [$.call_expression, $._type_query_member_call_expression_in_type_annotation],
       [$.new_expression, $.primary_expression],
       [$.meta_property, $.primary_expression],
       [$.construct_signature, $._property_name],
@@ -696,11 +698,12 @@ module.exports = function defineGrammar(dialect) {
       // required beforehand. This allows for parsing of annotations such as
       // foo: import('x').y.z;
       // but was a nightmare to get working.
-      _type_query_member_expression_in_type_annotation: $ => seq(
+      // A member chain that is not a pure `import(...)` dot chain: it has a bare `import` or a call in it.
+      _type_query_other_member_expression_in_type_annotation: $ => seq(
         field('object', choice(
           $.import,
-          alias($._type_query_member_expression_in_type_annotation, $.member_expression),
-          alias($._type_query_call_expression_in_type_annotation, $.call_expression),
+          alias($._type_query_other_member_expression_in_type_annotation, $.member_expression),
+          alias($._type_query_member_call_expression_in_type_annotation, $.call_expression),
         )),
         '.',
         field('property', choice(
@@ -708,10 +711,32 @@ module.exports = function defineGrammar(dialect) {
           alias($.identifier, $.property_identifier),
         )),
       ),
-      _type_query_call_expression_in_type_annotation: $ => seq(
+      // A dot chain that starts at `import(...)`, with no call in between and no bare `import`: the only
+      // chain that may end in type arguments (ours, on top of upstream #365).
+      _type_query_import_member_expression_in_type_annotation: $ => seq(
+        field('object', choice(
+          alias($._type_query_import_call_expression_in_type_annotation, $.call_expression),
+          alias($._type_query_import_member_expression_in_type_annotation, $.member_expression),
+        )),
+        '.',
+        field('property', choice(
+          $.private_property_identifier,
+          alias($.identifier, $.property_identifier),
+        )),
+      ),
+      // Type arguments only on the outermost member, not on an object or callee (ours, on top of upstream #365).
+      _type_query_instantiated_member_expression_in_type_annotation: $ => seq(
+        $._type_query_import_member_expression_in_type_annotation,
+        $.type_arguments,
+      ),
+      _type_query_import_call_expression_in_type_annotation: $ => seq(
+        field('function', $.import),
+        field('arguments', $.arguments),
+      ),
+      _type_query_member_call_expression_in_type_annotation: $ => seq(
         field('function', choice(
-          $.import,
-          alias($._type_query_member_expression_in_type_annotation, $.member_expression),
+          alias($._type_query_import_member_expression_in_type_annotation, $.member_expression),
+          alias($._type_query_other_member_expression_in_type_annotation, $.member_expression),
         )),
         field('arguments', $.arguments),
       ),
@@ -731,8 +756,11 @@ module.exports = function defineGrammar(dialect) {
         $.readonly_type,
         $.constructor_type,
         $.infer_type,
-        prec(-1, alias($._type_query_member_expression_in_type_annotation, $.member_expression)),
-        prec(-1, alias($._type_query_call_expression_in_type_annotation, $.call_expression)),
+        prec(-1, alias($._type_query_import_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_other_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_instantiated_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_import_call_expression_in_type_annotation, $.call_expression)),
+        prec(-1, alias($._type_query_member_call_expression_in_type_annotation, $.call_expression)),
       ),
 
       tuple_parameter: $ => seq(
