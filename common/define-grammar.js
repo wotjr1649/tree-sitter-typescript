@@ -72,6 +72,7 @@ module.exports = function defineGrammar(dialect) {
     ]),
 
     conflicts: ($, previous) => previous.concat([
+      [$.expression, $._typed_template_call],
       // `f<typeof import('m')>()`: with the call_expression ordered above it in `precedences`, the type query lost
       // to the call and the type arguments were read as a binary `<` and `>`.
       [$.call_expression, $._type_query_call_expression],
@@ -86,8 +87,13 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
 
-      [$._call_signature, $.function_type],
-      [$._call_signature, $.constructor_type],
+      ...(dialect === 'typescript' ? [
+        [$._call_signature, $.function_type],
+        [$._call_signature, $.constructor_type],
+      ] : [
+        [$._arrow_call_signature, $.function_type],
+        [$._arrow_call_signature, $.constructor_type],
+      ]),
 
       [$.primary_expression, $._parameter_name],
       [$.primary_expression, $._parameter_name, $.primary_type],
@@ -119,7 +125,9 @@ module.exports = function defineGrammar(dialect) {
       dialect === 'typescript' ? [
         [$.primary_type, $.type_parameter],
       ] : [
-        [$.jsx_opening_element, $.type_parameter],
+        [$.jsx_opening_element, $._arrow_type_parameter],
+        [$.jsx_opening_element, $.type_parameter, $._arrow_type_parameter],
+        [$.type_parameter, $._arrow_type_parameter],
         [$.jsx_namespace_name, $.primary_type],
       ],
     ),
@@ -185,15 +193,16 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       call_expression: $ => choice(
-        prec('call', seq(
+        prec.dynamic(2, prec('call', seq(
           field('function', choice($.expression, $.import)),
           field('type_arguments', optional($.type_arguments)),
           field('arguments', $.arguments),
-        )),
+        ))),
         prec('template_call', seq(
           field('function', choice($.primary_expression, $.new_expression)),
           field('arguments', $.template_string),
         )),
+        $._typed_template_call,
         prec('member', seq(
           field('function', $.primary_expression),
           '?.',
@@ -201,6 +210,20 @@ module.exports = function defineGrammar(dialect) {
           field('arguments', $.arguments),
         )),
       ),
+
+      // A tagged template with type arguments, `sql<{ a: string }>`x``. The callee
+      // is a primary_expression, as for the template above, so a prefix, binary or
+      // update operator in front binds to the whole tagged template, as in tsc
+      // (`await sql<T>`x`` is await (sql<T>`x`)). It conflicts with reducing the
+      // callee to an `expression` for a call or an instantiation. Dynamic
+      // precedence settles the readings that both parse: the template wins over
+      // the comparison `(a < b) > template`, and a plain call outranks the
+      // template reading so `c ? f<R<S>>(d) : e` still reads as a call.
+      _typed_template_call: $ => prec.dynamic(1, seq(
+        field('function', choice($.primary_expression, $.new_expression)),
+        field('type_arguments', $.type_arguments),
+        field('arguments', $.template_string),
+      )),
 
       new_expression: $ => prec.right('new', seq(
         'new',
@@ -910,7 +933,9 @@ module.exports = function defineGrammar(dialect) {
         optional('?.'),
         '[', field('index', choice($.predefined_type, $.string, $.number)), ']',
       ),
-      _type_query_call_expression: $ => seq(
+      // Dynamic precedence 1: in `f<typeof import('m')>(1, 2)` the comparison reading also holds a call_expression
+      // (`import('m')`, dynamic 2 through the plain call), tying with the call reading; the type query must outrank it.
+      _type_query_call_expression: $ => prec.dynamic(1, seq(
         field('function', choice(
           $.import,
           $.identifier,
@@ -918,7 +943,7 @@ module.exports = function defineGrammar(dialect) {
           alias($._type_query_subscript_expression, $.subscript_expression),
         )),
         field('arguments', $.arguments),
-      ),
+      )),
       _type_query_instantiation_expression: $ => seq(
         field('function', choice(
           $.import,
@@ -1047,10 +1072,57 @@ module.exports = function defineGrammar(dialect) {
 
       type_parameter: $ => seq(
         optional('const'),
-        field('name', $._type_identifier),
+        optional(choice('in', seq(optional('in'), 'out'))),
+        // `out` is contextual: `type A<out> = out` names a type parameter `out` (tsc accepts it).
+        field('name', choice($._type_identifier, alias('out', $.type_identifier))),
         field('constraint', optional($.constraint)),
         field('value', optional($.default_type)),
       ),
+
+      // tsx only. tsc reads `<in` and `<out` after an expression-start `<` as a JSX tag name and rejects a
+      // variance modifier on the first type parameter of an arrow function, so that one takes none; `in` and `out`
+      // stay plain names and tags, as before variance annotations existed. Later parameters (`<T, in U>`) are
+      // unambiguous and keep them.
+      ...(dialect === 'tsx' ? {
+        arrow_function: $ => seq(
+          optional('async'),
+          choice(
+            field('parameter', choice(
+              alias($._reserved_identifier, $.identifier),
+              $.identifier,
+            )),
+            $._arrow_call_signature,
+          ),
+          '=>',
+          field('body', choice(
+            $.expression,
+            $.statement_block,
+          )),
+        ),
+
+        _arrow_call_signature: $ => seq(
+          field('type_parameters', optional(alias($._arrow_type_parameters, $.type_parameters))),
+          field('parameters', $.formal_parameters),
+          field('return_type', optional(
+            choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+          )),
+        ),
+
+        _arrow_type_parameters: $ => seq(
+          '<',
+          alias($._arrow_type_parameter, $.type_parameter),
+          repeat(seq(',', $.type_parameter)),
+          optional(','),
+          '>',
+        ),
+
+        _arrow_type_parameter: $ => seq(
+          optional('const'),
+          field('name', $._type_identifier),
+          field('constraint', optional($.constraint)),
+          field('value', optional($.default_type)),
+        ),
+      } : {}),
 
       default_type: $ => seq(
         '=',

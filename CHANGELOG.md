@@ -100,6 +100,55 @@
   - Credit: upstream tree-sitter/tree-sitter-typescript PR #381 by @jhoward321, head commit
     `affacccfb08d6370a488df542de257017f38be28` (grammar hunks and corpus tests taken unchanged; the line-break test is
     ours).
+- A tagged template with type arguments parses as a `call_expression` with `type_arguments` in both grammars
+  (issue #341): ``f<T>`x` ``, ``a.b<T>`x` ``, ``sql<{ a: string }>`select` ``, ``f<T[]>`x` ``, ``f<[A, B]>`x` ``,
+  ``f<() => void>`x` ``. Object, array, function and tuple-of-type-keyword type arguments (``f<[string, number]>`x` ``) were `ERROR`s
+  before; simple ones, including a tuple of identifiers (``f<[A, B]>`x` ``, read as an `array`), were misread without
+  error as comparisons, ``(f < T) > `x` ``. A prefix, binary or update operator in front binds to the
+  whole tagged template, as in tsc (``await sql<T>`x` `` is `await (sql<T>`x`)`), and calls, instantiation expressions
+  and comparisons such as `f<T>(x)`, `a < b > c` and `c ? f<R<S>>(d) : e` keep their trees.
+  - Node kinds and fields added: none (`call_expression` already has the `type_arguments` field;
+    `node-types.json` unchanged in both grammars).
+  - Error-free tree changes (intended, the base trees were misparses): ``f<T>`x` ``, ``a.b<T>`x` ``,
+    ``f<A, B>`x` ``, ``f<[A, B]>`x` ``, ``f<Array<T>>`x` ``, ``f<T>`a${b}c` ``, ``a < b > `x` ``, ``a<b>`x`.y``, ``f<T>`x``y` ``,
+    ``await sql<T>`x` `` and ``new Foo<T>`x` `` (now `new (Foo<T>`x`)`), and the same forms after `+`, `*`, `typeof`,
+    `void`, `delete`, `!`, `-` and `++`, change from `binary_expression` / `sequence_expression` trees to
+    `call_expression` + `type_arguments`. tsc reads all of them as tagged templates. Highlight and tag queries match
+    accordingly (for example `@function` and `@reference.call` on the tag).
+  - `test/examples/known-failures.txt`: no entry cleared.
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #382 by @jhoward321, head commit
+    `3517fdf4b0de94c7abc48df803a1118d7286ca4e` (grammar hunks and corpus tests taken unchanged). PR #342 and #350 are
+    not used (#350 changes generated files and a corpus test only, and only for typescript).
+- Variance annotations on type parameters parse without error in both grammars (issue #370): `interface I<in T>`,
+  `type B<out T>`, `class C<in out T>`, `class D<const in T>`, `declare class C<in out T>`,
+  `type G<in A, out B>`, `interface Q<out A extends string = 'a'>`. Before, `in`/`out` there was an `ERROR`. The
+  modifiers are anonymous tokens before the `name` field of `type_parameter`. A type parameter may still be named
+  `out`: `type A<out> = out`, `type B<out = string> = out` and `type C<T, out> = out` keep parsing as before, and `out` stays
+  an ordinary identifier elsewhere (`const out = 1; out.x;`, `let x: out;`). `type E<in out> = number` (an `in`
+  modifier on a parameter named `out`) was an error before and now parses.
+  - tsx: `<in` and `<out` after an expression-start `<` stay JSX tags: `<in />`, `<out />`, `<in y />`,
+    `<out in T />`, `<in out>text</in>`, `<out in><in out /></out>` parse as `jsx_self_closing_element` /
+    `jsx_element` exactly as before (tsc reads them as JSX). To keep that, an arrow function takes no variance
+    modifier on its *first* type parameter in tsx (tsc rejects `<in T,>(x: T) => x` and `<out T,>(x: T) => x` in
+    .tsx files too); later parameters keep them (`<T, in U>(x: U) => x`), and `<T,>`, `<T extends X>`, `<out,>`,
+    `<out = X>`, `<const T,>` and `async <T,>` parse as before. `typescript` is not affected. This adds the
+    hidden rules `_arrow_call_signature`, `_arrow_type_parameters` and `_arrow_type_parameter` (aliased to
+    `type_parameters` / `type_parameter`) to the tsx grammar: no visible node kind or field changes.
+  - Node kinds and fields added: the anonymous node `out`, in both grammars. No node kind or field removed or renamed.
+  - Error-free tree changes: one, in `typescript` only: `const f = async <in>(x: T) => x;` (tsc rejects it, TS1109)
+    was an `arrow_function` and is now a `binary_expression` chain. Nothing else among the corpus inputs, the P112
+    inputs, the review probes and the 710 `.tsx` example files.
+  - Intended new errors (tsc rejects them, TS1359): `type D<in> = number;` and `type L<in, T> = T;` parsed without
+    error before and now report an error.
+  - Kept as they are (owner decision, 2026-11-19): `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
+    `<in const T>` still report an error, although tsc's parser accepts them (it rejects them only in the checker,
+    TS1030 / TS1029); `type E<out extends string> = out;` still parses without error (a parameter named `out` with a
+    constraint), although tsc rejects it (TS1359).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses variance annotations).
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #364 by @tomerwave, head commit
+    `465aa162d077093dc5ad4f46a9463bde6274425e` (grammar hunk and corpus test taken unchanged). Keeping `out` usable
+    as a type parameter name (`alias('out', $.type_identifier)` in `name`) is ours; with #364 alone those inputs
+    become errors.
 - `f<typeof import('m')>(...)`: the type query `typeof import('m')` as the first type argument of a call is read as
   type arguments, not as the binary expression `f < typeof import('m') > (...)` (for example
   `importOriginal<typeof import('vscode')>()`, `f<typeof import('m')>(1, 2)`, `f<typeof import('m').x, string>()`).
@@ -107,6 +156,9 @@
   silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
   resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
   so both readings stay alive and the one that fits the following tokens wins.
+  `_type_query_call_expression` also carries dynamic precedence 1: with the tagged-template change merged, the plain
+  call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the comparison reading (which holds the call
+  `import('m')`) tied with the call reading and won.
   - Node kinds and fields added: none; `node-types.json` unchanged by this part.
   - Error-free tree changes: 36 of the 17,664 files of the pinned example repositories change their (error-free) tree,
     all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
@@ -121,10 +173,8 @@
     stays listed: besides `importOriginal<typeof import('../cliHelpers')>()` it uses `import('vscode').ChatResultUsage[]`
     (line 211), which needs the separate fix for an `import(...)` type followed by `[]`; whichever of the two changes is
     merged second removes the entry.
-  - Error-free tree change on input tsc reads differently (recorded, owner decision 2026-11-19):
-    `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) was nested `binary_expression`s and is now
-    an `instantiation_expression` on the left of `+`, the reading the base already gives `f < typeof x > +x;`.
-    Telling such comparisons from instantiation expressions is a later candidate.
+  - `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) keeps its base tree, nested
+    `binary_expression`s: the comparison reading wins there, so this change leaves it alone.
   - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
     `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
   - Ours, no upstream pull request.
