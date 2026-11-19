@@ -64,6 +64,8 @@ static bool scan_whitespace_and_comments(TSLexer *lexer, bool *scanned_comment) 
                         skip(lexer);
                         if (lexer->lookahead == '/') {
                             skip(lexer);
+                            // As tree-sitter-javascript e7d9759: else the ternary `?` fallback swallows this comment.
+                            *scanned_comment = true;
                             break;
                         }
                     } else {

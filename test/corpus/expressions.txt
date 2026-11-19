@@ -1011,3 +1011,131 @@ JSX elements named in and out
           (property_identifier)))
       close_tag: (jsx_closing_element
         name: (identifier)))))
+
+==========================================================
+JSX attribute strings with an ampersand
+:language(tsx)
+==========================================================
+
+<A text="E&xit" />;
+<A text='E&xit' />;
+<A t="a&" />;
+<A t="&#" />;
+<A t="&ab;cd&ef" />;
+<A t="&amp;&#65;&#x41;" />;
+<A t="a && b" />;
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment)
+          (string_fragment)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment)
+          (string_fragment)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (html_character_reference)
+          (string_fragment)
+          (string_fragment)
+          (string_fragment)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (html_character_reference)
+          (html_character_reference)
+          (html_character_reference)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment))))))
+
+==========================================================
+Block comment on a new line before a ternary question mark
+==========================================================
+
+a
+/* c */ ? b : c;
+a
+/* c */
+? b : c;
+a /* c */ ? b : c;
+
+---
+
+(program
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier)))
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier)))
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier))))
+
+==========================================================
+Block comment on a new line before a ternary question mark (TSX)
+:language(tsx)
+==========================================================
+
+a
+/* c */ ? b : c;
+
+---
+
+(program
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier))))
