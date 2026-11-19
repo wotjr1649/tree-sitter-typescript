@@ -198,6 +198,65 @@
     (TS1109) and accepted by the grammar before and after this change, with the operator in no node. This is an
     older mismatch (the automatic-semicolon check consumes the operator before the ternary `?` is read), left open.
   - `test/examples/known-failures.txt`: no entry cleared (the affected inputs had no error before).
+- An `import(...)` type followed by `[]` or an index parses without error in both grammars: `import('x').Y[]`,
+  `import('x').Y['k']`, `import('x')['k']`, `import('x')[]`, `import('x').Y<T>[]`, and the same types as operands of
+  `readonly`, `keyof`, `?` in a tuple, a conditional type and so on (tsc accepts all of them). Before, the `[...]`
+  part was an `ERROR`. The member chain that starts at `import(...)` and the bare `import(...)` (hidden rules from
+  S4, aliased to `member_expression` and `call_expression` as before) are now primary types, which is what
+  `array_type`, `lookup_type` and `keyof` take; they were only `type`s. The chains with a call or a bare `import`
+  (`import('x').A()`, `import.A`) stay `type`s, so `import('x').A()[]` and `import.A[]` stay errors, as in tsc.
+  - Node kinds and fields added: none. The `primary_type` supertype lists `call_expression` and `member_expression` as
+    subtypes (`node-types.json`, both grammars); `test/node-kinds` is unchanged.
+  - Error-free tree change: an `as` or `satisfies` expression whose type is an `import(...)` member chain or a bare
+    `import(...)`, followed on the same line by an index: `const x = v as import('x').Y['k'];`,
+    `v satisfies import('x')['k']`, `v as import('x').Y[0]`, `v as import('x').Y[a.b]` (tsc 7.0.2 accepts all of them
+    and reads the index as part of the type: it erases it from the emit). At the base the index was read as an
+    expression: a `subscript_expression` around the `as_expression` (or `satisfies_expression`); now it is a
+    `lookup_type` inside the type, as tsc reads it. A consumer that matched `subscript_expression` over an `as`
+    expression on such input must match `lookup_type` instead. Same change in both grammars; the oracle record
+    `n1/lookup-string` covers `let x: import('x').Y['k']`, the corpus test `Import type with an index after as or
+    satisfies, on one line` (and its TSX copy) pins the `as` / `satisfies` form. No query in `queries/` or in the
+    inherited JavaScript queries names `subscript_expression`, `lookup_type`, `as_expression` or `array_type`; the
+    `string` / `number` index is a `literal_type` around the same `string` / `number` node, so the highlight captures
+    on it are unchanged.
+  - Same input, index on the next line: `const x = v as import('x').Y` + line break + `[a + b];` (also `satisfies`,
+    `[f()]`, `[a?.b]`) is an `ERROR` since this change, a `subscript_expression` at the base; tsc accepts it (a type
+    index must start on the same line) and reads two statements. The base already reads every other type the same
+    way (`v as Foo` + line break + `[a + b];` is an `ERROR` at the base, and `['k']`, `[0]` or `[a.b]` on the next line is
+    silently absorbed into the type), so this change extends that existing limitation to `import(...)` types and
+    adds no new kind of difference. Not fixed here; a separate change for all types.
+  - `test/examples/known-failures.txt`: 8 entries cleared (`v1.1: import(...) type followed by a member, type
+    arguments, index or []`).
+  - Not fixed, still errors although tsc accepts them (they were errors at the base too): an `import(...)` member
+    type inside parentheses or after `...` in a tuple (`(import('x').Y)[]`, `[...import('x').Y[]]`), `import('x')<T>`, and `f<import('x').B>()`.
+  - Not part of this change: `typeof import('m')` as a type argument of a call (`importOriginal<typeof import('vscode')>()`,
+    15 `known-failures.txt` entries), a separate cause fixed in its own change. One of those files,
+    `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`, also
+    uses `import('vscode').ChatResultUsage[]` (line 211): it needs both changes, and whichever is merged second removes
+    its entry.
+  - Ours, no upstream pull request.
+- An empty type parameter list (`type A<> = number;`, `class C<> {}`, `interface I<> {}`, `function f<>() {}`,
+  `m<>() {}`, `type F = <>() => void;`) parses without error in both grammars. `tsc` 7.0.2 reports nothing for these
+  with `--noCheck` (TS1098 "Type parameter list cannot be empty" is a checker error, and `tsc` does not report it at all
+  for type aliases and interfaces). Before, both grammars put a zero-width `type_parameter` holding a `MISSING
+  type_identifier` inside `type_parameters`; now `type_parameters` has no children.
+  - Node kinds and fields added: none. `node-types.json` in both grammars: the children of `type_parameters` are no
+    longer `required` (it may be empty); nothing removed or renamed.
+  - Error-free tree changes: none found (existing corpus inputs, the probe inputs, and all 17,664 `.ts`/`.tsx` files
+    of the pinned examples, whose trees are byte-identical to the base).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses this form).
+  - An arrow function still needs a non-empty list: `const g = <>(x) => x;` and `<>() => 1` stay errors in the
+    `typescript` grammar, as `tsc` reads `<>` there as a type assertion with no type (TS1110). The arrow function has
+    its own signature rule for this; the conflicts `[_call_signature, function_type]` and
+    `[_call_signature, constructor_type]` move to it. In `tsx` the arrow function's signature is the one the variance
+    entry above defines (`_arrow_type_parameters`: a first parameter without a variance modifier, then any number,
+    so the list is non-empty there too); only `typescript` uses `_nonempty_type_parameters`.
+  - Error trees only: with an empty list allowed, error recovery for a variance modifier alone changes, e.g.
+    `type D<in> = number;` (tsc TS1359 at 7) now gives `type_parameters` holding an `ERROR` that is exactly the `in`
+    token `[7,9)`, where it was a `type_parameter` with a `MISSING type_identifier` at 9. The four oracle cases for
+    these (`s1/neg-in-alone.*`, `s1/p112-variance-in-alone.*`) are re-registered with `errorAt` 7, `7-9:ERROR`.
+  - Known difference: an empty type argument list (`f<>(x)`, `new C<>()`, `let x: A<>;`), which `tsc` also accepts
+    with `--noCheck` (TS1099 is a checker error), still gives an error; it is not part of this release.
 - Automatic semicolon insertion treats every ECMAScript line terminator as a line break, in both grammars, as `tsc`
   does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
   scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or

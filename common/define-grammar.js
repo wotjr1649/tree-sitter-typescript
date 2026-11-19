@@ -85,13 +85,12 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
 
+      // The arrow function's own signature (see arrow_function) takes over these conflicts from _call_signature.
+      [$._arrow_call_signature, $.function_type],
+      [$._arrow_call_signature, $.constructor_type],
       ...(dialect === 'typescript' ? [
-        [$._call_signature, $.function_type],
-        [$._call_signature, $.constructor_type],
-      ] : [
-        [$._arrow_call_signature, $.function_type],
-        [$._arrow_call_signature, $.constructor_type],
-      ]),
+        [$.type_parameters, $._nonempty_type_parameters],
+      ] : []),
 
       [$.primary_expression, $._parameter_name],
       [$.primary_expression, $._parameter_name, $.primary_type],
@@ -816,10 +815,7 @@ module.exports = function defineGrammar(dialect) {
         $.readonly_type,
         $.constructor_type,
         $.infer_type,
-        prec(-1, alias($._type_query_import_member_expression_in_type_annotation, $.member_expression)),
         prec(-1, alias($._type_query_other_member_expression_in_type_annotation, $.member_expression)),
-        prec(-1, alias($._type_query_instantiated_member_expression_in_type_annotation, $.member_expression)),
-        prec(-1, alias($._type_query_import_call_expression_in_type_annotation, $.call_expression)),
         prec(-1, alias($._type_query_member_call_expression_in_type_annotation, $.call_expression)),
       ),
 
@@ -866,6 +862,13 @@ module.exports = function defineGrammar(dialect) {
         $.flow_maybe_type,
         $.type_query,
         $.index_type_query,
+        // `import(...)` types that may be followed by `[]` or an index (`import('x').Y[]`, `import('x')['k']`): a
+        // member chain that starts at `import(...)` and the bare `import(...)`. They are primary types, not only
+        // `type`s, because `array_type`, `lookup_type`, `keyof` and the like take a primary type. The chains with a
+        // call or a bare `import` stay in `type` (below): tsc rejects `import('x').A()[]` and `import.A[]`.
+        prec(-1, alias($._type_query_import_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_instantiated_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_import_call_expression_in_type_annotation, $.call_expression)),
         alias($.this, $.this_type),
         $.existential_type,
         $.literal_type,
@@ -1091,7 +1094,37 @@ module.exports = function defineGrammar(dialect) {
         )),
       ),
 
+      // tsc's parser accepts an empty list (`type A<> = number;`); TS1098 is a checker error.
       type_parameters: $ => seq(
+        '<', optional(seq(commaSep1($.type_parameter), optional(','))), '>',
+      ),
+
+      // tsc reads `<>(x) => x` as a type assertion with no type (TS1110), so an arrow function needs a non-empty list.
+      arrow_function: $ => seq(
+        optional('async'),
+        choice(
+          field('parameter', choice(
+            alias($._reserved_identifier, $.identifier),
+            $.identifier,
+          )),
+          $._arrow_call_signature,
+        ),
+        '=>',
+        field('body', choice(
+          $.expression,
+          $.statement_block,
+        )),
+      ),
+
+      _arrow_call_signature: $ => seq(
+        field('type_parameters', optional(alias($._nonempty_type_parameters, $.type_parameters))),
+        field('parameters', $.formal_parameters),
+        field('return_type', optional(
+          choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+        )),
+      ),
+
+      _nonempty_type_parameters: $ => seq(
         '<', commaSep1($.type_parameter), optional(','), '>',
       ),
 

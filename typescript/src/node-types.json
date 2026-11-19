@@ -272,6 +272,10 @@
         "named": true
       },
       {
+        "type": "call_expression",
+        "named": true
+      },
+      {
         "type": "conditional_type",
         "named": true
       },
@@ -305,6 +309,10 @@
       },
       {
         "type": "lookup_type",
+        "named": true
+      },
+      {
+        "type": "member_expression",
         "named": true
       },
       {
@@ -5083,7 +5091,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "type_parameter",
