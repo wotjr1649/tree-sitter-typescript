@@ -304,14 +304,42 @@ static bool keyword_starts_member(TSLexer *lexer, const bool *valid_symbols) {
     }
 }
 
-// After `let`, a next-line word that goes on past `in` or `instanceof` with other than an ASCII letter (`let⏎in_x = 1`,
-// `let⏎instanceof_x`) continues the declaration, as in tsc and as before this change (the old iswalpha() check sent it
-// to keyword_starts_member, which inserts no semicolon where `||` may follow).
-// shortcut: other next-line words after `let` (`let⏎x = 1`, `let⏎inx = 1`) still get a semicolon, as before; upgrade
-// with a reserved-word check if tsc's reading of those is wanted.
-static bool word_continues_let(int32_t c, const bool *valid_symbols) {
-    return valid_symbols[LEXICAL_DECLARATION_BINDING] && !valid_symbols[ERROR_RECOVERY] &&
-           !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+// ECMAScript ReservedWord (tsc's keywords up to LastReservedWord): after `let` and a line break, tsc reads any other
+// word as the binding (`let⏎x = 1`, also `let⏎yield`, `let⏎let`) and one of these as a new statement. `as` and
+// `satisfies` are here too: tsc takes them as the binding, but the grammar cannot (`let as = 1;` errors on one line).
+static const char *const reserved_words[] = {
+    "break", "case",   "catch",  "class",      "const", "continue", "debugger", "default", "delete",
+    "do",    "else",   "enum",   "export",     "extends", "false",  "finally",  "for",     "function",
+    "if",    "import", "in",     "instanceof", "new",   "null",     "return",   "super",   "switch",
+    "this",  "throw",  "true",   "try",        "typeof", "var",     "void",     "while",   "with",
+    "as",    "satisfies",
+};
+
+// After `let` (the hidden token is valid only there) and a line break, reads the next word. A word that is not
+// reserved continues the declaration; a reserved word gets the answer the switch below gave it before.
+static bool scan_word_after_let(TSLexer *lexer, const bool *valid_symbols) {
+    char word[11] = {0};
+    bool may_be_reserved = true;
+    for (unsigned n = 0; is_identifier_part(lexer->lookahead); n++, skip(lexer)) {
+        if (n >= 10 || lexer->lookahead < 'a' || lexer->lookahead > 'z') {
+            may_be_reserved = false;
+        } else {
+            word[n] = (char)lexer->lookahead;
+        }
+    }
+    for (unsigned i = 0; may_be_reserved && i < sizeof reserved_words / sizeof reserved_words[0]; i++) {
+        if (strcmp(word, reserved_words[i]) != 0) {
+            continue;
+        }
+        if (strcmp(word, "in") == 0 || strcmp(word, "instanceof") == 0) {
+            return keyword_starts_member(lexer, valid_symbols);
+        }
+        if (strcmp(word, "with") == 0) {
+            return !skip_space_and_comments(lexer) || lexer->lookahead != '{';
+        }
+        return true;
+    }
+    return false;
 }
 
 // Automatic semicolon insertion breaks detection of object patterns
@@ -381,6 +409,11 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
 
     if (!scan_whitespace_and_comments(lexer, scanned_comment)) {
         return false;
+    }
+
+    if (valid_symbols[LEXICAL_DECLARATION_BINDING] && !valid_symbols[ERROR_RECOVERY] &&
+        is_identifier_part(lexer->lookahead) && !(lexer->lookahead >= '0' && lexer->lookahead <= '9')) {
+        return scan_word_after_let(lexer, valid_symbols);
     }
 
     switch (lexer->lookahead) {
@@ -460,9 +493,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             if (!is_identifier_part(lexer->lookahead)) {
                 return keyword_starts_member(lexer, valid_symbols);
             }
-            if (word_continues_let(lexer->lookahead, valid_symbols)) {
-                return false;
-            }
 
             for (unsigned i = 0; i < 8; i++) {
                 if (lexer->lookahead != "stanceof"[i]) {
@@ -474,7 +504,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             if (!is_identifier_part(lexer->lookahead)) {
                 return keyword_starts_member(lexer, valid_symbols);
             }
-            return !word_continues_let(lexer->lookahead, valid_symbols);
+            break;
     }
 
     return true;

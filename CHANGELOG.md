@@ -374,43 +374,73 @@
     `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
     automatic semicolon after a Flow-style ambient module type annotation.
 - Automatic semicolon insertion before a word that starts with `in` or `instanceof` after a line break where a binary
-  operator may follow, in both grammars, as `tsc` does: `a = b⏎in_progress = true`, `foo()⏎in1.x()`,
-  `c = d⏎instanceof$ = 2`, `e = f⏎inφ = 3`, `g = h⏎ina = 4` gave `ERROR`. The external scanner
-  (`common/scanner.h`) took such a word for the keyword `in` or `instanceof` when the character after it was not a
-  letter by the C library's `iswalpha()` (which also depends on the platform and locale). Now the word goes on after
-  `in` or `instanceof` on an ASCII letter, digit, `_`, `$` or `\`, or on any non-ASCII character that is not in the
-  grammar's extras (the grammar's own identifier characters), as already in class and type members (above). `a⏎in b`,
-  `a⏎instanceof B`, `for (var x⏎in y)` and `let⏎in b` are unchanged. `tsc` 7.0.2 accepts all these inputs.
-  - Right after `let`, such a word still continues the declaration, as in `tsc` and as before: `let⏎in_x = 1;`,
-    `let⏎in_x: number[];`, `let⏎in_x!: number;`, `let⏎instanceof_x, y;`. For this, `lexical_declaration` takes an
-    optional hidden external token `_lexical_declaration_binding` after its `let` or `const`; the scanner never
-    produces it, its validity only tells the scanner where it is. Other next-line words after `let` (`let⏎x = 1`,
-    `let⏎inx = 1`) still end the statement at `let`, as before (`tsc` reads one declaration; a known difference).
+  operator may follow, in both grammars, as `tsc` does: `a = b⏎in_progress = true`, `foo()⏎in1.x()` and `c =
+  d⏎instanceof$ = 2` gave `ERROR`. The external scanner (`common/scanner.h`) took such a word for the keyword `in` or
+  `instanceof` when the character after it was not a letter by the C library's `iswalpha()` (which also depends on the
+  platform and locale). Now the word goes on after `in` or `instanceof` on an ASCII letter, digit, `_`, `$` or `\`, or
+  on any non-ASCII character that is not in the grammar's extras (the grammar's own identifier characters), as already
+  in class and type members (above). `a⏎in b`, `a⏎instanceof B`, `for (var x⏎in y)` and `let⏎in b` are unchanged. `tsc`
+  7.0.2 accepts all these inputs.
+  - After `let` and a line break (LF, CR, CRLF, U+2028, U+2029, or a block comment holding one), a word that is not an
+    ECMAScript reserved word continues the declaration, in both grammars, as `tsc` and the specification read it:
+    `let⏎ordinary: number[] = [];`, `let⏎ordinary!: number;`, `let⏎ordinary: Record<string, number> = {};`, `let⏎await`
+    and `async function g() { let⏎await }` gave `ERROR` (`let` then a label or an `await`), and `let⏎x = 1;`, `let⏎x,
+    y;` gave two statements (below). The scanner reads the word and inserts no semicolon unless it is a reserved word
+    (`break` ... `with`, tsc's list) or `as` / `satisfies` (which `tsc` takes as the binding but the grammar cannot:
+    `let as = 1;` errors on one line). A reserved word reads as before: `let⏎if (x) {}`, `let⏎return` and `let⏎enum E
+    {}` start a statement, `let⏎in b` and `let⏎instanceof C` are binary expressions. `let⏎(x)` and `let⏎[a] = b` are
+    unchanged, and so is `const` (`const⏎x = 1;` was one declaration already). For this, `lexical_declaration` takes an
+    optional hidden external token `_lexical_declaration_binding` after its `let` or `const`; the scanner never produces
+    it, its validity only tells the scanner that it stands right after `let`, where `let` alone could also end a
+    statement (not during error recovery, where every token is valid).
   - Node kinds and fields added: none. `grammar.json` and `parser.c` change (the hidden external token);
     `node-types.json` does not.
-  - Error-free tree changes, all toward `tsc` (it reads two statements), as before any other identifier (`ordinary`):
-    - `yield⏎in_x`: a `yield_expression` with the operand `in_x`, now `yield` then the statement `in_x;`. No query
-      capture changes.
-    - `type⏎in_x = number;`: a `type_alias_declaration`, now `type;` then an assignment. `type` loses `@keyword`, `in_x`
-      `@type` and `number` `@type.builtin` (own highlights); all three get `@variable` and `local.reference`.
-    - `async⏎in_x => in_x` and `const f = async⏎in_x => in_x;`: an async arrow function, now the identifier `async`
-      (a statement, or the initializer of `f`) then an arrow function. `async`: `@keyword` -> `@variable` and
-      `local.reference`; `local.scope` starts at the arrow function; `f` loses `@function` and its
-      `definition.function` tag.
+  - Error-free tree changes, toward `tsc`:
+    - `let` + line break + a word that is not reserved: `let⏎x = 1;`, `let⏎x, y;`, `let⏎ordinary = 1,⏎other = 2;`,
+      `let⏎inx = 1;`, `let⏎ina = 4;`, `let⏎$x = 1;`, `let⏎type = 1;`, `let⏎of = 1;`, `let⏎yield`, `let⏎let`, and the
+      words with a non-ASCII character such as `let⏎inφ = 1;`, `let⏎iné = 1;`, `let⏎instanceofφ = 0;`, `let⏎φ = 1;`,
+      `let⏎한 = 1;`, also inside a block or a function: the identifier `let` as an expression statement (`let;`) then a
+      second statement (an assignment, a sequence, `yield`), now one `lexical_declaration` (`tsc` emit: `let x = 1;`,
+      `let inφ = 1;`). Queries: in the bundled JavaScript queries `let` goes from `@variable` and `local.reference` to
+      `@keyword`, and the binding gains `local.definition` (it keeps `@variable` and `local.reference`); the own queries
+      and `tags.scm` capture nothing different.
+    - `function* g() { let⏎yield }`: `let;` then a `yield_expression`, now `let yield` (`tsc` does the same; the binding
+      `yield` in a generator is the binder's error, which `--noCheck` drops). `yield`: `@keyword` -> `@variable`, and it
+      gains `local.definition` and `local.reference`; `let` as in the item above.
+    - Words after `in`/`instanceof` that go on with `_`, a digit, `$` or `\` (`let⏎in_x = 1;`, `let⏎in1 = 1;`,
+      `let⏎instanceof_x, y;`) continued the declaration before N7 too (the old `iswalpha()` path); their trees do not
+      change. The non-ASCII ones (`let⏎inφ`, `let⏎iné`, `let⏎instanceofφ`) are in the item above.
+    - Not `let`: as before any other identifier (`ordinary`), `tsc` reads two statements:
+      - `yield⏎in_x`: a `yield_expression` with the operand `in_x`, now `yield` then the statement `in_x;`. No query
+        capture changes.
+      - `type⏎in_x = number;`: a `type_alias_declaration`, now `type;` then an assignment. `type` loses `@keyword`,
+        `in_x` `@type` and `number` `@type.builtin` (own highlights); all three get `@variable` and `local.reference`.
+      - `async⏎in_x => in_x` and `const f = async⏎in_x => in_x;`: an async arrow function, now the identifier `async` (a
+        statement, or the initializer of `f`) then an arrow function. `async`: `@keyword` -> `@variable` and
+        `local.reference`; `local.scope` starts at the arrow function; `f` loses `@function` and its
+        `definition.function` tag.
     - Already so with N5 (above), unchanged here; listed because the N7 review found them against `62e7b3c`, the N5
       revision before its own fix: `continue⏎in_x` (a labelled `continue_statement`, now `continue;` then `in_x;`);
       `public`, `private`, `protected`, `declare` or `override` + `⏎in_x = 1` in a class (one field with the modifier,
-      now a field named by the keyword then `in_x`; `@keyword` -> `@property`); `readonly⏎in_x: number` in an
-      interface (one readonly property, now two properties; `@keyword` -> `@property`). These follow `tsc`. `set⏎in_x(v)
-      {}` in a class (a setter, now a field `set` then a method; `@keyword` -> `@property`, `local.scope` and
-      `definition.method` start at `in_x`) moves away from `tsc`, as `static` and `get`: the known difference above
-      (owner decision 12).
-    None of the 17,665 pinned example files changes its tree.
-  - Newly accepted inputs that `tsc` rejects (the grammar's identifier token takes any non-space character, as for
-    words that do not start with `in`, which the same inputs already showed): `in💩 = 1`, `in! = 1` and
-    `instanceof = 1` on a new line.
-  - Known difference (pre-existing): U+0085 (NEL) is white space for `tsc` and for the C library's `iswspace()`, but
-    not in the grammar's extras, and the lexer reads it as an identifier character. The scanner follows the lexer, so
+      now a field named by the keyword then `in_x`; `@keyword` -> `@property`); `readonly⏎in_x: number` in an interface
+      (one readonly property, now two properties; `@keyword` -> `@property`). These follow `tsc`. `set⏎in_x(v) {}` in a
+      class (a setter, now a field `set` then a method; `@keyword` -> `@property`, `local.scope` and `definition.method`
+      start at `in_x`) moves away from `tsc`, as `static` and `get`: the known difference above (owner decision 12).
+    None of the 17,665 pinned example files changes its tree (S-expressions with ranges, against `main` `e56ad86`).
+  - Now `ERROR`, as `tsc` rejects them (they parsed without error): a non-reserved word after `let⏎` that the old
+    reading made a new statement: `let⏎ordinary();`, `let⏎ordinary.x = 1;`, `let⏎ordinary[0] = 1;`, `let⏎ordinary =>
+    ordinary;`, `let⏎ordinary: while (1) {}`, `let⏎type T = number;`, `let⏎async function f() {}`, `let⏎declare const x
+    = 1;`, `let⏎namespace N {}`, `let⏎module M {}`, `let⏎abstract class C {}`, `let⏎interface I {}`. `tsc` reads `let
+    ordinary` (`let type` ...) and then expects `,` (TS1005).
+  - Newly accepted inputs that `tsc` rejects (the grammar's identifier token takes any non-space character): after `a =
+    b` and a line break, `in💩 = 1;`, `in\u0021 = 1;` and `in\u0073tanceof = 1;` (as written in the source, with the
+    backslash) gave `ERROR` and now parse; `tsc` rejects all three. The same inputs with a word that does not start with
+    `in` (`ix💩`, `ix\u0021`, `i\u006estanceof`) already parsed, so this is a lookalike of existing over-acceptance
+    (owner rule 10).
+  - Known difference (pre-existing): U+0085 (NEL) is white space for `tsc` but not in the grammar's extras: the lexer
+    reads it as an identifier character, and the scanner follows the lexer (it tests code points, not the C library). So
     `class C { x⏎in<U+0085>=1 }` is a field named `in<U+0085>` (`tsc`: a field `in`), and `a⏎in<U+0085> b;` gives
-    `ERROR` (`tsc` accepts it), as before.
+    `ERROR` (`tsc` accepts it), as before. (The C library differs too: on the review host `iswspace(0x85)` returned 8 in
+    `ucrtbase.dll` and 0 in `msvcrt.dll`.)
+  - Known difference (pre-existing): `let⏎{ a } = b;` gives `ERROR` (`tsc`: one declaration); `{` is not a word.
   - `test/examples/known-failures.txt`: no entry cleared.

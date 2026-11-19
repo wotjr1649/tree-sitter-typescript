@@ -405,7 +405,7 @@ module.exports = function defineGrammar(dialect) {
       )),
 
       // The scanner never produces `_lexical_declaration_binding`; its validity tells it that `let` may go on
-      // with a binding on the next line (`let⏎in_x = 1`), where `let` alone could also end a statement.
+      // with a binding on the next line (`let⏎x = 1`), where `let` alone could also end a statement.
       lexical_declaration: $ => seq(
         field('kind', choice('let', 'const')),
         optional($._lexical_declaration_binding),
