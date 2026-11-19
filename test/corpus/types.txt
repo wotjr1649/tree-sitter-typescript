@@ -2415,6 +2415,275 @@ const foo: import('bar').Bar<string> = 'baz';
       (string
         (string_fragment)))))
 
+================================================
+Import type followed by an index or array suffix
+================================================
+
+type A = import('x').Y[];
+let b: import('x').Y['k'];
+let c: import('x')['k'];
+let d: import('x')[];
+let e: import('x').Y<T>[][];
+let f: readonly import('x').Y[];
+let g: Extract<import('m').S['message']['content'][number], { type: 'a' }>;
+let h: [import('x').Y[], number];
+
+---
+
+(program
+  (type_alias_declaration
+    (type_identifier)
+    (array_type
+      (member_expression
+        (call_expression
+          (import)
+          (arguments
+            (string
+              (string_fragment))))
+        (property_identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (lookup_type
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (lookup_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (array_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (array_type
+          (array_type
+            (member_expression
+              (call_expression
+                (import)
+                (arguments
+                  (string
+                    (string_fragment))))
+              (property_identifier)
+              (type_arguments
+                (type_identifier))))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (readonly_type
+          (array_type
+            (member_expression
+              (call_expression
+                (import)
+                (arguments
+                  (string
+                    (string_fragment))))
+              (property_identifier)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (generic_type
+          (type_identifier)
+          (type_arguments
+            (lookup_type
+              (lookup_type
+                (lookup_type
+                  (member_expression
+                    (call_expression
+                      (import)
+                      (arguments
+                        (string
+                          (string_fragment))))
+                    (property_identifier))
+                  (literal_type
+                    (string
+                      (string_fragment))))
+                (literal_type
+                  (string
+                    (string_fragment))))
+              (predefined_type))
+            (object_type
+              (property_signature
+                (property_identifier)
+                (type_annotation
+                  (literal_type
+                    (string
+                      (string_fragment)))))))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (tuple_type
+          (array_type
+            (member_expression
+              (call_expression
+                (import)
+                (arguments
+                  (string
+                    (string_fragment))))
+              (property_identifier)))
+          (predefined_type))))))
+
+======================================================
+Import type followed by an index or array suffix (TSX)
+:language(tsx)
+======================================================
+
+type A = import('x').Y[];
+let b: import('x').Y['k'];
+let c: import('x')[];
+
+---
+
+(program
+  (type_alias_declaration
+    (type_identifier)
+    (array_type
+      (member_expression
+        (call_expression
+          (import)
+          (arguments
+            (string
+              (string_fragment))))
+        (property_identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (lookup_type
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (array_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment)))))))))
+
+============================================================
+Import type with an index after as or satisfies, on one line
+============================================================
+
+const x = v as import('x').Y['k'];
+const y = v satisfies import('x')['k'];
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (identifier)
+        (lookup_type
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (satisfies_expression
+        (identifier)
+        (lookup_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (literal_type
+            (string
+              (string_fragment))))))))
+
+==================================================================
+Import type with an index after as or satisfies, on one line (TSX)
+:language(tsx)
+==================================================================
+
+const x = v as import('x').Y['k'];
+const y = v satisfies import('x')['k'];
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (identifier)
+        (lookup_type
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier))
+          (literal_type
+            (string
+              (string_fragment)))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (satisfies_expression
+        (identifier)
+        (lookup_type
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (literal_type
+            (string
+              (string_fragment))))))))
+
 ============================================
 typeof import() as a type argument of a call
 ============================================
