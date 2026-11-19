@@ -76,6 +76,7 @@ module.exports = function defineGrammar(dialect) {
       // `f<typeof import('m')>()`: with the call_expression ordered above it in `precedences`, the type query lost
       // to the call and the type arguments were read as a binary `<` and `>`.
       [$.call_expression, $._type_query_call_expression],
+      [$.arguments, $._type_query_import_arguments],
       [$.call_expression, $.instantiation_expression, $.binary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
@@ -966,17 +967,29 @@ module.exports = function defineGrammar(dialect) {
         optional('?.'),
         '[', field('index', choice($.predefined_type, $.string, $.number)), ']',
       ),
-      // Dynamic precedence 1: in `f<typeof import('m')>(1, 2)` the comparison reading also holds a call_expression
-      // (`import('m')`, dynamic 2 through the plain call), tying with the call reading; the type query must outrank it.
-      _type_query_call_expression: $ => prec.dynamic(1, seq(
-        field('function', choice(
-          $.import,
-          $.identifier,
-          alias($._type_query_member_expression, $.member_expression),
-          alias($._type_query_subscript_expression, $.subscript_expression),
+      _type_query_call_expression: $ => choice(
+        // `import('m')` with one argument: the only call tsc reads as a type (tsc also allows `{ with: ... }` as a second
+        // argument; not covered, see `_type_query_import_arguments`). Dynamic precedence 1:
+        // in `f<typeof import('m')>(1, 2)` the comparison reading also holds a call_expression (`import('m')`,
+        // dynamic 2 through the plain call), tying with the call reading; the type query must outrank it. Not on the
+        // calls below: tsc reads `sql<A, typeof f(x)>\`t\`` and `f<typeof import('m', 'n')>(1)` as comparisons.
+        prec.dynamic(1, seq(
+          field('function', $.import),
+          field('arguments', alias($._type_query_import_arguments, $.arguments)),
         )),
-        field('arguments', $.arguments),
-      )),
+        seq(
+          field('function', choice(
+            $.import,
+            $.identifier,
+            alias($._type_query_member_expression, $.member_expression),
+            alias($._type_query_subscript_expression, $.subscript_expression),
+          )),
+          field('arguments', $.arguments),
+        ),
+      ),
+      // One argument. `arguments` lists `expression` and `spread_element` as children; a `string` or `object` here would add
+      // those child types to node-types.json.
+      _type_query_import_arguments: $ => seq('(', $.expression, ')'),
       _type_query_instantiation_expression: $ => seq(
         field('function', choice(
           $.import,

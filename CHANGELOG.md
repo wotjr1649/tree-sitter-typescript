@@ -234,6 +234,7 @@
     `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`, also
     uses `import('vscode').ChatResultUsage[]` (line 211): it needs both changes, and whichever is merged second removes
     its entry.
+  - Ours, no upstream pull request.
 - `f<typeof import('m')>(...)`: the type query `typeof import('m')` as the first type argument of a call is read as
   type arguments, not as the binary expression `f < typeof import('m') > (...)` (for example
   `importOriginal<typeof import('vscode')>()`, `f<typeof import('m')>(1, 2)`, `f<typeof import('m').x, string>()`).
@@ -241,9 +242,15 @@
   silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
   resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
   so both readings stay alive and the one that fits the following tokens wins.
-  `_type_query_call_expression` also carries dynamic precedence 1: with the tagged-template change merged, the plain
-  call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the comparison reading (which holds the call
-  `import('m')`) tied with the call reading and won.
+  The type query call `import(<one argument>)` also carries dynamic precedence 1 (a separate production of
+  `_type_query_call_expression`, its argument list aliased to `arguments`): with the tagged-template change merged, the
+  plain call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the comparison reading (which holds the call
+  `import('m')`) tied with the call reading and won. The precedence is only on that production, not on every type
+  query call: ``sql<A, typeof f(x)>`text` `` (also `typeof obj.f(x)`, `typeof obj?.f(x)`), `f<typeof import('m', 'n')>(1)`
+  and `f<typeof import(...m)>(1)` stay comparisons, as for tsc (no error either way, only the tree differs).
+  Not covered: tsc also allows `{ with: ... }` as a second argument of the import type, so
+  `f<typeof import('m', { with: { a: 'b' } })>(1, 2)` stays the comparison chain it was at the base; an object or
+  string argument in that production would add child types to `arguments` in `node-types.json`.
   - Node kinds and fields added: none; `node-types.json` unchanged by this part.
   - Error-free tree changes: 36 of the 17,664 files of the pinned example repositories change their (error-free) tree,
     all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
@@ -253,11 +260,10 @@
     input kept: `f<typeof import('vscode')>(1, 2);` in `test/corpus/types.txt`. Queries: `highlights.scm` gains the
     `type_arguments` brackets, and the JavaScript `highlights.scm` and `tags.scm` call patterns now match these calls;
     no query pattern loses a match.
-  - `test/examples/known-failures.txt`: 14 entries cleared (`v1.1: typeof import(...) type query as a type argument`).
-    `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`
-    stays listed: besides `importOriginal<typeof import('../cliHelpers')>()` it uses `import('vscode').ChatResultUsage[]`
-    (line 211), which needs the separate fix for an `import(...)` type followed by `[]`; this change is merged second and
-    removes the entry.
+  - `test/examples/known-failures.txt`: 15 entries cleared (`v1.1: typeof import(...) type query as a type argument`),
+    14 left. One of them, `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`,
+    also uses `import('vscode').ChatResultUsage[]` (line 211) and needed the `import(...)` followed by `[]` change, which
+    is already in main.
   - `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) keeps its base tree, nested
     `binary_expression`s: the comparison reading wins there, so this change leaves it alone.
   - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
