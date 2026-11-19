@@ -76,7 +76,7 @@ module.exports = function defineGrammar(dialect) {
       // `f<typeof import('m')>()`: with the call_expression ordered above it in `precedences`, the type query lost
       // to the call and the type arguments were read as a binary `<` and `>`.
       [$.call_expression, $._type_query_call_expression],
-      [$.arguments, $._type_query_import_arguments],
+      [$.primary_expression, $._type_query_import_arguments],
       [$.call_expression, $.instantiation_expression, $.binary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
@@ -967,11 +967,12 @@ module.exports = function defineGrammar(dialect) {
         '[', field('index', choice($.predefined_type, $.string, $.number)), ']',
       ),
       _type_query_call_expression: $ => choice(
-        // `import('m')` with one argument: the only call tsc reads as a type (tsc also allows `{ with: ... }` as a second
-        // argument; not covered, see `_type_query_import_arguments`). Dynamic precedence 1:
+        // `import('m')` or `import('m', { with: ... })`: the only calls tsc reads as a type (an import type takes a string
+        // literal and an optional attributes object, see `_type_query_import_arguments`). Dynamic precedence 1:
         // in `f<typeof import('m')>(1, 2)` the comparison reading also holds a call_expression (`import('m')`,
         // dynamic 2 through the plain call), tying with the call reading; the type query must outrank it. Not on the
-        // calls below: tsc reads `sql<A, typeof f(x)>\`t\`` and `f<typeof import('m', 'n')>(1)` as comparisons.
+        // calls below: tsc reads `sql<A, typeof f(x)>\`t\``, `f<typeof import('m', 'n')>(1)` and `f<typeof import(g(x))>(1)`
+        // as comparisons.
         prec.dynamic(1, seq(
           field('function', $.import),
           field('arguments', alias($._type_query_import_arguments, $.arguments)),
@@ -986,9 +987,10 @@ module.exports = function defineGrammar(dialect) {
           field('arguments', $.arguments),
         ),
       ),
-      // One argument. `arguments` lists `expression` and `spread_element` as children; a `string` or `object` here would add
-      // those child types to node-types.json.
-      _type_query_import_arguments: $ => seq('(', $.expression, ')'),
+      // A string literal and an optional object (the import attributes), no trailing comma: tsc rejects `import('m',)` (TS1005)
+      // and reads `import('m', { with: {} },)` as a comparison. Any other argument is not an import type for us either.
+      // `arguments` lists `string` and `object` among its children because of this rule (a schema addition).
+      _type_query_import_arguments: $ => seq('(', $.string, optional(seq(',', $.object)), ')'),
       _type_query_instantiation_expression: $ => seq(
         field('function', choice(
           $.import,

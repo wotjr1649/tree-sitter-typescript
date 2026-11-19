@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "51333a88748ad6a74f101e475947c5c99b5b1a3a31240ffcba1fa636fe75c453",
+  "cases_sha256": "a7fd3fd2d13202dcc21f5253396c52853d693764e8b88ca457b9b2a38591fc6f",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -4510,16 +4510,128 @@
    "at": null
   },
   {
-   "id": "n1b/import-identifier-targ-call-args.ts",
-   "sha256": "c4f71402a911207fc6dbed8753e2dcbd2af16535d88d222ad2c056e5da0897f6",
+   "id": "n1b/import-nested-call-comparison.ts",
+   "sha256": "1e4bdb69ac2690042eaf7fb342fcc06e6acae833b7573d52cb35c79890a04148",
    "grammar": "typescript",
    "verdict": "accept",
    "codes": [],
    "at": null
   },
   {
-   "id": "n1b/import-identifier-targ-call-args.tsx",
-   "sha256": "c4f71402a911207fc6dbed8753e2dcbd2af16535d88d222ad2c056e5da0897f6",
+   "id": "n1b/import-nested-call-comparison.tsx",
+   "sha256": "1e4bdb69ac2690042eaf7fb342fcc06e6acae833b7573d52cb35c79890a04148",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-nested-call-args-comparison.ts",
+   "sha256": "246ef9f6bc1474cdf4edda2976388003ca5e66a0880d7617603b7ae2ca111573",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-nested-call-args-comparison.tsx",
+   "sha256": "246ef9f6bc1474cdf4edda2976388003ca5e66a0880d7617603b7ae2ca111573",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-concat-comparison.ts",
+   "sha256": "54187673a47dabb1c8141c9d870e493c64e592327d094158cc01415dd33f7d82",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-concat-comparison.tsx",
+   "sha256": "54187673a47dabb1c8141c9d870e493c64e592327d094158cc01415dd33f7d82",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-conditional-comparison.ts",
+   "sha256": "00ae2b75dfeccb81872cbd1729999e4da94bf3756ea05405c0ef0aeb81be6452",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-conditional-comparison.tsx",
+   "sha256": "00ae2b75dfeccb81872cbd1729999e4da94bf3756ea05405c0ef0aeb81be6452",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-nested-call-tagged-comparison.ts",
+   "sha256": "2e39dbbdb46d5ef4ee310cd0f509e9d4060174635d2611f94578f1c4ab78b03f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-nested-call-tagged-comparison.tsx",
+   "sha256": "2e39dbbdb46d5ef4ee310cd0f509e9d4060174635d2611f94578f1c4ab78b03f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-options-trailing-comma-comparison.ts",
+   "sha256": "8758a664738d175e60b84b35b46481576bdcc56e8a6871820402c1c61266e128",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-options-trailing-comma-comparison.tsx",
+   "sha256": "8758a664738d175e60b84b35b46481576bdcc56e8a6871820402c1c61266e128",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-options-targ-call-args.ts",
+   "sha256": "db605f8eb6980cca77ac0dfe63e44aaf66026b583a6c22c09bbd88cd677f9b32",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-options-targ-call-args.tsx",
+   "sha256": "db605f8eb6980cca77ac0dfe63e44aaf66026b583a6c22c09bbd88cd677f9b32",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-options-targ-tagged.ts",
+   "sha256": "13fbcf670c80e877145bdd5b75b53e62032cf6a9cbd1b0599ad616927062ab94",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n1b/import-options-targ-tagged.tsx",
+   "sha256": "13fbcf670c80e877145bdd5b75b53e62032cf6a9cbd1b0599ad616927062ab94",
    "grammar": "tsx",
    "verdict": "accept",
    "codes": [],

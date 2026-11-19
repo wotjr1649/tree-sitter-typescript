@@ -264,17 +264,18 @@
   silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
   resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
   so both readings stay alive and the one that fits the following tokens wins.
-  The type query call `import(<one argument>)` also carries dynamic precedence 1 (a separate production of
-  `_type_query_call_expression`, its argument list aliased to `arguments`): with the tagged-template change merged, the
-  plain call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the comparison reading (which holds the call
-  `import('m')`) tied with the call reading and won. The precedence is only on that production, not on every type
-  query call: ``sql<A, typeof f(x)>`text` `` (also `typeof obj.f(x)`, `typeof obj?.f(x)`), `f<typeof import('m', 'n')>(1)`
-  and `f<typeof import(...m)>(1)` stay comparisons, as for tsc (no error either way, only the tree differs).
-  Not covered: tsc also allows `{ with: ... }` as a second argument of the import type, so
-  `f<typeof import('m', { with: { a: 'b' } })>(1, 2)` stays the comparison chain it was at the base; an object or
-  string argument in that production would add child types to `arguments` in `node-types.json`.
-  - Node kinds and fields added: none; `node-types.json` unchanged by this part.
-  - Error-free tree changes: 36 of the 17,664 files of the pinned example repositories change their (error-free) tree,
+  The type query call `import('m')` or `import('m', { with: ... })` (a string literal and an optional object, no trailing
+  comma: the hidden rule `_type_query_import_arguments`, aliased to `arguments`) also carries dynamic precedence 1: with
+  the tagged-template change merged, the plain call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the
+  comparison reading (which holds the call `import('m')`) tied with the call reading and won. The precedence is only on
+  that production, not on every type query call, and the argument is a string, as in tsc's import type:
+  ``sql<A, typeof f(x)>`text` `` (also `typeof obj.f(x)`, `typeof obj?.f(x)`), `f<typeof import('m', 'n')>(1)`,
+  `f<typeof import(...m)>(1)`, `f<typeof import(g(x))>(1)`, `f<typeof import('m' + suffix)>(1, 2)` and
+  `f<typeof import(x ? 'm' : 'n')>(1, 2)` stay comparisons, as for tsc (no error either way, only the tree differs).
+  `f<typeof import('vscode', { with: { 'resolution-mode': 'import' } })>(1, 2)` is a call, as for tsc.
+  - Node kinds and fields added: none. Child types added: `arguments` lists `object` and `string` among its children in
+    `node-types.json` (both grammars; no kind or field is added, removed or renamed, and `test/node-kinds` is unchanged).
+  - Error-free tree changes: 36 of the 17,665 files of the pinned example repositories change their (error-free) tree,
     all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
     (`importAMDNodeModule<typeof import('jschardet')>('jschardet', 'dist/jschardet.min.js')`): the base tree is a chain
     of `binary_expression` (comparison, comparison, a `sequence_expression` of the arguments); the new tree is a
@@ -283,9 +284,16 @@
     `type_arguments` brackets, and the JavaScript `highlights.scm` and `tags.scm` call patterns now match these calls;
     no query pattern loses a match.
   - `test/examples/known-failures.txt`: 15 entries cleared (`v1.1: typeof import(...) type query as a type argument`),
-    14 left. One of them, `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`,
-    also uses `import('vscode').ChatResultUsage[]` (line 211) and needed the `import(...)` followed by `[]` change, which
-    is already in main.
+    14 left. One of the 15, `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`,
+    also uses `import('vscode').ChatResultUsage[]` (line 211) and needed the `import(...)` followed by `[]` change,
+    which is already in main; it parses and is no longer listed.
+  - Remaining differences from tsc: an import type argument other than a string literal (`f<typeof import(m)>(1, 2)`,
+    `import({ a: 'm' })`, `import(42)` and similar) is a call for tsc and a comparison chain here, as at the base;
+    ``sql<typeof import('m')>`text` `` (one type argument) is a comparison here and at the base, a tagged template for
+    tsc; `f<typeof import('m',)>(1, 2)` (TS1005) and `f<typeof import()>(1)` (TS1110) are comparisons without an error,
+    as at the base. New with this change: the second argument is any `object`, so `f<typeof import('m', { x: 1 })>(1, 2)`
+    (a comparison for tsc, which wants `{ with: ... }`) and `f<typeof import('m', {})>(1, 2)` (TS1005) are calls without
+    an error here, comparisons at the base.
   - `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) keeps its base tree, nested
     `binary_expression`s: the comparison reading wins there, so this change leaves it alone.
   - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the

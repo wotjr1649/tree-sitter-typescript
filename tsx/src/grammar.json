@@ -10148,7 +10148,28 @@
         },
         {
           "type": "SYMBOL",
-          "name": "expression"
+          "name": "string"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ","
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "object"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -11755,7 +11776,7 @@
       "_type_query_call_expression"
     ],
     [
-      "arguments",
+      "primary_expression",
       "_type_query_import_arguments"
     ],
     [
