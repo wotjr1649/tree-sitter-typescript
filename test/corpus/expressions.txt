@@ -424,3 +424,54 @@ a ? function(){ return true } : b;
           (return_statement
             (true))))
       (identifier))))
+
+==========================================================
+Block comment on a new line before a ternary question mark
+==========================================================
+
+a
+/* c */ ? b : c;
+a
+/* c */
+? b : c;
+a /* c */ ? b : c;
+
+---
+
+(program
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier)))
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier)))
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier))))
+
+==========================================================
+Block comment on a new line before a ternary question mark (TSX)
+:language(tsx)
+==========================================================
+
+a
+/* c */ ? b : c;
+
+---
+
+(program
+  (expression_statement
+    (ternary_expression
+      (identifier)
+      (comment)
+      (identifier)
+      (identifier))))
