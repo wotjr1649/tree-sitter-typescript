@@ -251,8 +251,8 @@
 {"id":"s3/p112-accessor-static.tsx","sha256":"7b9b506e04448575cbeabf7dbb0b84d0c9b5431da8e5514ab21fd2fbbe088075","source":"class A { static accessor x = 1; }","grammar":"tsx","expect":["17-25:accessor"]}
 {"id":"n1/typeof-import-targ-call.ts","sha256":"49732e9e6307d9a736f5820677f920f8aae72cef5c5e36f29e3158f172b7a7fc","source":"f<typeof import('vscode')>();","grammar":"typescript"}
 {"id":"n1/typeof-import-targ-call.tsx","sha256":"49732e9e6307d9a736f5820677f920f8aae72cef5c5e36f29e3158f172b7a7fc","source":"f<typeof import('vscode')>();","grammar":"tsx"}
-{"id":"n1/typeof-import-targ-call-args.ts","sha256":"ab65676605d00745f4327571439b09fdd91eeb287daefdbd6b91424743a5f776","source":"f<typeof import('vscode')>(1, 2);","grammar":"typescript"}
-{"id":"n1/typeof-import-targ-call-args.tsx","sha256":"ab65676605d00745f4327571439b09fdd91eeb287daefdbd6b91424743a5f776","source":"f<typeof import('vscode')>(1, 2);","grammar":"tsx"}
+{"id":"n1/typeof-import-targ-call-args.ts","sha256":"ab65676605d00745f4327571439b09fdd91eeb287daefdbd6b91424743a5f776","source":"f<typeof import('vscode')>(1, 2);","grammar":"typescript","expect":["0-32:call_expression","1-26:type_arguments"]}
+{"id":"n1/typeof-import-targ-call-args.tsx","sha256":"ab65676605d00745f4327571439b09fdd91eeb287daefdbd6b91424743a5f776","source":"f<typeof import('vscode')>(1, 2);","grammar":"tsx","expect":["0-32:call_expression","1-26:type_arguments"]}
 {"id":"n1/typeof-import-member-targ-call.ts","sha256":"afb340301644f7e2ee000ae566151a0548d3add47e9617c83c7244ed84ebad46","source":"f<typeof import('vscode').y>();","grammar":"typescript"}
 {"id":"n1/typeof-import-member-targ-call.tsx","sha256":"afb340301644f7e2ee000ae566151a0548d3add47e9617c83c7244ed84ebad46","source":"f<typeof import('vscode').y>();","grammar":"tsx"}
 {"id":"n1/typeof-import-two-targs-call.ts","sha256":"2c8b13f4310f0fdaff07dbbbd346ed15e05efda1a877f80e38c9e7432cdf1534","source":"f<typeof import('vscode'), string>();","grammar":"typescript"}

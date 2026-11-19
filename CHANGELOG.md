@@ -121,6 +121,10 @@
     stays listed: besides `importOriginal<typeof import('../cliHelpers')>()` it uses `import('vscode').ChatResultUsage[]`
     (line 211), which needs the separate fix for an `import(...)` type followed by `[]`; whichever of the two changes is
     merged second removes the entry.
+  - Error-free tree change on input tsc reads differently (recorded, owner decision 2026-11-19):
+    `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) was nested `binary_expression`s and is now
+    an `instantiation_expression` on the left of `+`, the reading the base already gives `f < typeof x > +x;`.
+    Telling such comparisons from instantiation expressions is a later candidate.
   - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
     `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
   - Ours, no upstream pull request.
