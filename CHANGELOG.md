@@ -467,7 +467,7 @@
       (one readonly property, now two properties; `@keyword` -> `@property`). These follow `tsc`. `set⏎in_x(v) {}` in a
       class (a setter, now a field `set` then a method; `@keyword` -> `@property`, `local.scope` and `definition.method`
       start at `in_x`) moves away from `tsc`, as `static` and `get`: the known difference above (owner decision 12).
-    None of the 17,665 pinned example files changes its tree (S-expressions with ranges, against `main` `e56ad86`).
+    None of the 17,665 pinned example files changes its tree (S-expressions with ranges, against `main` `d4c5286`).
   - Now `ERROR`, as `tsc` rejects them (they parsed without error): a non-reserved word after `let⏎` that the old
     reading made a new statement: `let⏎ordinary();`, `let⏎ordinary.x = 1;`, `let⏎ordinary[0] = 1;`, `let⏎ordinary =>
     ordinary;`, `let⏎ordinary: while (1) {}`, `let⏎type T = number;`, `let⏎async function f() {}`, `let⏎declare const x
