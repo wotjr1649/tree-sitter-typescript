@@ -12,9 +12,10 @@ history, kept as `refs/upstream/v0.23.2`, and later upstream changes are adopted
   hand-written `*/src/scanner.c`. `*/src/parser.c`, `*/src/grammar.json`, `*/src/node-types.json` and
   `*/src/tree_sitter/*` are generated: edit the grammar, run `tree-sitter generate --abi 15 --js-runtime native` with
   CLI 0.27.2 in `typescript/` and `tsx/`, commit both.
-- `tree-sitter generate` embeds `tree-sitter.json` `metadata.version` in `parser.c`, so at v1.0.0 it stays upstream's
-  `0.23.2` (the baseline bytes must not change) while the other manifests say `1.0.0`; it takes the real version
-  from the first behaviour-changing release (v1.1+).
+- `tree-sitter generate` embeds `tree-sitter.json` `metadata.version` in `parser.c`, so every manifest (`package.json`,
+  `package-lock.json`, `Cargo.toml`, `Cargo.lock`, `pyproject.toml`, `CMakeLists.txt`, `common/common.mak`,
+  `tree-sitter.json`) carries the release version, `2.0.0` at the time of writing. Fix pull requests change none of
+  them; the release pull request changes all together and regenerates both `parser.c` (ADR-0001 amendment).
 - `third_party/tree-sitter-javascript/` (`grammar.js`, the generation input, and `queries/`) is copied unchanged from a
   named tree-sitter-javascript tag. Never edit it; replacing it changes its source and SHA-256s in `NOTICE` and the
   CI check together.
@@ -27,14 +28,16 @@ history, kept as `refs/upstream/v0.23.2`, and later upstream changes are adopted
   only shrink. A new failure fails CI; a listed file that starts parsing is removed in the same change; a pull
   request that adds a path to the list fails CI unless it also changes `repos.txt`
   (`test/examples/check-known-failures-shrink.sh`). Entries marked
-  `v1.1:` are the planned v1.1 grammar fixes: `typeof import(...)` as a type argument, `import(...)` types followed by
-  a member, type arguments, index or `[]`, bare `&` in JSX text, `unique` after `<`, `symbol` as a tuple label,
-  `abstract` as an object-type property, `\u` without hex digits in templates, and a call signature starting with `<`
-  on a new line. Entries marked `not complete TypeScript` are fixture inputs, not grammar gaps. Moving a pin updates
-  the list in the same change.
-- Node kinds and field names are a public contract: removing or renaming one is breaking (major version, CHANGELOG;
-  create `CHANGELOG.md` when the first entry is needed); adding one is not. Keep the grammar names `typescript` and
-  `tsx` and the C symbols `tree_sitter_typescript` and `tree_sitter_tsx`.
+  `candidate:` are grammar gaps not fixed yet and possible later changes: `unique` after `<`, `symbol` as a tuple
+  label, `abstract` as an object-type property, `\u` without hex digits in templates, and a call signature starting
+  with `<` on a new line. Entries marked `not complete TypeScript` are fixture inputs, not grammar gaps. Moving a pin
+  updates the list in the same change.
+- Versions follow SemVer (ADR-0001 amendment, as `tree-sitter-mssql`). MAJOR: a node kind or field is removed or
+  renamed, or the tree of previously error-free input changes. MINOR: additions and error-to-ok fixes with no
+  error-free tree change. PATCH: no tree of valid input changes. Node kinds and field names are a public contract:
+  adding one is not breaking, removing or renaming one is MAJOR and goes in `CHANGELOG.md` (Keep a Changelog) with a
+  migration document. Keep the grammar names `typescript` and `tsx` and the C symbols `tree_sitter_typescript` and
+  `tree_sitter_tsx`.
 - A fix starts from a failing case (corpus test or oracle case) and cites its evidence. Existing corpus tests keep
   passing unless the change alters them on purpose and says why.
 - Keep every copyright line in `LICENSE` and the attribution in `NOTICE` (MIT).

@@ -1,6 +1,28 @@
 # Changelog
 
-## Unreleased
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2026-11-20
+
+The first release that changes how the grammars parse. 1.0.0 is the upstream `tree-sitter/tree-sitter-typescript`
+v0.23.2 grammar regenerated with tree-sitter CLI 0.27.2 (ABI 15) and behaves the same; this repository continues from
+it as an independent repository (ADR-0001). 2.0.0 contains the fixes S1-S6, N1-N5, N1b and N7 (one change per defect
+class, each checked against `typescript` 7.0.2 `tsc` in the oracle, whose committed cases have no mismatch with tsc).
+Breaking: the tree of some input that parsed without error at 1.0.0 is different now (tagged templates with type
+arguments, `accessor` followed by a line break, a block comment before a ternary `?`, a `&` before the closing quote of
+a TSX attribute string, an index after `as import('x').Y`, `f<typeof import('m')>(x)`, line breaks other than LF in
+automatic semicolon insertion, `let` followed by a line break and a binding, a word starting with `in` after a line
+break), some invalid inputs that were accepted are errors now (`type D<in> = number;`, `<A t="a&" b="/>;` in TSX,
+`a⏎/* c */ +? b : c;`, `let⏎ordinary();`), and some valid inputs are errors now, as a related form already
+was at 1.0.0 (a class member named `in` after a lone CR, U+2028, U+2029 or a line-breaking block comment, like after an
+LF; `v as import('x').Y` + line break + `[a + b];`, like after any other type); no node kind or field is removed or
+renamed. Schema additions: a `type_arguments` child of `member_expression`, the anonymous node `out`,
+`type_parameters` children no longer required, `call_expression` and `member_expression` as subtypes of
+`primary_type`, `object` and `string` among the children of `arguments`. The Go module path is
+`github.com/wotjr1649/tree-sitter-typescript/v2`. See [docs/migrating-from-1.0.md](docs/migrating-from-1.0.md).
 
 ### Fixed
 
@@ -140,7 +162,7 @@
     inputs, the review probes and the 710 `.tsx` example files.
   - Intended new errors (tsc rejects them, TS1359): `type D<in> = number;` and `type L<in, T> = T;` parsed without
     error before and now report an error.
-  - Kept as they are (owner decision, 2026-11-19): `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
+  - Kept as they are, recorded as known differences: `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
     `<in const T>` still report an error, although tsc's parser accepts them (it rejects them only in the checker,
     TS1030 / TS1029); `type E<out extends string> = out;` still parses without error (a parameter named `out` with a
     constraint), although tsc rejects it (TS1359).
@@ -315,10 +337,11 @@
   `tsc` 7.0.2 accepts all these inputs. The paths this change adds (line terminators, the `}` guard, `with`) and the
   existing same-line `}` check classify white space and word characters by code point (the grammar's extras; U+0085 is
   an identifier character there, as in the lexer), not through the C library (`iswspace()` at `e56ad86`); the
-  `in`/`instanceof` path is the one of `e56ad86`. The same-line `}` check changes with no line break at all (owner
-  decision 26): `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same with U+200B, which `tsc` accepts,
+  `in`/`instanceof` path is the one of `e56ad86`. The same-line `}` check changes with no line break at all (kept
+  on purpose, so that the result does not depend on the C library): `type F = ({ a }<U+FEFF>: { a: number }) => number;`
+  and the same with U+200B, which `tsc` accepts,
   were `ERROR` at `e56ad86` and now keep their object pattern; with U+2060, which `tsc` rejects (TS1127), the input
-  now parses too, the leniency `e56ad86` already has for `type F = ({}<U+2060>: {}) => number;` (owner decision 10).
+  now parses too, the leniency `e56ad86` already has for `type F = ({}<U+2060>: {}) => number;` (recorded as a known difference).
   Comment scanning in one call: a block comment that holds no line terminator and comes before any line break is left
   to the lexer at once, and so is a second comment that holds one. After a first comment that holds a line terminator,
   the comments without one that follow are all read in the same call, up to the next token or the second
@@ -348,7 +371,7 @@
       - `type T = A ⏎ [B];`: a `lookup_type`, now `type T = A;` then the array `[B]`.
     - Same as the LF form, which `tsc` reads differently (recorded known differences, unchanged for LF):
       - `static`, `get`, `set` + `⏎` + member: one static member or accessor, now two members (a field named
-        `static`, `get` or `set`, then the member); `tsc` reads one member (owner decision 12). `@keyword` ->
+        `static`, `get` or `set`, then the member); `tsc` reads one member (recorded as a known difference). `@keyword` ->
         `@property`; in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`.
     - A line comment ended by U+2028, U+2029 or a lone CR after an LF (`a⏎// c<U+2028>…`): before, the scanner read
       the comment on to the next LF and decided there. Now the text after the comment decides, as with LF:
@@ -370,7 +393,7 @@
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known differences recorded (owner decisions 20, 23 and 24): an input whose line break is a CR, U+2028, U+2029 or a
+  - Known differences recorded: an input whose line break is a CR, U+2028, U+2029 or a
     line-breaking block comment, that `tsc` accepts and that parsed at `e56ad86` only because the old scanner did not
     see the break, now gives `ERROR` where its LF form already gives `ERROR` at `e56ad86` (the scanner cannot tell
     these from inputs that must keep going); fixing them needs a grammar change, a candidate after v2.0.0.
@@ -382,7 +405,7 @@
     - `import x from "m"<CR>with /* c */ { type: "json" };` (a comment between `with` and `{`), and the same after
       U+2028, U+2029 or a line comment: the LF form is `ERROR` at `e56ad86`, so the comment is not skipped.
     - `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line: the known
-      v1.1 gap in `known-failures.txt`) and `a as T⏎// c<U+2028>[b + c];` (a type takes no `[` after a line break).
+      `candidate:` gap in `known-failures.txt`) and `a as T⏎// c<U+2028>[b + c];` (a type takes no `[` after a line break).
     - Counts, over the 5,938 inputs of the reviews and the oracle that contain a CR, U+2028, U+2029 or a line-breaking
       block comment (both grammars; `tsc` accepts, `ERROR` here, `ERROR` for the LF form at `e56ad86`): 1,080, of which
       `e56ad86` parses the input itself without error in 170 (a CR, U+2028 or U+2029 it did not see as a line break, or a
@@ -472,7 +495,7 @@
         and `in_x: number;`). `@keyword` -> `@property`.
       - `set⏎in_x(v) {}` in a class: main a setter (a `method_definition`), now a field `set` then a method `in_x`; `tsc`
         keeps the setter (`set in_x(v) {}`), so this one moves away from `tsc`, as `static` and `get`: the known
-        difference above (owner decision 12), which main already has for `set⏎ordinary(v) {}`. Queries: `set` goes from
+        difference above, which main already has for `set⏎ordinary(v) {}`. Queries: `set` goes from
         `@keyword` to `@property` (bundled JavaScript queries), and `local.scope` and `definition.method` start at `in_x`
         instead of at `set`.
       N5 at `5226028` (before its reduction) already gave the head trees for these; this entry compares with `d4c5286`.
@@ -486,8 +509,8 @@
   - Newly accepted inputs that `tsc` rejects (the grammar's identifier token takes any non-space character): after `a =
     b` and a line break, `in💩 = 1;`, `in\u0021 = 1;` and `in\u0073tanceof = 1;` (as written in the source, with the
     backslash) gave `ERROR` and now parse; `tsc` rejects all three. The same inputs with a word that does not start with
-    `in` (`ix💩`, `ix\u0021`, `i\u006estanceof`) already parsed, so this is a lookalike of existing over-acceptance
-    (owner rule 10).
+    `in` (`ix💩`, `ix\u0021`, `i\u006estanceof`) already parsed, so this is a lookalike of existing over-acceptance,
+    recorded as a known difference.
   - Known difference (pre-existing): U+0085 (NEL) is white space for `tsc` but not in the grammar's extras: the lexer
     reads it as an identifier character, and the scanner follows the lexer (it tests code points, not the C library). So
     `class C { x⏎in<U+0085>=1 }` is a field named `in<U+0085>` (`tsc`: a field `in`), and `a⏎in<U+0085> b;` gives

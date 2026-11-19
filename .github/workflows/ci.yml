@@ -26,6 +26,30 @@ jobs:
           grep -qx '#define LANGUAGE_VERSION 15' typescript/src/parser.c
           grep -qx '#define LANGUAGE_VERSION 15' tsx/src/parser.c
           grep -q 'set(TREE_SITTER_ABI_VERSION 15 CACHE' CMakeLists.txt
+  versions:
+    name: Version consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # Every manifest and the latest CHANGELOG release carry one version (ADR-0001 amendment, Decision 4).
+      - name: Compare manifest versions
+        shell: bash
+        run: |-
+          versions=$(
+            echo "package.json $(jq -r .version package.json)"
+            echo "package-lock.json $(jq -r '.version + " " + .packages[""].version' package-lock.json)"
+            echo "tree-sitter.json $(jq -r .metadata.version tree-sitter.json)"
+            echo "Cargo.toml $(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)"
+            echo "Cargo.lock $(grep -A1 -x 'name = "tree-sitter-typescript"' Cargo.lock | grep -m1 '^version = ' | cut -d'"' -f2)"
+            echo "pyproject.toml $(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)"
+            echo "CMakeLists.txt $(grep -m1 -o 'VERSION "[^"]*"' CMakeLists.txt | cut -d'"' -f2)"
+            echo "common/common.mak $(sed -n 's/^VERSION := //p' common/common.mak)"
+            echo "CHANGELOG.md $(grep -m1 -o '^## \[[^]]*\]' CHANGELOG.md | tr -d '#[] ')"
+          )
+          echo "$versions"
+          test "$(echo "$versions" | cut -d' ' -f2- | tr ' ' '\n' | sort -u | grep -c .)" -eq 1 \
+            && test "$(echo "$versions" | cut -d' ' -f2- | tr ' ' '\n' | grep -c .)" -eq 10
   known-failures:
     name: Known failures only shrink
     if: github.event_name == 'pull_request'
