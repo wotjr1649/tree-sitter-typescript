@@ -1,5 +1,6 @@
 #include "tree_sitter/parser.h"
 
+#include <string.h>
 #include <wctype.h>
 
 enum TokenType {
@@ -13,6 +14,7 @@ enum TokenType {
     JSX_TEXT,
     FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON,
     ERROR_RECOVERY,
+    LEXICAL_DECLARATION_BINDING,
 };
 
 static void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
@@ -108,6 +110,49 @@ static bool is_identifier_part(int32_t c) {
     return !is_space(c);
 }
 
+// The words tsc --noCheck rejects as a binding after `let` and a line break (its keywords up to LastReservedWord):
+// tsc reads one of these as a new statement and any other word as the binding (`let⏎x = 1`, also `let⏎yield`,
+// `let⏎let`). Plus `as` and `satisfies`, kept for compatibility: tsc takes them as the binding, but the grammar
+// cannot (`let as = 1;` errors on one line).
+static const char *const reserved_words[] = {
+    "break", "case",   "catch",  "class",      "const", "continue", "debugger", "default", "delete",
+    "do",    "else",   "enum",   "export",     "extends", "false",  "finally",  "for",     "function",
+    "if",    "import", "in",     "instanceof", "new",   "null",     "return",   "super",   "switch",
+    "this",  "throw",  "true",   "try",        "typeof", "var",     "void",     "while",   "with",
+    "as",    "satisfies",
+};
+
+// After `let` (the hidden token is valid only there) and a line break, reads the next word. A word that is not
+// reserved continues the declaration; a reserved word gets the answer the switch below gives it: `in` and
+// `instanceof` as at main (no semicolon), `with` as in its own case, any other one a semicolon.
+static bool scan_word_after_let(TSLexer *lexer) {
+    char word[11] = {0};
+    bool may_be_reserved = true;
+    for (unsigned n = 0; is_identifier_part(lexer->lookahead); n++, skip(lexer)) {
+        if (n >= 10 || lexer->lookahead < 'a' || lexer->lookahead > 'z') {
+            may_be_reserved = false;
+        } else {
+            word[n] = (char)lexer->lookahead;
+        }
+    }
+    for (unsigned i = 0; may_be_reserved && i < sizeof reserved_words / sizeof reserved_words[0]; i++) {
+        if (strcmp(word, reserved_words[i]) != 0) {
+            continue;
+        }
+        if (strcmp(word, "in") == 0 || strcmp(word, "instanceof") == 0) {
+            return false;
+        }
+        if (strcmp(word, "with") == 0) {
+            while (is_space(lexer->lookahead)) {
+                skip(lexer);
+            }
+            return lexer->lookahead != '{';
+        }
+        return true;
+    }
+    return false;
+}
+
 // Automatic semicolon insertion breaks detection of object patterns
 // in a typed context:
 //   type F = ({a}: {a: number}) => number;
@@ -177,6 +222,11 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
         return false;
     }
 
+    if (valid_symbols[LEXICAL_DECLARATION_BINDING] && !valid_symbols[ERROR_RECOVERY] &&
+        is_identifier_part(lexer->lookahead) && !(lexer->lookahead >= '0' && lexer->lookahead <= '9')) {
+        return scan_word_after_let(lexer);
+    }
+
     switch (lexer->lookahead) {
         case '}':
             return scan_closing_brace(lexer, valid_symbols);
@@ -216,7 +266,9 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             return false;
 
         case '{':
-            if (valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON]) {
+            // After `let`, `{` starts an object pattern (`let⏎{ x } = obj`), as tsc reads it.
+            if (valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON] ||
+                (valid_symbols[LEXICAL_DECLARATION_BINDING] && !valid_symbols[ERROR_RECOVERY])) {
                 return false;
             }
             break;
@@ -254,7 +306,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             }
             skip(lexer);
 
-            if (!iswalpha(lexer->lookahead)) {
+            if (!is_identifier_part(lexer->lookahead)) {
                 return false;
             }
 
@@ -265,7 +317,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
                 skip(lexer);
             }
 
-            if (!iswalpha(lexer->lookahead)) {
+            if (!is_identifier_part(lexer->lookahead)) {
                 return false;
             }
             break;
