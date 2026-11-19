@@ -303,23 +303,18 @@
   does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
   scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or
   `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
-  not count as a line break either (the scanner read on to the next LF). After a line break, `in` or `instanceof`
-  where no binary operator may follow now starts the next class or type member when `=`, `:`, `?`, `;`, `}`, a
-  same-line block comment and then one of these, or an optional type-parameter list and a parameter list and then `{`,
-  `:`, `;` or `}` follows (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`,
-  `interface I { a: string⏎in(): void }`), and so does a word that
-  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)`, `for (var x⏎in (y))` and
-  `for (var x⏎in ("a);"))` are unchanged: a bracket inside a string, template, regular expression or comment of the
-  parameter list is not counted, but only where the scanner can tell what is code. At anything it cannot tell with
-  certainty (a `/` after `)`, `}`, `>`, `+`, `-`, `!`, `.` or a word, which may be a division or a regular expression; a
-  template with `${`; a string with a line continuation or a line terminator; an unterminated literal; the end of the
-  input) it counts every parenthesis, as it did before literals were skipped, so it never answers worse than that
-  count. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
-  its object pattern, as on one line) and before import attributes, also with comments between `with` and `{`
-  (`import x from "x"⏎with { type: "json" };`, `import x from "x"<CR>with /* c */ { type: "json" };`).
-  `tsc` 7.0.2 accepts all these inputs. The scanner classifies white space and word characters by code point on these
-  paths (the grammar's extras; U+0085 is an identifier character there, as in the lexer), so the result does not
-  depend on the C library; with `ucrtbase.dll` and `msvcrt.dll` it is the same. Each call scans at most one block
+  not count as a line break either (the scanner read on to the next LF). The rule is that each of these acts exactly
+  as LF does at `e56ad86`: the scanner makes the same decision after it as it makes after an LF, and what an LF does
+  there, they do. This includes `in` and `instanceof` after a line break: that path is the one of `e56ad86` (no lookahead
+  past the keyword), so `class A { a⏎in() {} }` is `ERROR` after an LF, a CR, U+2028, U+2029 and a line-breaking block
+  comment alike, and `for (var x⏎in y)` keeps its `in`.
+  Two additions apply to LF too (inputs `tsc` accepts and that were `ERROR` at `e56ad86`): `}` after a line break gets the
+  `}:` object-pattern guard it has on one line (`type F = ({ a⏎}: { a: number }) => number;` keeps its object
+  pattern), and `with` followed by `{` after a line break is not preceded by a semicolon (`import x from "x"⏎with {
+  type: "json" };`; a `with` statement always has `(`, and a comment between `with` and `{` is not skipped, as for LF).
+  `tsc` 7.0.2 accepts all these inputs. The paths this change adds (line terminators, the `}` guard, `with`) classify
+  white space and word characters by code point (the grammar's extras; U+0085 is an identifier character there, as in
+  the lexer), not through the C library; the `in`/`instanceof` path is the one of `e56ad86`. Each call scans at most one block
   comment that holds no line terminator, so a run of N such comments (`x/*c*/…;`, or adjacent comments that hold a
   line terminator) costs O(N), not O(N²). A run of comments that each start on a line after a line break
   (`x⏎/*c*/⏎/*c*/…;`) is still rescanned per comment, as at the base (N=4/8/16/32: 20/72/272/1056 slash skips in
@@ -367,17 +362,25 @@
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known differences kept: four inputs that parsed without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
-    did before: `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line,
-    the known v1.1 gap) and `a as T⏎// c<U+2028>[b + c];` (a type cannot take `[` after a line break), both
-    grammars; `tsc` accepts both. The scanner cannot tell these from `class A { a⏎<T>() {} }` and `a⏎[b]`; fixing
-    them needs a grammar change (owner decision 20).
-  - Known limit of the `in` member lookahead: where it cannot tell code from a literal (above), such as a regular
-    expression after `)`, `}` or a keyword (`if (b) /\)/.test(b)`, `return /\)/`) or a template with `${` (also in
-    a type, ``in<T extends `x${string}`>()``) inside the parameters or type parameters, the member after the line
-    break is still `ERROR`, as it is at `e56ad86`. Fourteen inputs (both grammars, `tsc` accepts) parse at `e56ad86` only
-    after a line comment ended by U+2028 (`a⏎// c<U+2028>in(b = (() => { if (b) /\)/.test(b); })()) {}`), because it
-    reads the comment on to the next LF; the same inputs with an LF there are `ERROR` at `e56ad86`, and are here.
+  - Known differences recorded (owner decisions 20, 23 and 24): an input whose line break is a CR, U+2028, U+2029 or a
+    line-breaking block comment, that `tsc` accepts and that parsed at `e56ad86` only because the old scanner did not
+    see the break, now gives `ERROR` where its LF form already gives `ERROR` at `e56ad86` (the scanner cannot tell
+    these from inputs that must keep going); fixing them needs a grammar change, a candidate after v2.0.0.
+    - A class or type member named `in`, `instanceof`, or starting with them (`in1`, `in_`, `in$`), after a line break:
+      `class A { a⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`,
+      `interface I { a: string⏎in(): void }`. `tsc` reads a member; the LF form is `ERROR` at `e56ad86`, and so is every
+      other line-break form now. Only a field or method of this name after a line break is affected; the same
+      member after `;` or on one line is not.
+    - `import x from "m"<CR>with /* c */ { type: "json" };` (a comment between `with` and `{`), and the same after
+      U+2028, U+2029 or a line comment: the LF form is `ERROR` at `e56ad86`, so the comment is not skipped.
+    - `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line: the known
+      v1.1 gap in `known-failures.txt`) and `a as T⏎// c<U+2028>[b + c];` (a type takes no `[` after a line break).
+    - Counts, over the 5,938 inputs of the reviews and the oracle that contain a CR, U+2028, U+2029 or a line-breaking
+      block comment (both grammars; `tsc` accepts, `ERROR` here, `ERROR` for the LF form at `e56ad86`): 1,080, of which
+      `e56ad86` parses the input itself without error in 170 (a CR, U+2028 or U+2029 it did not see as a line break, or a
+      line comment it read past U+2028). By shape: `in`/`instanceof` member 952, `with` comment 24, `as T⏎[` 26,
+      interface `<B>(` 26, a comment between `}` and `:` of a typed object pattern 26 (`ERROR` at `e56ad86` also with a
+      same-line comment) and `for (using a⏎of b)` 26 (`ERROR` at `e56ad86` also with an LF).
   - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
     `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
     automatic semicolon after a Flow-style ambient module type annotation.

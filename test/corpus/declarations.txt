@@ -1611,18 +1611,12 @@ class A { accessor
         (number)))))
 
 ==========================================================
-Class and interface members split at a block comment line break or before in
+Class members split at a block comment line break
 ==========================================================
 
 class A {
   static accessor /*
   */ x = 1;
-  y
-  in = 1;
-}
-interface I {
-  a: string
-  in: number
 }
 
 ---
@@ -1636,38 +1630,16 @@ interface I {
       (comment)
       (public_field_definition
         name: (property_identifier)
-        value: (number))
-      (public_field_definition
-        name: (property_identifier))
-      (public_field_definition
-        name: (property_identifier)
-        value: (number))))
-  (interface_declaration
-    name: (type_identifier)
-    body: (interface_body
-      (property_signature
-        name: (property_identifier)
-        type: (type_annotation
-          (predefined_type)))
-      (property_signature
-        name: (property_identifier)
-        type: (type_annotation
-          (predefined_type))))))
+        value: (number)))))
 
 ==========================================================
-Class and interface members split at a block comment line break or before in (TSX)
+Class members split at a block comment line break (TSX)
 :language(tsx)
 ==========================================================
 
 class A {
   static accessor /*
   */ x = 1;
-  y
-  in = 1;
-}
-interface I {
-  a: string
-  in: number
 }
 
 ---
@@ -1681,143 +1653,4 @@ interface I {
       (comment)
       (public_field_definition
         name: (property_identifier)
-        value: (number))
-      (public_field_definition
-        name: (property_identifier))
-      (public_field_definition
-        name: (property_identifier)
-        value: (number))))
-  (interface_declaration
-    name: (type_identifier)
-    body: (interface_body
-      (property_signature
-        name: (property_identifier)
-        type: (type_annotation
-          (predefined_type)))
-      (property_signature
-        name: (property_identifier)
-        type: (type_annotation
-          (predefined_type))))))
-
-==========================================================
-Class and interface members named in after a line break or a line comment
-==========================================================
-
-class A {
-  a
-  in() {}
-  b
-  in1 = 1;
-  c
-  in /* x */ = 1;
-  d
-  // c in_ = 1;
-}
-interface I {
-  a: string
-  in(): void
-}
-
----
-
-(program
-  (class_declaration
-    name: (type_identifier)
-    body: (class_body
-      (public_field_definition
-        name: (property_identifier))
-      (method_definition
-        name: (property_identifier)
-        parameters: (formal_parameters)
-        body: (statement_block))
-      (public_field_definition
-        name: (property_identifier))
-      (public_field_definition
-        name: (property_identifier)
-        value: (number))
-      (public_field_definition
-        name: (property_identifier))
-      (public_field_definition
-        name: (property_identifier)
-        (comment)
-        value: (number))
-      (public_field_definition
-        name: (property_identifier))
-      (comment)
-      (public_field_definition
-        name: (property_identifier)
-        value: (number))))
-  (interface_declaration
-    name: (type_identifier)
-    body: (interface_body
-      (property_signature
-        name: (property_identifier)
-        type: (type_annotation
-          (predefined_type)))
-      (method_signature
-        name: (property_identifier)
-        parameters: (formal_parameters)
-        return_type: (type_annotation
-          (predefined_type))))))
-
-==========================================================
-Class and interface members named in after a line break or a line comment (TSX)
-:language(tsx)
-==========================================================
-
-class A {
-  a
-  in() {}
-  b
-  in1 = 1;
-  c
-  in /* x */ = 1;
-  d
-  // c in_ = 1;
-}
-interface I {
-  a: string
-  in(): void
-}
-
----
-
-(program
-  (class_declaration
-    name: (type_identifier)
-    body: (class_body
-      (public_field_definition
-        name: (property_identifier))
-      (method_definition
-        name: (property_identifier)
-        parameters: (formal_parameters)
-        body: (statement_block))
-      (public_field_definition
-        name: (property_identifier))
-      (public_field_definition
-        name: (property_identifier)
-        value: (number))
-      (public_field_definition
-        name: (property_identifier))
-      (public_field_definition
-        name: (property_identifier)
-        (comment)
-        value: (number))
-      (public_field_definition
-        name: (property_identifier))
-      (comment)
-      (public_field_definition
-        name: (property_identifier)
-        value: (number))))
-  (interface_declaration
-    name: (type_identifier)
-    body: (interface_body
-      (property_signature
-        name: (property_identifier)
-        type: (type_annotation
-          (predefined_type)))
-      (method_signature
-        name: (property_identifier)
-        parameters: (formal_parameters)
-        return_type: (type_annotation
-          (predefined_type))))))
+        value: (number)))))
