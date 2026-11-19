@@ -257,3 +257,45 @@
     these (`s1/neg-in-alone.*`, `s1/p112-variance-in-alone.*`) are re-registered with `errorAt` 7, `7-9:ERROR`.
   - Known difference: an empty type argument list (`f<>(x)`, `new C<>()`, `let x: A<>;`), which `tsc` also accepts
     with `--noCheck` (TS1099 is a checker error), still gives an error; it is not part of this release.
+- `f<typeof import('m')>(...)`: the type query `typeof import('m')` as the first type argument of a call is read as
+  type arguments, not as the binary expression `f < typeof import('m') > (...)` (for example
+  `importOriginal<typeof import('vscode')>()`, `f<typeof import('m')>(1, 2)`, `f<typeof import('m').x, string>()`).
+  Before, `f<typeof import('m')>()` and `f<typeof import('m')>;` had an `ERROR`, and with arguments the call was
+  silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
+  resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
+  so both readings stay alive and the one that fits the following tokens wins.
+  The type query call `import('m')` or `import('m', { with: ... })` (a string literal and an optional object, no trailing
+  comma: the hidden rule `_type_query_import_arguments`, aliased to `arguments`) also carries dynamic precedence 1: with
+  the tagged-template change merged, the plain call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the
+  comparison reading (which holds the call `import('m')`) tied with the call reading and won. The precedence is only on
+  that production, not on every type query call, and the argument is a string, as in tsc's import type:
+  ``sql<A, typeof f(x)>`text` `` (also `typeof obj.f(x)`, `typeof obj?.f(x)`), `f<typeof import('m', 'n')>(1)`,
+  `f<typeof import(...m)>(1)`, `f<typeof import(g(x))>(1)`, `f<typeof import('m' + suffix)>(1, 2)` and
+  `f<typeof import(x ? 'm' : 'n')>(1, 2)` stay comparisons, as for tsc (no error either way, only the tree differs).
+  `f<typeof import('vscode', { with: { 'resolution-mode': 'import' } })>(1, 2)` is a call, as for tsc.
+  - Node kinds and fields added: none. Child types added: `arguments` lists `object` and `string` among its children in
+    `node-types.json` (both grammars; no kind or field is added, removed or renamed, and `test/node-kinds` is unchanged).
+  - Error-free tree changes: 36 of the 17,665 files of the pinned example repositories change their (error-free) tree,
+    all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
+    (`importAMDNodeModule<typeof import('jschardet')>('jschardet', 'dist/jschardet.min.js')`): the base tree is a chain
+    of `binary_expression` (comparison, comparison, a `sequence_expression` of the arguments); the new tree is a
+    `call_expression` with `type_arguments` (a `type_query`) and `arguments`, which is what tsc builds. Regression
+    input kept: `f<typeof import('vscode')>(1, 2);` in `test/corpus/types.txt`. Queries: `highlights.scm` gains the
+    `type_arguments` brackets, and the JavaScript `highlights.scm` and `tags.scm` call patterns now match these calls;
+    no query pattern loses a match.
+  - `test/examples/known-failures.txt`: 15 entries cleared (`v1.1: typeof import(...) type query as a type argument`),
+    14 left. One of the 15, `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`,
+    also uses `import('vscode').ChatResultUsage[]` (line 211) and needed the `import(...)` followed by `[]` change,
+    which is already in main; it parses and is no longer listed.
+  - Remaining differences from tsc: an import type argument other than a string literal (`f<typeof import(m)>(1, 2)`,
+    `import({ a: 'm' })`, `import(42)` and similar) is a call for tsc and a comparison chain here, as at the base;
+    ``sql<typeof import('m')>`text` `` (one type argument) is a comparison here and at the base, a tagged template for
+    tsc; `f<typeof import('m',)>(1, 2)` (TS1005) and `f<typeof import()>(1)` (TS1110) are comparisons without an error,
+    as at the base. New with this change: the second argument is any `object`, so `f<typeof import('m', { x: 1 })>(1, 2)`
+    (a comparison for tsc, which wants `{ with: ... }`) and `f<typeof import('m', {})>(1, 2)` (TS1005) are calls without
+    an error here, comparisons at the base.
+  - `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) keeps its base tree, nested
+    `binary_expression`s: the comparison reading wins there, so this change leaves it alone.
+  - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
+    `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
+  - Ours, no upstream pull request.
