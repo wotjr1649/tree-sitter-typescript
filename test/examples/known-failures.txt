@@ -1,7 +1,6 @@
 # Files in the pinned examples (repos.txt) that the grammar fails to parse, with the unsupported construct.
 # Format: path<TAB>construct. The list may only shrink: CI fails on a new failure and on a listed file that parses.
 # A pull request that adds a path fails CI unless it also changes repos.txt (check-known-failures-shrink.sh).
-examples/desktop/app/test/unit/ui/structural-and-text-components-test.tsx	v1.1: & followed by a letter in a JSX attribute string, e.g. text="E&xit"
 examples/redux/src/types/store.ts	v1.1: interface call signature starting with < on the line after a member without ;
 examples/vscode/.eslint-plugin-local/tests/code-translation-remind.test.ts	v1.1: \u not followed by hex digits in a template literal, e.g. String.raw`C:\unregistered`
 examples/vscode/extensions/copilot/src/extension/byok/vscode-node/test/geminiNativeProvider.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()

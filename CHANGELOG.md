@@ -149,6 +149,30 @@
     `465aa162d077093dc5ad4f46a9463bde6274425e` (grammar hunk and corpus test taken unchanged). Keeping `out` usable
     as a type parameter name (`alias('out', $.type_identifier)` in `name`) is ours; with #364 alone those inputs
     become errors.
+- In the `tsx` grammar, a `&` in a JSX attribute string that does not start a complete character reference parses
+  without error: `<A text="E&xit" />`, `'E&xit'`, `"&#"`, `"&#65"`, `"&ab;cd&ef"`, and a `&` right before the closing
+  quote (`"a&"`, `'a&'`). `tsc` 7.0.2 accepts all of these. Before, `&` followed by `#` or an ASCII letter had to start
+  an `html_character_reference`, so `"E&xit"` gave `(string (string_fragment) (ERROR (identifier)))`; and a `&` before
+  the closing quote took the quote into the `string_fragment`, so the string ran on to the next quote. A complete
+  reference (the shapes the existing `html_character_reference` token accepts: an ASCII name of 1-30 letters, `&#` and
+  1-5 ASCII digits, `&#x` or `&#X` and 1-6 ASCII hex digits, then `;`) is still an `html_character_reference`; a `&`
+  that starts an incomplete reference is now its own `string_fragment` (`"E&xit"` gives three: `E`, `&`, `xit`). The
+  JSX text rules and the `typescript` grammar are unchanged (its generated `parser.c` and both `node-types.json` are byte-identical).
+  - Node kinds and fields added: none.
+  - Error-free tree changes: two kinds of input that parsed without error before this change.
+    - Now an error, as intended: a `&` before the closing quote of one attribute string followed by an unterminated
+      string, for example `<A t="a&" b="/>;` (before: one string `"a&" b="`; `tsc` reports TS1002, unterminated
+      string literal).
+    - Still error-free, but the tree is corrected (the same swallowed-attribute defect on valid input):
+      `<A t="&" b="/>//"/>;` and `<A t='&' b='/>// '/>;`. Before, the string of `t` swallowed `" b="` (it ran from
+      its opening quote to the quote opening `b`'s value), the element closed at the first `/>` (bytes 12-14) and the
+      rest was a `comment`. Now `t="&"` and `b="/>//"` are two `jsx_attribute` nodes and the element closes at the
+      later `/>` (bytes 17-19; 18-20 in the single-quoted input). Schema: no change. Queries: the JSX `@attribute`
+      capture gains `b`, the `@comment` range of the old tree is gone, `@string` follows the two string nodes. `tsc`
+      7.0.2 accepts both inputs; both are oracle accept cases (`n3/attr-swallow-regression-double.tsx`,
+      `n3/attr-swallow-regression-single.tsx`).
+  - `test/examples/known-failures.txt`: `examples/desktop/app/test/unit/ui/structural-and-text-components-test.tsx`
+    cleared (`text="E&xit"`).
 - An `import(...)` type followed by `[]` or an index parses without error in both grammars: `import('x').Y[]`,
   `import('x').Y['k']`, `import('x')['k']`, `import('x')[]`, `import('x').Y<T>[]`, and the same types as operands of
   `readonly`, `keyof`, `?` in a tuple, a conditional type and so on (tsc accepts all of them). Before, the `[...]`
