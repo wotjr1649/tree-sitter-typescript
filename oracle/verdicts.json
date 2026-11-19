@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "0ef2012b60a2c5e2223fb400a4b385774ea4eca310f5364e2625443d93d7e5d8",
+  "cases_sha256": "4985a7f0d48379fb17a597c0ffba7022d1f9b315779d5f6fe4953792207e37b6",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -1663,6 +1663,72 @@
    "verdict": "accept",
    "codes": [],
    "at": null
+  },
+  {
+   "id": "s4/neg-targs-after-call-in-chain.ts",
+   "sha256": "c83dc6b5c091f7200ae2215faccffeb88bf06ba4cd03c5b5e4ffbd4fb4b53f3c",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 22
+  },
+  {
+   "id": "s4/neg-targs-after-call-in-chain.tsx",
+   "sha256": "c83dc6b5c091f7200ae2215faccffeb88bf06ba4cd03c5b5e4ffbd4fb4b53f3c",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 22
+  },
+  {
+   "id": "s4/neg-targs-after-member-call-in-chain.ts",
+   "sha256": "03cd56bcdf3e2962c36583da1d46f4a473b7564c6c36ea9e89175fd8ae3b4c85",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 24
+  },
+  {
+   "id": "s4/neg-targs-after-member-call-in-chain.tsx",
+   "sha256": "03cd56bcdf3e2962c36583da1d46f4a473b7564c6c36ea9e89175fd8ae3b4c85",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1109
+   ],
+   "at": 24
+  },
+  {
+   "id": "s4/neg-targs-on-bare-import.ts",
+   "sha256": "cec2b526a0f8f11d60faeca508fd5630e8096f8e8f3c453ef505400582b44f4e",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1005
+   ],
+   "at": 15
+  },
+  {
+   "id": "s4/neg-targs-on-bare-import.tsx",
+   "sha256": "cec2b526a0f8f11d60faeca508fd5630e8096f8e8f3c453ef505400582b44f4e",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1005
+   ],
+   "at": 15
   }
  ]
 }

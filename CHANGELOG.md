@@ -51,4 +51,8 @@
     `object` of a member and the `function` of a call, so it accepted `import('m').A<string>.B`,
     `import('m').A<string>.B<number>`, `import('m').A<string>()` and `import('m').A<string>().B<number>`. We put the
     type arguments in a separate rule used only for the outermost member (aliased to the same `member_expression`) and
-    drop #365's conflict entry, which is then unnecessary. Trees of the inputs #365 fixes are unchanged.
+    drop #365's conflict entry. That rule first wrapped the whole member rule, whose `object` can be a call or a bare
+    `import`, so `import('m').A().B<string>`, `import('m').A.B().C<string>` and `import.A<string>` (tsc rejects all
+    three) parsed clean. The type arguments now go only on a dot chain that starts at `import(...)`, with no call in
+    between and no bare `import`: the member and call rules are split into that chain and the rest (hidden rules, same
+    aliases; each of the two conflict entries for the member and call rules is split in two). Trees of the inputs #365 fixes are unchanged.
