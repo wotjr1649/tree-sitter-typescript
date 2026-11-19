@@ -85,8 +85,13 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
 
-      [$._call_signature, $.function_type],
-      [$._call_signature, $.constructor_type],
+      ...(dialect === 'typescript' ? [
+        [$._call_signature, $.function_type],
+        [$._call_signature, $.constructor_type],
+      ] : [
+        [$._arrow_call_signature, $.function_type],
+        [$._arrow_call_signature, $.constructor_type],
+      ]),
 
       [$.primary_expression, $._parameter_name],
       [$.primary_expression, $._parameter_name, $.primary_type],
@@ -118,7 +123,9 @@ module.exports = function defineGrammar(dialect) {
       dialect === 'typescript' ? [
         [$.primary_type, $.type_parameter],
       ] : [
-        [$.jsx_opening_element, $.type_parameter],
+        [$.jsx_opening_element, $._arrow_type_parameter],
+        [$.jsx_opening_element, $.type_parameter, $._arrow_type_parameter],
+        [$.type_parameter, $._arrow_type_parameter],
         [$.jsx_namespace_name, $.primary_type],
       ],
     ),
@@ -1065,10 +1072,57 @@ module.exports = function defineGrammar(dialect) {
 
       type_parameter: $ => seq(
         optional('const'),
-        field('name', $._type_identifier),
+        optional(choice('in', seq(optional('in'), 'out'))),
+        // `out` is contextual: `type A<out> = out` names a type parameter `out` (tsc accepts it).
+        field('name', choice($._type_identifier, alias('out', $.type_identifier))),
         field('constraint', optional($.constraint)),
         field('value', optional($.default_type)),
       ),
+
+      // tsx only. tsc reads `<in` and `<out` after an expression-start `<` as a JSX tag name and rejects a
+      // variance modifier on the first type parameter of an arrow function, so that one takes none; `in` and `out`
+      // stay plain names and tags, as before variance annotations existed. Later parameters (`<T, in U>`) are
+      // unambiguous and keep them.
+      ...(dialect === 'tsx' ? {
+        arrow_function: $ => seq(
+          optional('async'),
+          choice(
+            field('parameter', choice(
+              alias($._reserved_identifier, $.identifier),
+              $.identifier,
+            )),
+            $._arrow_call_signature,
+          ),
+          '=>',
+          field('body', choice(
+            $.expression,
+            $.statement_block,
+          )),
+        ),
+
+        _arrow_call_signature: $ => seq(
+          field('type_parameters', optional(alias($._arrow_type_parameters, $.type_parameters))),
+          field('parameters', $.formal_parameters),
+          field('return_type', optional(
+            choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+          )),
+        ),
+
+        _arrow_type_parameters: $ => seq(
+          '<',
+          alias($._arrow_type_parameter, $.type_parameter),
+          repeat(seq(',', $.type_parameter)),
+          optional(','),
+          '>',
+        ),
+
+        _arrow_type_parameter: $ => seq(
+          optional('const'),
+          field('name', $._type_identifier),
+          field('constraint', optional($.constraint)),
+          field('value', optional($.default_type)),
+        ),
+      } : {}),
 
       default_type: $ => seq(
         '=',
