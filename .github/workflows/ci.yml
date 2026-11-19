@@ -111,7 +111,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.23"
-          cache-dependency-path: oracle/replay/go.sum
+          # The Go bindings #include parser.c from outside their package, which Go's build cache does not track:
+          # a restored cache links the parser of an earlier run.
+          cache: false
       - name: Install tsc
         working-directory: oracle
         run: npm ci --ignore-scripts
