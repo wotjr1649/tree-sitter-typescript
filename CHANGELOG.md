@@ -312,13 +312,21 @@
   `}:` object-pattern guard it has on one line (`type F = ({ a⏎}: { a: number }) => number;` keeps its object
   pattern), and `with` followed by `{` after a line break is not preceded by a semicolon (`import x from "x"⏎with {
   type: "json" };`; a `with` statement always has `(`, and a comment between `with` and `{` is not skipped, as for LF).
-  `tsc` 7.0.2 accepts all these inputs. The paths this change adds (line terminators, the `}` guard, `with`) classify
-  white space and word characters by code point (the grammar's extras; U+0085 is an identifier character there, as in
-  the lexer), not through the C library; the `in`/`instanceof` path is the one of `e56ad86`. Each call scans at most one block
-  comment that holds no line terminator, so a run of N such comments (`x/*c*/…;`, or adjacent comments that hold a
-  line terminator) costs O(N), not O(N²). A run of comments that each start on a line after a line break
-  (`x⏎/*c*/⏎/*c*/…;`) is still rescanned per comment, as at the base (N=4/8/16/32: 20/72/272/1056 slash skips in
-  base and now).
+  `tsc` 7.0.2 accepts all these inputs. The paths this change adds (line terminators, the `}` guard, `with`) and the
+  existing same-line `}` check classify white space and word characters by code point (the grammar's extras; U+0085 is
+  an identifier character there, as in the lexer), not through the C library (`iswspace()` at `e56ad86`); the
+  `in`/`instanceof` path is the one of `e56ad86`. The same-line `}` check changes with no line break at all (owner
+  decision 26): `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same with U+200B, which `tsc` accepts,
+  were `ERROR` at `e56ad86` and now keep their object pattern; with U+2060, which `tsc` rejects (TS1127), the input
+  now parses too, the leniency `e56ad86` already has for `type F = ({}<U+2060>: {}) => number;` (owner decision 10).
+  Comment scanning in one call: a block comment that holds no line terminator and comes before any line break is left
+  to the lexer at once, and so is a second comment that holds one. After a first comment that holds a line terminator,
+  the comments without one that follow are all read in the same call, up to the next token or the second
+  line-breaking comment: one call over `x/*⏎*/` + N × `/*c*/` + `y;` skips 10/18/34/66 slashes for N=4/8/16/32
+  (`e56ad86`: none). That is the cost of one call, not of the whole parse. Over a whole parse a run of N comments
+  without a line terminator (`x/*c*/…;`), or of adjacent comments that hold one, costs O(N), not O(N²). A run of
+  comments that each start on a line after a line break (`x⏎/*c*/⏎/*c*/…;`) is still rescanned per comment, as at the
+  base (N=4/8/16/32: 20/72/272/1056 slash skips in base and now).
   - Node kinds and fields added: none (no generated file changes).
   - Error-free tree changes. An input whose line break has one of these forms now gets the tree the same input gets
     with LF; queries follow the trees. Where that tree differs from the old one (`⏎` here is a block comment holding a
@@ -381,6 +389,9 @@
       line comment it read past U+2028). By shape: `in`/`instanceof` member 952, `with` comment 24, `as T⏎[` 26,
       interface `<B>(` 26, a comment between `}` and `:` of a typed object pattern 26 (`ERROR` at `e56ad86` also with a
       same-line comment) and `for (using a⏎of b)` 26 (`ERROR` at `e56ad86` also with an LF).
-  - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
-    `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
-    automatic semicolon after a Flow-style ambient module type annotation.
+  - Known leniency (inputs `tsc` rejects that now parse, each the same defect `e56ad86` already has for the LF form or,
+    for the U+2060 case, for the empty pattern): `yield` then `*x` on the next line, a ternary after `/?` that loses its
+    `/` (also on one line: `a /? b : c;`, as `e56ad86` reads `a⏎/? b : c;`), a missing required `;` in a `for` header,
+    an automatic semicolon after a Flow-style ambient module type annotation, `with /* c */ (y) {}` after a lone CR, a
+    `for`-`in` whose right side holds `<div>{else}</div>` (`for (var x⏎// c<U+2028>in (<div>{else}</div>)) {}`), and
+    `type F = ({ a }<U+2060>: { a: number }) => number;`.
