@@ -42,9 +42,29 @@ static bool scan_template_chars(TSLexer *lexer) {
     }
 }
 
+// ECMAScript LineTerminator by code point: iswspace() of U+2028/U+2029 depends on the C library and locale.
+static bool is_line_terminator(int32_t c) { return c == '\n' || c == '\r' || c == 0x2028 || c == 0x2029; }
+
+// Skips a block comment after its `/*`; true when it is closed. Sets *line_break when it holds a line terminator.
+static bool skip_block_comment(TSLexer *lexer, bool *line_break) {
+    while (lexer->lookahead != 0) {
+        if (lexer->lookahead == '*') {
+            skip(lexer);
+            if (lexer->lookahead == '/') {
+                skip(lexer);
+                return true;
+            }
+        } else {
+            *line_break |= is_line_terminator(lexer->lookahead);
+            skip(lexer);
+        }
+    }
+    return false;
+}
+
 static bool scan_whitespace_and_comments(TSLexer *lexer, bool *scanned_comment) {
     for (;;) {
-        while (iswspace(lexer->lookahead)) {
+        while (iswspace(lexer->lookahead) || is_line_terminator(lexer->lookahead)) {
             skip(lexer);
         }
 
@@ -53,25 +73,15 @@ static bool scan_whitespace_and_comments(TSLexer *lexer, bool *scanned_comment) 
 
             if (lexer->lookahead == '/') {
                 skip(lexer);
-                while (lexer->lookahead != 0 && lexer->lookahead != '\n') {
+                while (lexer->lookahead != 0 && !is_line_terminator(lexer->lookahead)) {
                     skip(lexer);
                 }
                 *scanned_comment = true;
             } else if (lexer->lookahead == '*') {
                 skip(lexer);
-                while (lexer->lookahead != 0) {
-                    if (lexer->lookahead == '*') {
-                        skip(lexer);
-                        if (lexer->lookahead == '/') {
-                            skip(lexer);
-                            // As tree-sitter-javascript e7d9759: else the ternary `?` fallback swallows this comment.
-                            *scanned_comment = true;
-                            break;
-                        }
-                    } else {
-                        skip(lexer);
-                    }
-                }
+                bool line_break = false;
+                // As tree-sitter-javascript e7d9759: else the ternary `?` fallback swallows this comment.
+                *scanned_comment |= skip_block_comment(lexer, &line_break);
             } else {
                 return false;
             }
@@ -81,15 +91,44 @@ static bool scan_whitespace_and_comments(TSLexer *lexer, bool *scanned_comment) 
     }
 }
 
+// After a line break, `in` or `instanceof` names the next class or type member (as in tsc) when no binary operator may
+// follow and the next character can only follow a member name; `for (var x⏎in y)` keeps its `in`.
+static bool keyword_starts_member(TSLexer *lexer, const bool *valid_symbols) {
+    if (valid_symbols[LOGICAL_OR]) {
+        return false;
+    }
+    while (iswspace(lexer->lookahead) && !is_line_terminator(lexer->lookahead)) {
+        skip(lexer);
+    }
+    switch (lexer->lookahead) {
+        case 0:
+        case '=':
+        case ':':
+        case '?':
+        case ';':
+        case '}':
+            return true;
+        default:
+            return false;
+    }
+}
+
 static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, bool *scanned_comment) {
     lexer->result_symbol = AUTOMATIC_SEMICOLON;
     lexer->mark_end(lexer);
 
+    // A block comment holding a line terminator counts as one, as in tsc. After any comment, a later line
+    // terminator, `}` or end of input is left to the next call, made once the lexer has read the comment, as before.
+    bool comment = false;
+    bool comment_line_break = false;
     for (;;) {
         if (lexer->lookahead == 0) {
-            return true;
+            return !comment;
         }
         if (lexer->lookahead == '}') {
+            if (comment) {
+                return false;
+            }
             // Automatic semicolon insertion breaks detection of object patterns
             // in a typed context:
             //   type F = ({a}: {a: number}) => number;
@@ -102,16 +141,34 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             }
             return true;
         }
-        if (!iswspace(lexer->lookahead)) {
-            return false;
+        if (lexer->lookahead == '/') {
+            skip(lexer);
+            if (lexer->lookahead != '*') {
+                return false;
+            }
+            skip(lexer);
+            *scanned_comment = true;
+            if (!skip_block_comment(lexer, &comment_line_break)) {
+                return false;
+            }
+            comment = true;
+            continue;
         }
-        if (lexer->lookahead == '\n') {
+        if (is_line_terminator(lexer->lookahead)) {
+            if (comment) {
+                return false;
+            }
+            skip(lexer);
             break;
+        }
+        if (!iswspace(lexer->lookahead)) {
+            if (comment_line_break) {
+                break;
+            }
+            return false;
         }
         skip(lexer);
     }
-
-    skip(lexer);
 
     if (!scan_whitespace_and_comments(lexer, scanned_comment)) {
         return false;
@@ -175,7 +232,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             skip(lexer);
 
             if (!iswalpha(lexer->lookahead)) {
-                return false;
+                return keyword_starts_member(lexer, valid_symbols);
             }
 
             for (unsigned i = 0; i < 8; i++) {
@@ -186,7 +243,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             }
 
             if (!iswalpha(lexer->lookahead)) {
-                return false;
+                return keyword_starts_member(lexer, valid_symbols);
             }
             break;
     }

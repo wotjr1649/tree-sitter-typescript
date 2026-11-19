@@ -1467,3 +1467,92 @@ class Bar extends Foo {
         name: (property_identifier)
         parameters: (formal_parameters)
         body: (statement_block)))))
+
+==========================================================
+Class and interface members split at a block comment line break or before in
+==========================================================
+
+class A {
+  static accessor /*
+  */ x = 1;
+  y
+  in = 1;
+}
+interface I {
+  a: string
+  in: number
+}
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (public_field_definition
+        name: (property_identifier))
+      (comment)
+      (public_field_definition
+        name: (property_identifier)
+        value: (number))
+      (public_field_definition
+        name: (property_identifier))
+      (public_field_definition
+        name: (property_identifier)
+        value: (number))))
+  (interface_declaration
+    name: (type_identifier)
+    body: (interface_body
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type)))
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type))))))
+
+==========================================================
+Class and interface members split at a block comment line break or before in (TSX)
+:language(tsx)
+==========================================================
+
+class A {
+  static accessor /*
+  */ x = 1;
+  y
+  in = 1;
+}
+interface I {
+  a: string
+  in: number
+}
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (public_field_definition
+        name: (property_identifier))
+      (comment)
+      (public_field_definition
+        name: (property_identifier)
+        value: (number))
+      (public_field_definition
+        name: (property_identifier))
+      (public_field_definition
+        name: (property_identifier)
+        value: (number))))
+  (interface_declaration
+    name: (type_identifier)
+    body: (interface_body
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type)))
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type))))))

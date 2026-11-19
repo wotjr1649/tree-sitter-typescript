@@ -25,3 +25,28 @@
     `examples/vscode/src/vs/platform/userDataSync/common/abstractSynchronizer.ts` (line 575), and it gains one
     `comment` node. Queries: `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
   - `test/examples/known-failures.txt`: no entry cleared (the affected inputs had no error before).
+- Automatic semicolon insertion treats every ECMAScript line terminator as a line break, in both grammars, as `tsc`
+  does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
+  scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or
+  `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
+  not count as a line break either. Also, after a line break, `in` or `instanceof` followed by `=`, `:`, `?`, `;` or
+  `}` where no binary operator may follow now starts the next class or type member (`class A { x⏎in = 1; }`,
+  `interface I { a: string⏎in: number }`) instead of giving `ERROR`; `a⏎in b` and `for (var x⏎in y)` are unchanged.
+  `tsc` 7.0.2 accepts all these inputs.
+  - Node kinds and fields added: none (no generated file changes).
+  - Error-free tree changes: an input whose line break has one of these forms now gets the tree the same input gets
+    with LF. Where that tree differs from the old one: `return`, `break`, `continue`, `readonly`, `async` (class
+    member), `type` and `declare` followed by such a line break end there (`return;` then `x;`, as `tsc` reads them;
+    before, `return /*⏎*/ x` returned `x`). `static`, `get` and `set` followed by such a line break now also give two
+    members, like the LF form; `tsc` reads one member there (see the known difference below). A
+    block comment holding the line break now follows the inserted semicolon (a sibling of the statement or member)
+    instead of sitting inside it. Queries follow these trees (for example `@keyword` -> `@property` for `static`, and
+    in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`). None of the 17,665 pinned example files
+    changes its tree.
+  - `test/examples/known-failures.txt`: no entry cleared.
+  - Known difference kept: `static`, `get` or `set` followed by a line break (any form, LF included) and a member name
+    gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
+    or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
+    after v2.0.0.
+  - Known difference kept: `in()` or `in<T>()` as a method name after a line break still gives `ERROR` (the scanner
+    cannot tell it from `for (var x⏎in (y))`).
