@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2026-11-19
+
+<!-- Release PR: set the date to the day the PR is opened. N1, N1b, N4, N5 and N7 are not merged yet: the sentences
+     below that name them, and their entries, follow when they merge; re-check every list against the final main. -->
+
+The first release that changes how the grammars parse. 1.0.0 is the upstream `tree-sitter/tree-sitter-typescript`
+v0.23.2 grammar regenerated with tree-sitter CLI 0.27.2 (ABI 15) and behaves the same; this repository continues from
+it as an independent repository (ADR-0001). 2.0.0 contains the fixes S1-S6, N1-N5, N1b and N7 (one change per defect
+class, each checked against `typescript` 7.0.2 `tsc` in the oracle, whose committed cases have no mismatch with tsc).
+Breaking: the tree of some input that parsed without error at 1.0.0 is different now (tagged templates with type
+arguments, `accessor` followed by a line break, a block comment before a ternary `?`, a `&` before the closing quote of
+a TSX attribute string, `f<typeof import('m')>(x)`, line breaks other than LF in automatic semicolon insertion), and
+some invalid inputs that were accepted are errors now (`type D<in> = number;`, `<A t="a&" b="/>;` in TSX,
+`a⏎/* c */ +? b : c;`); no node kind or field is removed or renamed. Schema additions: a `type_arguments` child of
+`member_expression`, the anonymous node `out`, `type_parameters` children no longer required. See
+[docs/migrating-from-1.0.md](docs/migrating-from-1.0.md).
 
 ### Fixed
 
