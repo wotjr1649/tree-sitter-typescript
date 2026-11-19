@@ -56,3 +56,18 @@
     three) parsed clean. The type arguments now go only on a dot chain that starts at `import(...)`, with no call in
     between and no bare `import`: the member and call rules are split into that chain and the rest (hidden rules, same
     aliases; each of the two conflict entries for the member and call rules is split in two). Trees of the inputs #365 fixes are unchanged.
+  - Known differences from tsc (not fixed here): ten inputs that tsc 7.0.2 rejects parse clean in both grammars with this
+    change (error at the base). In each case the same defect without type arguments after `import(...)` was already
+    accepted at the base (`3061888`, both grammars, tsc rejects it), so this change extends existing leniency to the new
+    type-arguments path and adds no new kind of leniency:
+    - `import(...)` with invalid arguments followed by a member and type arguments: `type T = import().A<string>;`
+      (TS1110), `import('m' + '/sub').A<string>`, `import('m', opts).A<string>`, `import('m', {}, {}).A<string>`,
+      `import(getModule()).A<string>`, `import('m', { wrong: {} }).A<string>`, `import('m',).A<string>` (TS1005) and
+      `import(...args).A<string>` (TS1110). Base accepts `type T = import().A;`, `import('m' + '/sub').A`, and the same
+      six other argument forms without `<string>`.
+    - `let x: import('m').A.B` and, on the next line, `<string>;`: tsc reports TS1109 (typescript) and TS17008
+      (tsx), because type arguments cannot follow a line break; the grammar attaches `<string>` to the type. Base
+      accepts `let x: Foo` + line break + `<string>;` and `let x: a.B` + line break + `<string>;`.
+    - `type T = import('m').A<typeof import('n').B().C<string>>;` (TS1005): the call inside the nested `typeof` path.
+      Base accepts `type T = typeof import('n').B().C<string>;` and `type T = X<typeof import('n').B().C<string>>;`.
+    These stay open for a later change.
