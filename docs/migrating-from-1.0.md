@@ -36,7 +36,7 @@ Nothing removed, nothing renamed. Added or relaxed, in both grammars unless note
 | the `primary_type` supertype lists `call_expression` and `member_expression` as subtypes | N1, #13 | `import('x').Y[]`; trees change only for an index after `as`/`satisfies` (below) |
 | `arguments` lists `object` and `string` among its children | N1b, #14 | `typeof import('m', { with: ... })` in a type query (hidden `_type_query_import_arguments`, aliased to `arguments`) |
 
-No new node kind, no new field name. `test/node-kinds/{typescript,tsx}.txt` (the snapshot) gains the line `"out"`
+No new named node kind, no new field name. `test/node-kinds/{typescript,tsx}.txt` (the snapshot) gains the line `"out"`
 (S1) and nothing else.
 
 ## Trees that change for previously error-free input
@@ -57,11 +57,11 @@ both grammars; the 112 existing corpus inputs do not.
 | ``f<A, B>`x` `` | `sequence_expression` of two comparisons | `call_expression` with two type arguments |
 | ``f<Array<T>>`x` `` | three nested comparisons | `call_expression` with a `generic_type` argument |
 | ``a<b>`x`.y`` | comparison with `member_expression(template_string)` | `member_expression(object: call_expression)` |
-| ``f<T>`x``y` `` | comparison with `call_expression(template, template)` | `call_expression(call_expression(f<T>`x`), template)` |
+| ```f<T>`x``y` ``` | comparison with `call_expression(template, template)` | ``call_expression(call_expression(f<T>`x`), template)`` |
 | ``await sql<T>`x` `` | `await_expression` inside a comparison | `await_expression(call_expression)` |
 | ``a + b<c>`x` ``, ``a * b<c>`x` `` | operator inside a comparison | `binary_expression(a, call_expression)` |
 | ``typeof``/``void``/``delete``/``!``/``-``/``++`` before ``a<b>`x` `` | unary or update inside a comparison | `unary_expression`/`update_expression` around `call_expression` |
-| ``new Foo<T>`x` `` | `call_expression(new_expression(Foo<T>), template)` | `new_expression(constructor: call_expression(Foo<T>`x`))` |
+| ``new Foo<T>`x` `` | `call_expression(new_expression(Foo<T>), template)` | ``new_expression(constructor: call_expression(Foo<T>`x`))`` |
 
 Object, array, tuple and function type arguments (``sql<{ a: string }>`select` ``, ``f<T[]>`x` ``) were `ERROR`s and
 now parse (error to ok). `f<T>(x)`, `a < b > c`, `a?.b<T>(c)` and `c ? f<R<S>>(d) : e` keep their trees. Queries: the
