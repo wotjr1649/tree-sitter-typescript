@@ -398,9 +398,10 @@ static bool keyword_starts_member(TSLexer *lexer, const bool *valid_symbols) {
     }
 }
 
-// ECMAScript ReservedWord (tsc's keywords up to LastReservedWord): after `let` and a line break, tsc reads any other
-// word as the binding (`let⏎x = 1`, also `let⏎yield`, `let⏎let`) and one of these as a new statement. `as` and
-// `satisfies` are here too: tsc takes them as the binding, but the grammar cannot (`let as = 1;` errors on one line).
+// The words tsc --noCheck rejects as a binding after `let` and a line break (its keywords up to LastReservedWord):
+// tsc reads one of these as a new statement and any other word as the binding (`let⏎x = 1`, also `let⏎yield`,
+// `let⏎let`). Plus `as` and `satisfies`, kept for compatibility: tsc takes them as the binding, but the grammar
+// cannot (`let as = 1;` errors on one line).
 static const char *const reserved_words[] = {
     "break", "case",   "catch",  "class",      "const", "continue", "debugger", "default", "delete",
     "do",    "else",   "enum",   "export",     "extends", "false",  "finally",  "for",     "function",
@@ -546,7 +547,9 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             return false;
 
         case '{':
-            if (valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON]) {
+            // After `let`, `{` starts an object pattern (`let⏎{ x } = obj`), as tsc reads it.
+            if (valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON] ||
+                (valid_symbols[LEXICAL_DECLARATION_BINDING] && !valid_symbols[ERROR_RECOVERY])) {
                 return false;
             }
             break;

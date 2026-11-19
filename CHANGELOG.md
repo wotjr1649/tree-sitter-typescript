@@ -389,15 +389,22 @@
   on any non-ASCII character that is not in the grammar's extras (the grammar's own identifier characters), as already
   in class and type members (above). `a⏎in b`, `a⏎instanceof B`, `for (var x⏎in y)` and `let⏎in b` are unchanged. `tsc`
   7.0.2 accepts all these inputs.
-  - After `let` and a line break (LF, CR, CRLF, U+2028, U+2029, or a block comment holding one), a word that is not an
-    ECMAScript reserved word continues the declaration, in both grammars, as `tsc` and the specification read it:
-    `let⏎ordinary: number[] = [];`, `let⏎ordinary!: number;`, `let⏎ordinary: Record<string, number> = {};`, `let⏎await`
-    and `async function g() { let⏎await }` gave `ERROR` (`let` then a label or an `await`), and `let⏎x = 1;`, `let⏎x,
-    y;` gave two statements (below). The scanner reads the word and inserts no semicolon unless it is a reserved word
-    (`break` ... `with`, tsc's list) or `as` / `satisfies` (which `tsc` takes as the binding but the grammar cannot:
-    `let as = 1;` errors on one line). A reserved word reads as before: `let⏎if (x) {}`, `let⏎return` and `let⏎enum E
-    {}` start a statement, `let⏎in b` and `let⏎instanceof C` are binary expressions. `let⏎(x)` and `let⏎[a] = b` are
-    unchanged, and so is `const` (`const⏎x = 1;` was one declaration already). For this, `lexical_declaration` takes an
+  - After `let` and a line break (LF, CR, CRLF, U+2028, U+2029, or a block comment holding one), a word that is not
+    reserved, or `{` (an object pattern), continues the declaration, in both grammars, as `tsc` and the specification
+    read it: `let⏎ordinary: number[] = [];`, `let⏎ordinary!: number;`, `let⏎ordinary: Record<string, number> = {};`,
+    `let⏎await` and `async function g() { let⏎await }` gave `ERROR` (`let` then a label or an `await`), and `let⏎x =
+    1;`, `let⏎x, y;` gave two statements (below). `let⏎{ x } = obj;`, `let⏎{ x }: { x: number } = obj;`, `let⏎{ x } =
+    o, y = 1;` and `let // c⏎{ x } = obj;`, also in a function, a block, a `case`, after `if (a)` or a label, gave
+    `ERROR` (`let;`, a block, then `=`): with LF or CRLF already at `e56ad86`, and with CR, U+2028, U+2029 or a block
+    comment holding a line break since N5 (above; `e56ad86` read those as one line). The scanner reads the word and
+    inserts no semicolon unless it is a reserved word: the words `tsc --noCheck` rejects as a binding here (`break` ...
+    `with`, its keywords up to `LastReservedWord`), plus `as` and `satisfies`, kept for compatibility (`tsc` takes them
+    as the binding, but the grammar cannot: `let as = 1;` errors on one line). A reserved word reads as before:
+    `let⏎if (x) {}`, `let⏎return` and `let⏎enum E {}` start a statement, `let⏎in b` and `let⏎instanceof C` are binary
+    expressions. Before `{` it inserts no semicolon either. `let⏎(x)` and `let⏎[a] = b` are unchanged, and so is
+    `const` (`const⏎x = 1;` and `const⏎{ x } = obj;` were one declaration already). Where `let` is only an
+    expression, a block after it stays a block: `x = let⏎{}`, `function f() { return let⏎{} }`; so do `let;⏎{ x }`
+    and `let:⏎{}`. For this, `lexical_declaration` takes an
     optional hidden external token `_lexical_declaration_binding` after its `let` or `const`; the scanner never produces
     it, its validity only tells the scanner that it stands right after `let`, where `let` alone could also end a
     statement (not during error recovery, where every token is valid).
@@ -415,6 +422,14 @@
     - `function* g() { let⏎yield }`: `let;` then a `yield_expression`, now `let yield` (`tsc` does the same; the binding
       `yield` in a generator is the binder's error, which `--noCheck` drops). `yield`: `@keyword` -> `@variable`, and it
       gains `local.definition` and `local.reference`; `let` as in the item above.
+    - `let` + line break + `{`: `let⏎{ a: b, ...c } = d;` and `let⏎{⏎  a: { b },⏎} = o;` (`let;` then an assignment to
+      an object pattern), `let⏎{ x }`, `let⏎{ x };`, `let⏎{}` and `let⏎{ l: x }` (`let;` then a block, or an object),
+      now one `lexical_declaration` with an `object_pattern` (`tsc` emit: `let { a: b, ...c } = d;`, `let {};`, `let {
+      l: x };`; a missing initializer is the checker's error, which `--noCheck` drops). Queries: in the bundled
+      JavaScript queries `let` goes from `@variable` and `local.reference` to `@keyword`, the block's `local.scope` is
+      gone, and `x` in `{ l: x }` gains `local.definition`; the own queries and `tags.scm` capture nothing different.
+      With CR, U+2028, U+2029 or a block comment, `e56ad86` already read these as one declaration; N5 made them two
+      statements, and they are one again.
     - Words after `in`/`instanceof` that go on with `_`, a digit, `$` or `\` (`let⏎in_x = 1;`, `let⏎in1 = 1;`,
       `let⏎instanceof_x, y;`) continued the declaration before N7 too (the old `iswalpha()` path); their trees do not
       change. The non-ASCII ones (`let⏎inφ`, `let⏎iné`, `let⏎instanceofφ`) are in the item above.
@@ -440,6 +455,7 @@
     ordinary;`, `let⏎ordinary: while (1) {}`, `let⏎type T = number;`, `let⏎async function f() {}`, `let⏎declare const x
     = 1;`, `let⏎namespace N {}`, `let⏎module M {}`, `let⏎abstract class C {}`, `let⏎interface I {}`. `tsc` reads `let
     ordinary` (`let type` ...) and then expects `,` (TS1005).
+    Likewise a block after `let⏎` that is no object pattern: `let⏎{ foo() }`, `let⏎{ x = 1; }` (`tsc`: TS1005).
   - Newly accepted inputs that `tsc` rejects (the grammar's identifier token takes any non-space character): after `a =
     b` and a line break, `in💩 = 1;`, `in\u0021 = 1;` and `in\u0073tanceof = 1;` (as written in the source, with the
     backslash) gave `ERROR` and now parse; `tsc` rejects all three. The same inputs with a word that does not start with
@@ -450,5 +466,4 @@
     `class C { x⏎in<U+0085>=1 }` is a field named `in<U+0085>` (`tsc`: a field `in`), and `a⏎in<U+0085> b;` gives
     `ERROR` (`tsc` accepts it), as before. (The C library differs too: on the review host `iswspace(0x85)` returned 8 in
     `ucrtbase.dll` and 0 in `msvcrt.dll`.)
-  - Known difference (pre-existing): `let⏎{ a } = b;` gives `ERROR` (`tsc`: one declaration); `{` is not a word.
   - `test/examples/known-failures.txt`: no entry cleared.

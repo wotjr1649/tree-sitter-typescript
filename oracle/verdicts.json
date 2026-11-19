@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "ee8b784d54158602d025a89549ae6a2338201eedb70ca4903cf5552a5a625583",
+  "cases_sha256": "ce9093fa8029bb421d411319be42563215dd1a8f53659467024cbaa4571d5778",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -9838,6 +9838,316 @@
     1005
    ],
    "at": 12
+  },
+  {
+   "id": "n7/letobj-obj-lf.ts",
+   "sha256": "903c39d69955f64e0b1cc21e88d7ed34ba16bb2b8f5d51e13234db3c8d7c99ce",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-lf.tsx",
+   "sha256": "903c39d69955f64e0b1cc21e88d7ed34ba16bb2b8f5d51e13234db3c8d7c99ce",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-cr.ts",
+   "sha256": "9bf8416f777c8cc9d96ac0a3233395c382012b455d3c99d36987824e8cbfd533",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-cr.tsx",
+   "sha256": "9bf8416f777c8cc9d96ac0a3233395c382012b455d3c99d36987824e8cbfd533",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-crlf.ts",
+   "sha256": "7268ba28b1ed0de5334ffcfb5ccb5ab58c13a07386a7d2c6c9faac121aca1689",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-crlf.tsx",
+   "sha256": "7268ba28b1ed0de5334ffcfb5ccb5ab58c13a07386a7d2c6c9faac121aca1689",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-ls.ts",
+   "sha256": "d8e93d1ec2642ef627f0978a507c515843e7f1d7ce0745deba886ebbf78324e0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-ls.tsx",
+   "sha256": "d8e93d1ec2642ef627f0978a507c515843e7f1d7ce0745deba886ebbf78324e0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-ps.ts",
+   "sha256": "ccf10cd7f30fc96705f1ad2b8e5ba57bb849442c7809de973ff672f33e69b516",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-ps.tsx",
+   "sha256": "ccf10cd7f30fc96705f1ad2b8e5ba57bb849442c7809de973ff672f33e69b516",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-block.ts",
+   "sha256": "e4f7b59bbb33dd5ddb24114b3cc8d279f6e309437354d6f9c779ceb67e18ab35",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-block.tsx",
+   "sha256": "e4f7b59bbb33dd5ddb24114b3cc8d279f6e309437354d6f9c779ceb67e18ab35",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-rest.ts",
+   "sha256": "1e93185c1f99ce74f1665c1aad539cad0a1545825ed7634844931a644b8bfcb9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-rest.tsx",
+   "sha256": "1e93185c1f99ce74f1665c1aad539cad0a1545825ed7634844931a644b8bfcb9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-const-lf.ts",
+   "sha256": "33d3a3128ba816dd1c531cc6475b55dc8b965ff7a77b8658c906fab7e41f7cc0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-const-lf.tsx",
+   "sha256": "33d3a3128ba816dd1c531cc6475b55dc8b965ff7a77b8658c906fab7e41f7cc0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-noinit.ts",
+   "sha256": "25ee2c692649e9756e6f605f3d86bdf0daa248879f93d4e0c1f2579cfbcdd8ea",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-noinit.tsx",
+   "sha256": "25ee2c692649e9756e6f605f3d86bdf0daa248879f93d4e0c1f2579cfbcdd8ea",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-empty.ts",
+   "sha256": "075198e1b66d36362f8aa63652662c262db9e1d0aad8a8323162c0afcedf9fe1",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-empty.tsx",
+   "sha256": "075198e1b66d36362f8aa63652662c262db9e1d0aad8a8323162c0afcedf9fe1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-block-label.ts",
+   "sha256": "86c9b4f03a073fc00bb500a7a419ba9d5e824284afe58203d67d70a25e7143af",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-block-label.tsx",
+   "sha256": "86c9b4f03a073fc00bb500a7a419ba9d5e824284afe58203d67d70a25e7143af",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-if.ts",
+   "sha256": "ad8c117ac06ba3905b93aa3e271b17ea27166ceaf9f3cad5e36480b88a060ce3",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-if.tsx",
+   "sha256": "ad8c117ac06ba3905b93aa3e271b17ea27166ceaf9f3cad5e36480b88a060ce3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-label.ts",
+   "sha256": "a399b832e5a8fca26713cbff2c4ec2c6697384817d5cbd6ecc820826ca1f312e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-label.tsx",
+   "sha256": "a399b832e5a8fca26713cbff2c4ec2c6697384817d5cbd6ecc820826ca1f312e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-fn.ts",
+   "sha256": "2fe29b7d34fff412c89bd9588dcb349a6f9c69137a9fbb72692d0a62a991dcb1",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-obj-fn.tsx",
+   "sha256": "2fe29b7d34fff412c89bd9588dcb349a6f9c69137a9fbb72692d0a62a991dcb1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-assign-let-block.ts",
+   "sha256": "00de1c673d46df5bdefe265cb3b91680502ddab01bd57e22143973e62ef30957",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-assign-let-block.tsx",
+   "sha256": "00de1c673d46df5bdefe265cb3b91680502ddab01bd57e22143973e62ef30957",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-ret-let-block.ts",
+   "sha256": "fe4596fe2c7504d59c31ad0a9c85601206c7db496c1e48befc0fc6d418982117",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-ret-let-block.tsx",
+   "sha256": "fe4596fe2c7504d59c31ad0a9c85601206c7db496c1e48befc0fc6d418982117",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-label-let-nl.ts",
+   "sha256": "8e9f44dbd6cd3bcdd1f103327be4e5c10e054bc0dfc0dab604fa785698d10ca9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-label-let-nl.tsx",
+   "sha256": "8e9f44dbd6cd3bcdd1f103327be4e5c10e054bc0dfc0dab604fa785698d10ca9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-semi-block.ts",
+   "sha256": "b6c2a87711eb15d7f4f864865dc541153fef036de8e0ca11c0f8b1890860d1d8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-semi-block.tsx",
+   "sha256": "b6c2a87711eb15d7f4f864865dc541153fef036de8e0ca11c0f8b1890860d1d8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/letobj-block-stmt.ts",
+   "sha256": "ec1fb49c81fbed1cb5f35161eddec19657759e4e043b05101a624d9a5dd43b6f",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1128
+   ],
+   "at": 11
+  },
+  {
+   "id": "n7/letobj-block-stmt.tsx",
+   "sha256": "ec1fb49c81fbed1cb5f35161eddec19657759e4e043b05101a624d9a5dd43b6f",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1005,
+    1128
+   ],
+   "at": 11
   }
  ]
 }
