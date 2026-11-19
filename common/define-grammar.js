@@ -7,6 +7,7 @@ module.exports = function defineGrammar(dialect) {
     externals: ($, previous) => previous.concat([
       $._function_signature_automatic_semicolon,
       $.__error_recovery,
+      $._lexical_declaration_binding,
     ]),
 
     supertypes: ($, previous) => previous.concat([
@@ -402,6 +403,15 @@ module.exports = function defineGrammar(dialect) {
       non_null_expression: $ => prec.left('unary', seq(
         $.expression, '!',
       )),
+
+      // The scanner never produces `_lexical_declaration_binding`; its validity tells it that `let` may go on
+      // with a binding on the next line (`let⏎x = 1`), where `let` alone could also end a statement.
+      lexical_declaration: $ => seq(
+        field('kind', choice('let', 'const')),
+        optional($._lexical_declaration_binding),
+        commaSep1($.variable_declarator),
+        $._semicolon,
+      ),
 
       variable_declarator: $ => choice(
         seq(

@@ -1654,3 +1654,167 @@ class A {
       (public_field_definition
         name: (property_identifier)
         value: (number)))))
+
+==========================================================
+Class and interface members named with a word that starts with in or instanceof
+==========================================================
+
+class A {
+  x
+  in_y = 1
+  z
+  instanceof1: number
+}
+interface I {
+  a: string
+  in_b: number
+}
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (public_field_definition
+        name: (property_identifier))
+      (public_field_definition
+        name: (property_identifier)
+        value: (number))
+      (public_field_definition
+        name: (property_identifier))
+      (public_field_definition
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type)))))
+  (interface_declaration
+    name: (type_identifier)
+    body: (interface_body
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type)))
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type))))))
+
+==========================================================
+Class and interface members named with a word that starts with in or instanceof (TSX)
+:language(tsx)
+==========================================================
+
+class A {
+  x
+  in_y = 1
+  z
+  instanceof1: number
+}
+interface I {
+  a: string
+  in_b: number
+}
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (public_field_definition
+        name: (property_identifier))
+      (public_field_definition
+        name: (property_identifier)
+        value: (number))
+      (public_field_definition
+        name: (property_identifier))
+      (public_field_definition
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type)))))
+  (interface_declaration
+    name: (type_identifier)
+    body: (interface_body
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type)))
+      (property_signature
+        name: (property_identifier)
+        type: (type_annotation
+          (predefined_type))))))
+
+==========================================================
+Let followed by a line break and a word that starts with in or instanceof
+==========================================================
+
+let
+in_x: number[];
+let
+in_y!: number;
+let
+instanceof_x, y;
+let
+in1 = 1;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (array_type
+          (predefined_type)))))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (predefined_type))))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier))
+    (variable_declarator
+      name: (identifier)))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (number))))
+
+==========================================================
+Let followed by a line break and a word that starts with in or instanceof (TSX)
+:language(tsx)
+==========================================================
+
+let
+in_x: number[];
+let
+in_y!: number;
+let
+instanceof_x, y;
+let
+in1 = 1;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (array_type
+          (predefined_type)))))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (predefined_type))))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier))
+    (variable_declarator
+      name: (identifier)))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (number))))

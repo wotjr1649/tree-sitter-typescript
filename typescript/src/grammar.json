@@ -996,6 +996,18 @@
           }
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_lexical_declaration_binding"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "SEQ",
           "members": [
             {
@@ -12468,6 +12480,10 @@
     {
       "type": "SYMBOL",
       "name": "__error_recovery"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_lexical_declaration_binding"
     }
   ],
   "inline": [
