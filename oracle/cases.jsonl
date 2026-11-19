@@ -144,8 +144,8 @@
 {"id":"s5/p112-tagged-member-callee.tsx","sha256":"cba60646be3f65f65df8e0987243269621724cdd73bb555c7f20a4287704e810","source":"a.b<T>`x`;","grammar":"tsx","expect":["0-9:call_expression","3-6:type_arguments"]}
 {"id":"s5/p112-tagged-nested-targ.ts","sha256":"73fded5f38556d229556235c0bfa2184758e1f80f335af1cec0529fa4d4a1834","source":"f<Array<T>>`x`;","grammar":"typescript","expect":["0-14:call_expression","1-11:type_arguments"]}
 {"id":"s5/p112-tagged-nested-targ.tsx","sha256":"73fded5f38556d229556235c0bfa2184758e1f80f335af1cec0529fa4d4a1834","source":"f<Array<T>>`x`;","grammar":"tsx","expect":["0-14:call_expression","1-11:type_arguments"]}
-{"id":"s5/p112-tagged-new-callee.ts","sha256":"1d701b848fbb017ed4055de61c32844c3e10fd4fd1e1c34d65163fd6c1ea3f4d","source":"new Foo<T>`x`;","grammar":"typescript","expect":["4-13:call_expression","7-10:type_arguments"]}
-{"id":"s5/p112-tagged-new-callee.tsx","sha256":"1d701b848fbb017ed4055de61c32844c3e10fd4fd1e1c34d65163fd6c1ea3f4d","source":"new Foo<T>`x`;","grammar":"tsx","expect":["4-13:call_expression","7-10:type_arguments"]}
+{"id":"s5/p112-tagged-new-callee.ts","sha256":"1d701b848fbb017ed4055de61c32844c3e10fd4fd1e1c34d65163fd6c1ea3f4d","source":"new Foo<T>`x`;","grammar":"typescript","expect":["0-13:new_expression","4-13:call_expression","7-10:type_arguments"]}
+{"id":"s5/p112-tagged-new-callee.tsx","sha256":"1d701b848fbb017ed4055de61c32844c3e10fd4fd1e1c34d65163fd6c1ea3f4d","source":"new Foo<T>`x`;","grammar":"tsx","expect":["0-13:new_expression","4-13:call_expression","7-10:type_arguments"]}
 {"id":"s5/p112-tagged-lt-tagged-template.ts","sha256":"8e61b30e87e751463d0f7de9cbe5dd0dc69dcc65b35eb5b06d29eca931e24130","source":"f<T`x`;","grammar":"typescript"}
 {"id":"s5/p112-tagged-lt-tagged-template.tsx","sha256":"8e61b30e87e751463d0f7de9cbe5dd0dc69dcc65b35eb5b06d29eca931e24130","source":"f<T`x`;","grammar":"tsx"}
 {"id":"s5/p112-tagged-object-targ.ts","sha256":"8a4107cba2e0997e052f75a05fcc1087dfb61744c154e1ce39a8162332ac5fc0","source":"sql<{ a: string }>`select`;","grammar":"typescript","expect":["0-26:call_expression","3-18:type_arguments"]}
