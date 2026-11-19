@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "d14e4cdff4b294f30bb139392dbdfe45dc319183c25e67e7368df9b3f4716443",
+  "cases_sha256": "e8f812c82d41a439bececb102b12730a7f631e2e201f943596d49b441947bda7",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -1587,6 +1587,22 @@
   {
    "id": "n3/text-ref-control.tsx",
    "sha256": "a5ccba0be1ff245611ff1ab922fbfca91191efb57a5512ba23b93035d77d67a1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-swallow-regression-double.tsx",
+   "sha256": "c33889e848e7ab4299deac5ab9f4c81a9d3ee9b9bdb30ed013203d7b4adc13c4",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-swallow-regression-single.tsx",
+   "sha256": "7baa2b932371f7acabf717a599bfd3096195bbd8fc0e3dc1171544645cdbbfee",
    "grammar": "tsx",
    "verdict": "accept",
    "codes": [],

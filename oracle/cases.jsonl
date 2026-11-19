@@ -185,3 +185,5 @@
 {"id":"n3/attr-ampersand-then-ref.tsx","sha256":"089dc85488e3eee57994ed6725ccc595d0ed408541e895bd28a7f03d7caafd42","source":"<A t=\"&&amp;\" />;","grammar":"tsx","expect":["6-12:string_fragment"]}
 {"id":"n3/attr-ref-hex-then-named-single.tsx","sha256":"6b35e63341e77319089d59b01b4d1bc7102b3cfddcbaa5d7759eb86d07833fa3","source":"<A t='&#x41;&b;c' />;","grammar":"tsx","expect":["6-12:html_character_reference","12-15:html_character_reference","15-16:string_fragment"]}
 {"id":"n3/text-ref-control.tsx","sha256":"a5ccba0be1ff245611ff1ab922fbfca91191efb57a5512ba23b93035d77d67a1","source":"<p>E&amp;x</p>;","grammar":"tsx","expect":["3-4:jsx_text","4-9:html_character_reference","9-10:jsx_text"]}
+{"id":"n3/attr-swallow-regression-double.tsx","sha256":"c33889e848e7ab4299deac5ab9f4c81a9d3ee9b9bdb30ed013203d7b4adc13c4","source":"<A t=\"&\" b=\"/>//\"/>;","grammar":"tsx","expect":["9-17:jsx_attribute"]}
+{"id":"n3/attr-swallow-regression-single.tsx","sha256":"7baa2b932371f7acabf717a599bfd3096195bbd8fc0e3dc1171544645cdbbfee","source":"<A t='&' b='/>// '/>;","grammar":"tsx","expect":["9-18:jsx_attribute"]}
