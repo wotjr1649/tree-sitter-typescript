@@ -257,21 +257,70 @@
     these (`s1/neg-in-alone.*`, `s1/p112-variance-in-alone.*`) are re-registered with `errorAt` 7, `7-9:ERROR`.
   - Known difference: an empty type argument list (`f<>(x)`, `new C<>()`, `let x: A<>;`), which `tsc` also accepts
     with `--noCheck` (TS1099 is a checker error), still gives an error; it is not part of this release.
+- `f<typeof import('m')>(...)`: the type query `typeof import('m')` as the first type argument of a call is read as
+  type arguments, not as the binary expression `f < typeof import('m') > (...)` (for example
+  `importOriginal<typeof import('vscode')>()`, `f<typeof import('m')>(1, 2)`, `f<typeof import('m').x, string>()`).
+  Before, `f<typeof import('m')>()` and `f<typeof import('m')>;` had an `ERROR`, and with arguments the call was
+  silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
+  resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
+  so both readings stay alive and the one that fits the following tokens wins.
+  The type query call `import('m')` or `import('m', { with: ... })` (a string literal and an optional object, no trailing
+  comma: the hidden rule `_type_query_import_arguments`, aliased to `arguments`) also carries dynamic precedence 1: with
+  the tagged-template change merged, the plain call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the
+  comparison reading (which holds the call `import('m')`) tied with the call reading and won. The precedence is only on
+  that production, not on every type query call, and the argument is a string, as in tsc's import type:
+  ``sql<A, typeof f(x)>`text` `` (also `typeof obj.f(x)`, `typeof obj?.f(x)`), `f<typeof import('m', 'n')>(1)`,
+  `f<typeof import(...m)>(1)`, `f<typeof import(g(x))>(1)`, `f<typeof import('m' + suffix)>(1, 2)` and
+  `f<typeof import(x ? 'm' : 'n')>(1, 2)` stay comparisons, as for tsc (no error either way, only the tree differs).
+  `f<typeof import('vscode', { with: { 'resolution-mode': 'import' } })>(1, 2)` is a call, as for tsc.
+  - Node kinds and fields added: none. Child types added: `arguments` lists `object` and `string` among its children in
+    `node-types.json` (both grammars; no kind or field is added, removed or renamed, and `test/node-kinds` is unchanged).
+  - Error-free tree changes: 36 of the 17,665 files of the pinned example repositories change their (error-free) tree,
+    all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
+    (`importAMDNodeModule<typeof import('jschardet')>('jschardet', 'dist/jschardet.min.js')`): the base tree is a chain
+    of `binary_expression` (comparison, comparison, a `sequence_expression` of the arguments); the new tree is a
+    `call_expression` with `type_arguments` (a `type_query`) and `arguments`, which is what tsc builds. Regression
+    input kept: `f<typeof import('vscode')>(1, 2);` in `test/corpus/types.txt`. Queries: `highlights.scm` gains the
+    `type_arguments` brackets, and the JavaScript `highlights.scm` and `tags.scm` call patterns now match these calls;
+    no query pattern loses a match.
+  - `test/examples/known-failures.txt`: 15 entries cleared (`v1.1: typeof import(...) type query as a type argument`),
+    14 left. One of the 15, `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`,
+    also uses `import('vscode').ChatResultUsage[]` (line 211) and needed the `import(...)` followed by `[]` change,
+    which is already in main; it parses and is no longer listed.
+  - Remaining differences from tsc: an import type argument other than a string literal (`f<typeof import(m)>(1, 2)`,
+    `import({ a: 'm' })`, `import(42)` and similar) is a call for tsc and a comparison chain here, as at the base;
+    ``sql<typeof import('m')>`text` `` (one type argument) is a comparison here and at the base, a tagged template for
+    tsc; `f<typeof import('m',)>(1, 2)` (TS1005) and `f<typeof import()>(1)` (TS1110) are comparisons without an error,
+    as at the base. New with this change: the second argument is any `object`, so `f<typeof import('m', { x: 1 })>(1, 2)`
+    (a comparison for tsc, which wants `{ with: ... }`) and `f<typeof import('m', {})>(1, 2)` (TS1005) are calls without
+    an error here, comparisons at the base.
+  - `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) keeps its base tree, nested
+    `binary_expression`s: the comparison reading wins there, so this change leaves it alone.
+  - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
+    `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
+  - Ours, no upstream pull request.
 - Automatic semicolon insertion treats every ECMAScript line terminator as a line break, in both grammars, as `tsc`
   does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
   scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or
   `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
   not count as a line break either (the scanner read on to the next LF). After a line break, `in` or `instanceof`
   where no binary operator may follow now starts the next class or type member when `=`, `:`, `?`, `;`, `}`, a
-  same-line block comment and then one of these, or a parameter list and then `{`, `:`, `;` or `}` follows
-  (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `interface I { a: string⏎in(): void }`), and so does a word that
-  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)` and `for (var x⏎in (y))` are
-  unchanged. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
-  its object pattern, as on one line) and before import attributes (`import x from "x"⏎with { type: "json" };`).
+  same-line block comment and then one of these, or an optional type-parameter list and a parameter list and then `{`,
+  `:`, `;` or `}` follows (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`,
+  `interface I { a: string⏎in(): void }`), and so does a word that
+  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)`, `for (var x⏎in (y))` and
+  `for (var x⏎in ("a);"))` are unchanged: a bracket inside a string, template, regular expression or comment of the
+  parameter list is not counted, and where a literal cannot be skipped (a template with `${`) the scanner answers
+  as before. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
+  its object pattern, as on one line) and before import attributes, also with comments between `with` and `{`
+  (`import x from "x"⏎with { type: "json" };`, `import x from "x"<CR>with /* c */ { type: "json" };`).
   `tsc` 7.0.2 accepts all these inputs. The scanner classifies white space and word characters by code point on these
   paths (the grammar's extras; U+0085 is an identifier character there, as in the lexer), so the result does not
   depend on the C library; with `ucrtbase.dll` and `msvcrt.dll` it is the same. Each call scans at most one block
-  comment that holds no line terminator, so a run of N comments costs O(N), not O(N²).
+  comment that holds no line terminator, so a run of N such comments (`x/*c*/…;`, or adjacent comments that hold a
+  line terminator) costs O(N), not O(N²). A run of comments that each start on a line after a line break
+  (`x⏎/*c*/⏎/*c*/…;`) is still rescanned per comment, as at the base (N=4/8/16/32: 20/72/272/1056 slash skips in
+  base and now).
   - Node kinds and fields added: none (no generated file changes).
   - Error-free tree changes. An input whose line break has one of these forms now gets the tree the same input gets
     with LF; queries follow the trees. Where that tree differs from the old one (`⏎` here is a block comment holding a
@@ -315,12 +364,12 @@
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known differences kept: `in<T>()` as a method name after a line break still gives `ERROR`. Four inputs that parsed
-    without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
+  - Known differences kept: four inputs that parsed without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
     did before: `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line,
     the known v1.1 gap) and `a as T⏎// c<U+2028>[b + c];` (a type cannot take `[` after a line break), both
     grammars; `tsc` accepts both. The scanner cannot tell these from `class A { a⏎<T>() {} }` and `a⏎[b]`; fixing
-    them needs a grammar change. In a `(...)` after `in`, a parenthesis inside a string or template is counted.
+    them needs a grammar change (owner decision 20). A regular expression after a keyword (`return /)/`) in the `(...)`
+    after `in` reads as a division there, so its brackets are counted.
   - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
     `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
     automatic semicolon after a Flow-style ambient module type annotation.

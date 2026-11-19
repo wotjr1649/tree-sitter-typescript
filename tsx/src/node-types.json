@@ -681,7 +681,15 @@
           "named": true
         },
         {
+          "type": "object",
+          "named": true
+        },
+        {
           "type": "spread_element",
+          "named": true
+        },
+        {
+          "type": "string",
           "named": true
         }
       ]

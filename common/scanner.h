@@ -1,5 +1,6 @@
 #include "tree_sitter/parser.h"
 
+#include <string.h>
 #include <wctype.h>
 
 enum TokenType {
@@ -135,23 +136,115 @@ static bool skip_space_and_comments(TSLexer *lexer) {
     }
 }
 
-// After `in(`: a method or method signature named `in` when the balanced parameter list is followed by a body, a
-// return type or the end of the member. In a for-in header, `in (y)` is followed by `)` or an operator instead.
-// shortcut: a parenthesis inside a string, template or regex in the list is counted; upgrade if one shows up there.
-static bool parameters_end_member(TSLexer *lexer) {
-    for (unsigned depth = 0;;) {
+// Skips a string literal after its opening quote; false when it is unterminated.
+static bool skip_string(TSLexer *lexer, int32_t quote) {
+    for (;;) {
+        int32_t c = lexer->lookahead;
+        if (c == 0 || is_line_terminator(c)) {
+            return false;
+        }
+        skip(lexer);
+        if (c == quote) {
+            return true;
+        }
+        if (c == '\\' && lexer->lookahead != 0) {
+            skip(lexer);
+        }
+    }
+}
+
+// Skips a template literal after its opening backtick; false when it is unterminated or holds a `${`.
+static bool skip_template(TSLexer *lexer) {
+    for (;;) {
         int32_t c = lexer->lookahead;
         if (c == 0) {
             return false;
         }
         skip(lexer);
-        if (c == '(') {
-            depth++;
-        } else if (c == ')' && --depth == 0) {
-            break;
+        if (c == '`') {
+            return true;
+        }
+        if (c == '\\' && lexer->lookahead != 0) {
+            skip(lexer);
+        } else if (c == '$' && lexer->lookahead == '{') {
+            return false;
         }
     }
-    if (!skip_space_and_comments(lexer)) {
+}
+
+// Skips a regular expression literal after its opening slash; false when it is unterminated.
+static bool skip_regex(TSLexer *lexer) {
+    for (bool in_class = false;;) {
+        int32_t c = lexer->lookahead;
+        if (c == 0 || is_line_terminator(c)) {
+            return false;
+        }
+        skip(lexer);
+        if (c == '\\' && lexer->lookahead != 0 && !is_line_terminator(lexer->lookahead)) {
+            skip(lexer);
+        } else if (c == '[') {
+            in_class = true;
+        } else if (c == ']') {
+            in_class = false;
+        } else if (c == '/' && !in_class) {
+            return true;
+        }
+    }
+}
+
+// From `open` to its matching `close`, counting only what is code: a bracket inside a string, template, regular
+// expression or comment is not counted. False when the end is not found or a literal cannot be skipped (then the
+// caller keeps the answer of the old scanner). A `/` is a division after an operand (`)`, `]`, a word) and a regular
+// expression after anything else; `=>` is not a `>`.
+// shortcut: a regex after a keyword (`return /)/`) reads as a division, and a template with `${` is not skipped; upgrade if one shows up in a parameter list.
+static bool skip_balanced(TSLexer *lexer, int32_t open, int32_t close) {
+    unsigned depth = 0;
+    int32_t prev = 0;
+    for (;;) {
+        int32_t c = lexer->lookahead;
+        if (c == 0) {
+            return false;
+        }
+        skip(lexer);
+        if (c == '"' || c == '\'') {
+            if (!skip_string(lexer, c)) {
+                return false;
+            }
+        } else if (c == '`') {
+            if (!skip_template(lexer)) {
+                return false;
+            }
+        } else if (c == '/' && lexer->lookahead == '/') {
+            while (lexer->lookahead != 0 && !is_line_terminator(lexer->lookahead)) {
+                skip(lexer);
+            }
+            continue;
+        } else if (c == '/' && lexer->lookahead == '*') {
+            skip(lexer);
+            bool line_break = false;
+            if (!skip_block_comment(lexer, &line_break)) {
+                return false;
+            }
+            continue;
+        } else if (c == '/' && (prev == 0 || strchr("(,=:[!&|?{};+-*%<>~^", prev) != NULL)) {
+            if (!skip_regex(lexer)) {
+                return false;
+            }
+        } else if (c == open) {
+            depth++;
+        } else if (c == close && !(c == '>' && prev == '=') && --depth == 0) {
+            return true;
+        }
+        if (!is_space(c)) {
+            prev = c < 0x80 ? c : 'a';
+        }
+    }
+}
+
+// After `in(`: a method or method signature named `in` when the balanced parameter list is followed by a body, a
+// return type or the end of the member. In a for-in header, `in (y)` is followed by `)` or an operator instead.
+static bool parameters_end_member(TSLexer *lexer) {
+    if (!skip_balanced(lexer, '(', ')') || !skip_space_and_comments(lexer)) {
         return false;
     }
     switch (lexer->lookahead) {
@@ -199,6 +292,11 @@ static bool keyword_starts_member(TSLexer *lexer, const bool *valid_symbols) {
         case ';':
         case '}':
             return true;
+        case '<': // `in<T>() {}`: `in <T>(y)` in a for-in header is followed by `)` instead
+            if (!skip_balanced(lexer, '<', '>') || !skip_space_and_comments(lexer) || lexer->lookahead != '(') {
+                return false;
+            }
+            return parameters_end_member(lexer);
         case '(':
             return parameters_end_member(lexer);
         default:
@@ -301,10 +399,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             if (is_identifier_part(lexer->lookahead)) {
                 return true;
             }
-            while (is_space(lexer->lookahead)) {
-                skip(lexer);
-            }
-            return lexer->lookahead != '{';
+            return !skip_space_and_comments(lexer) || lexer->lookahead != '{';
 
         case '`':
         case ',':
