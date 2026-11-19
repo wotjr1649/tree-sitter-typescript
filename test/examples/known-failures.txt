@@ -26,17 +26,14 @@ examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/
 examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/src/common/typescripts.ts	v1.1: property named abstract in an object type, e.g. { abstract: Set<string> }
 examples/vscode/extensions/copilot/src/extension/typescriptContext/vscode-node/test/structuralDiffContribution.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
 examples/vscode/extensions/copilot/src/platform/authentication/test/node/session.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/platform/telemetry/common/telemetry.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/extensions/copilot/src/platform/telemetry/test/node/assignmentFilters.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
 examples/vscode/extensions/copilot/src/platform/telemetry/vscode-node/test/microsoftExperimentationService.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
 examples/vscode/extensions/vscode-colorize-perf-tests/test/colorize-fixtures/test-checker.ts	not complete TypeScript: test fixture truncated in the middle of an expression
-examples/vscode/src/vs/code/electron-browser/workbench/workbench.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/platform/agentHost/node/agentHostDatabase.ts	v1.1: identifier unique after < read as the unique type operator, e.g. i < unique.length
 examples/vscode/src/vs/platform/agentHost/node/claude/claudeSubagentSignals.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/platform/agentHost/test/node/codex/codexChatDiscovery.test.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/platform/browserView/electron-browser/preload-browserView.ts	v1.1: identifier unique after < read as the unique type operator, e.g. i < unique.length
 examples/vscode/src/vs/platform/tunnel/test/node/tunnelProxy.test.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
-examples/vscode/src/vs/sessions/electron-browser/sessions.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/workbench/contrib/chat/test/common/promptSyntax/hookSchema.test.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/workbench/contrib/issue/browser/issueFormService.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/workbench/contrib/terminal/test/browser/terminalProfileService.integrationTest.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
