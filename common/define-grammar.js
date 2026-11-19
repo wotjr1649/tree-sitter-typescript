@@ -82,8 +82,10 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
 
-      [$._call_signature, $.function_type],
-      [$._call_signature, $.constructor_type],
+      // The arrow function's own signature (see arrow_function) takes over these conflicts from _call_signature.
+      [$._arrow_call_signature, $.function_type],
+      [$._arrow_call_signature, $.constructor_type],
+      [$.type_parameters, $._nonempty_type_parameters],
 
       [$.primary_expression, $._parameter_name],
       [$.primary_expression, $._parameter_name, $.primary_type],
@@ -1001,7 +1003,37 @@ module.exports = function defineGrammar(dialect) {
         )),
       ),
 
+      // tsc's parser accepts an empty list (`type A<> = number;`); TS1098 is a checker error.
       type_parameters: $ => seq(
+        '<', optional(seq(commaSep1($.type_parameter), optional(','))), '>',
+      ),
+
+      // tsc reads `<>(x) => x` as a type assertion with no type (TS1110), so an arrow function needs a non-empty list.
+      arrow_function: $ => seq(
+        optional('async'),
+        choice(
+          field('parameter', choice(
+            alias($._reserved_identifier, $.identifier),
+            $.identifier,
+          )),
+          $._arrow_call_signature,
+        ),
+        '=>',
+        field('body', choice(
+          $.expression,
+          $.statement_block,
+        )),
+      ),
+
+      _arrow_call_signature: $ => seq(
+        field('type_parameters', optional(alias($._nonempty_type_parameters, $.type_parameters))),
+        field('parameters', $.formal_parameters),
+        field('return_type', optional(
+          choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+        )),
+      ),
+
+      _nonempty_type_parameters: $ => seq(
         '<', commaSep1($.type_parameter), optional(','), '>',
       ),
 
