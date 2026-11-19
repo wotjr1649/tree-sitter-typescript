@@ -235,3 +235,25 @@
     uses `import('vscode').ChatResultUsage[]` (line 211): it needs both changes, and whichever is merged second removes
     its entry.
   - Ours, no upstream pull request.
+- An empty type parameter list (`type A<> = number;`, `class C<> {}`, `interface I<> {}`, `function f<>() {}`,
+  `m<>() {}`, `type F = <>() => void;`) parses without error in both grammars. `tsc` 7.0.2 reports nothing for these
+  with `--noCheck` (TS1098 "Type parameter list cannot be empty" is a checker error, and `tsc` does not report it at all
+  for type aliases and interfaces). Before, both grammars put a zero-width `type_parameter` holding a `MISSING
+  type_identifier` inside `type_parameters`; now `type_parameters` has no children.
+  - Node kinds and fields added: none. `node-types.json` in both grammars: the children of `type_parameters` are no
+    longer `required` (it may be empty); nothing removed or renamed.
+  - Error-free tree changes: none found (existing corpus inputs, the probe inputs, and all 17,664 `.ts`/`.tsx` files
+    of the pinned examples, whose trees are byte-identical to the base).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses this form).
+  - An arrow function still needs a non-empty list: `const g = <>(x) => x;` and `<>() => 1` stay errors in the
+    `typescript` grammar, as `tsc` reads `<>` there as a type assertion with no type (TS1110). The arrow function has
+    its own signature rule for this; the conflicts `[_call_signature, function_type]` and
+    `[_call_signature, constructor_type]` move to it. In `tsx` the arrow function's signature is the one the variance
+    entry above defines (`_arrow_type_parameters`: a first parameter without a variance modifier, then any number,
+    so the list is non-empty there too); only `typescript` uses `_nonempty_type_parameters`.
+  - Error trees only: with an empty list allowed, error recovery for a variance modifier alone changes, e.g.
+    `type D<in> = number;` (tsc TS1359 at 7) now gives `type_parameters` holding an `ERROR` that is exactly the `in`
+    token `[7,9)`, where it was a `type_parameter` with a `MISSING type_identifier` at 9. The four oracle cases for
+    these (`s1/neg-in-alone.*`, `s1/p112-variance-in-alone.*`) are re-registered with `errorAt` 7, `7-9:ERROR`.
+  - Known difference: an empty type argument list (`f<>(x)`, `new C<>()`, `let x: A<>;`), which `tsc` also accepts
+    with `--noCheck` (TS1099 is a checker error), still gives an error; it is not part of this release.
