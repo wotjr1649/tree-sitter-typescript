@@ -404,7 +404,7 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
     - `import x from "m"<CR>with /* c */ { type: "json" };` (a comment between `with` and `{`), and the same after
       U+2028, U+2029 or a line comment: the LF form is `ERROR` at `e56ad86`, so the comment is not skipped.
     - `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line: the known
-      v1.1 gap in `known-failures.txt`) and `a as T⏎// c<U+2028>[b + c];` (a type takes no `[` after a line break).
+      `candidate:` gap in `known-failures.txt`) and `a as T⏎// c<U+2028>[b + c];` (a type takes no `[` after a line break).
     - Counts, over the 5,938 inputs of the reviews and the oracle that contain a CR, U+2028, U+2029 or a line-breaking
       block comment (both grammars; `tsc` accepts, `ERROR` here, `ERROR` for the LF form at `e56ad86`): 1,080, of which
       `e56ad86` parses the input itself without error in 170 (a CR, U+2028 or U+2029 it did not see as a line break, or a

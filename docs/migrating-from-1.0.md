@@ -1,18 +1,13 @@
 # Moving from 1.0.0 to 2.0.0
 
-> **Release-PR note (remove before merging the release PR).** Updated on 2026-11-20 from `main` = `d4c5286`. Merged:
-> #3 (S2), #4 (S6), #5 (S4), #6 (S3), #7 (S5), #9 (S1), #10 (N3), #11 (N2), #13 (N1), #12 (N4), #14 (N1b), #15 (N5).
-> Not merged, marked **[pending]** below: #17 (N7). The **[pending]** item is taken from its pull request's description
-> and changes if the pull request changes; complete it when that pull request merges. Counts are
-> from the pull request that carries them, measured against its own base, not against `v1.0.0` (`59fc4ed`) directly:
-> replace this note by one measurement of the final `main` against `v1.0.0` (corpus, oracle sources and the pinned
-> examples, deduplicated), as mssql's guide does.
-
 2.0.0 is the first release that changes how the grammars parse. 1.0.0 is the upstream v0.23.2 grammar regenerated with
 CLI 0.27.2 (`tree-sitter/tree-sitter-typescript` `f975a62`, see ADR-0001), with identical behaviour. Versions follow
 SemVer from here (ADR-0001 amendment): this is a MAJOR release because the tree of some input that parsed without
 error at 1.0.0 is different now. A query or a tree walker written against the old tree of those forms can stop
 matching. Nothing is removed or renamed: no node kind and no field.
+
+Counts below come from the pull request that carries them (named next to each change), measured against that pull
+request's base; the CHANGELOG entry of each change gives the full lists.
 
 ## Schema (`node-types.json`)
 
@@ -159,12 +154,40 @@ Queries follow the trees: the keyword of a split modifier gets `@property` (Java
 `definition.method` tag and `local.scope` start at the method name; in `set /*⏎*/ x(v) {}` the comment becomes the
 `@doc` of method `x`. None of the 17,665 pinned example files changes its tree (compared with `e56ad86`).
 
-### Identifiers starting with `in` and `let` across a line break (N7, #17) **[pending]**
+### Identifiers starting with `in` and `let` across a line break (N7, #17)
 
-#17 tells `in`/`instanceof` from identifiers that start with them (`in_progress`, `in1`, `in$`) after a line break
-(owner decision 12), and keeps a `let`/`const` declaration across a line break before an ordinary identifier or `{`, as
-tsc reads it (owner decisions 22 and 25; `let⏎x = 1` was `let;` + an assignment at 1.0.0). Not merged yet: add the
-before/after trees, the tsc verdicts and the counts from #17's CHANGELOG entry when it merges.
+After a line break the external scanner took a word that starts with `in` or `instanceof` (`in_x`, `in1`, `in$`) for
+the keyword when the next character was not a letter by the C library's `iswalpha()`, so no semicolon was inserted
+(owner decision 12). Now such a word is an identifier: the line ends before it, as tsc reads it. `in` and `instanceof`
+themselves read as before. Separately, `let` + line break + a word that is not reserved, or `{`, continues the
+declaration, as tsc and the specification read it (owner decisions 22 and 25); before, `let` ended the statement after
+an LF (and, with N5 alone, after the other line breaks).
+
+| input (`⏎` = line break) | 1.0.0 | 2.0.0 | tsc |
+| --- | --- | --- | --- |
+| `let⏎x = 1;`, `let⏎x, y;`, `let⏎type = 1;`, `let⏎φ = 1;` | `let;` + an assignment or sequence | one `lexical_declaration` | one declaration |
+| `let⏎{ a: b, ...c } = d;`, `let⏎{ x }`, `let⏎{}` | `let;` + an assignment to an object pattern, a block or an object | one `lexical_declaration` with an `object_pattern` | one declaration |
+| `function* g() { let⏎yield }` | `let;` + `yield_expression` | `let yield` | `let yield` |
+| `yield⏎in_x` | `yield_expression` with operand `in_x` | `yield;` + `in_x;` | two statements |
+| `type⏎in_x = number;` | `type_alias_declaration` | `type;` + an assignment | two statements |
+| `async⏎in_x => in_x` | async arrow function | identifier `async` + an arrow function | two statements |
+| `continue⏎in_x;` in a loop | `continue` with the label `in_x` | `continue;` + `in_x;` | two statements |
+| `private⏎in_x = 1` (also `public`, `protected`, `declare`, `override`) in a class | one field with the modifier | a field named by the keyword + field `in_x` | two members |
+| `readonly⏎in_x: number` in an interface | one readonly property | two properties | two properties |
+| `set⏎in_x(v) {}` in a class | a setter | field `set` + method `in_x` | one setter (see known differences) |
+
+With CR, U+2028, U+2029 or a line-breaking block comment, 1.0.0 already read the `let` rows as one declaration; N5 made
+them two statements and N7 makes them one again. Words after `let⏎` that start with `in`/`instanceof` and go on with
+`_`, a digit, `$` or `\` (`let⏎in_x = 1;`) keep their tree. `let⏎(x)`, `let⏎[a] = b`, `const` and `let` + line break +
+a reserved word (`let⏎if (x) {}`, `let⏎in b`) keep their trees; where `let` is only an expression (`x = let⏎{}`) a
+block after it stays a block. `lexical_declaration` takes a hidden external token `_lexical_declaration_binding` after
+`let`/`const` (never produced, it only marks the position): `grammar.json` and `parser.c` change, `node-types.json`
+does not.
+
+Queries follow the trees: in the bundled JavaScript queries `let` goes from `@variable`/`local.reference` to `@keyword`
+and the binding gains `local.definition`; a split modifier keyword gets `@property` instead of `@keyword`; `type` and
+`async` lose `@keyword`; in `set⏎in_x(v) {}` `local.scope` and `definition.method` start at `in_x`. None of the 17,665
+pinned example files changes its tree (compared with `main` `d4c5286`, the base of #17).
 
 ## Previously error-free input that is an error now (intended)
 
@@ -174,9 +197,12 @@ before/after trees, the tsc verdicts and the counts from #17's CHANGELOG entry w
 | `type L<in, T> = T;` (S1, #9) | ok | `ERROR` | TS1359, TS1139 |
 | `<A t="a&" b="/>;` in TSX (N3, #10) | no error: `t` holds the string `"a&" b="`, the element closes at `/>` | `t="a&"` ends at its own quote, `b="/>;` is an unterminated string: error | TS1002 |
 | `a⏎/* c */ +? b : c;` and the same with `-?`, `/?`, `in?`, `instanceof?` (N2, #11) | no error: a plain ternary, comment and operator in no node | `comment` node kept, `ERROR` from the `?` | TS1109 |
+| `let⏎ordinary();`, `let⏎ordinary.x = 1;`, `let⏎ordinary => ordinary;`, `let⏎type T = number;`, `let⏎interface I {}` and similar (N7, #17) | `let;` + a second statement | `ERROR` | TS1005 |
+| `let⏎{ foo() }`, `let⏎{ x = 1; }` (N7, #17) | `let;` + a block | `ERROR` | TS1005 |
 
 All of these inputs are invalid TypeScript. The first two come from `in` becoming a variance modifier; the type
-parameter named `in` was never valid. Type parameters named `out` (`type A<out> = out;`, `type B<out = string> = out;`,
+parameter named `in` was never valid. The N7 rows come from `let` + line break + a non-reserved word or `{` continuing
+the declaration, as tsc reads it; tsc then expects `,`. Type parameters named `out` (`type A<out> = out;`, `type B<out = string> = out;`,
 `type C<T, out> = out;`, `type E<in out> = number;`) keep parsing without error and keep `out` as a `type_identifier`.
 
 ## Valid input that is an error now (recorded)
@@ -192,13 +218,14 @@ Fixing them needs a grammar change, a candidate after 2.0.0.
 - **A non-LF line break before a member named `in`/`instanceof`, `with /* c */ {`, `<B>(` or `as T⏎[` (N5, owner
   decisions 20, 23, 24 and 27).** With a lone CR, U+2028, U+2029 or a line-breaking block comment as the line break:
   `class A { a⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`, `interface I { a: string⏎in(): void }`
-  (also `instanceof` and names starting with them: `in1`, `in_`, `in$`); `import x from "m"<CR>with /* c */ { type:
+  (also `instanceof`); `import x from "m"<CR>with /* c */ { type:
   "json" };`; `interface A { a: T⏎// c<U+2028><B>(b: B): V; }`; `a as T⏎// c<U+2028>[b + c];`. The LF form of each is an
   `ERROR` at `e56ad86` too. Over the 5,938 review and oracle inputs that contain such a line break, 1,080 are of this kind
   (tsc accepts, `ERROR` here, `ERROR` for the LF form at `e56ad86`); 170 of them parsed without error at `e56ad86`
   itself. By shape: `in`/`instanceof` member 952, `with` comment 24, `as T⏎[` 26, interface `<B>(` 26, a comment
-  between `}` and `:` of a typed object pattern 26, `for (using a⏎of b)` 26. N7 (#17, **[pending]**) changes the
-  `in1`/`in_`/`in$` part.
+  between `}` and `:` of a typed object pattern 26, `for (using a⏎of b)` 26. These counts are N5's (#15); the
+  `in`/`instanceof` count also held members whose names only start with them (`in1`, `in_`, `in$`), which parse since
+  N7 (#17).
 
 ## Inputs that were errors and parse now (additions, no migration needed)
 
@@ -215,7 +242,9 @@ line-breaking block comment as an automatic-semicolon line break, `a = b /*⏎*/
 `class A { static accessor /*⏎*/ x = 1; }` (N5, #15); with any line break, LF included, `}` before `:` of a typed
 object pattern, `type F = ({ a⏎}: { a: number }) => number;`, and `with {` of import attributes on the next line,
 `import x from "x"⏎with { type: "json" };` (N5); `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same
-with U+200B (N5, owner decision 26).
+with U+200B (N5, owner decision 26); a word that starts with `in`/`instanceof` after a line break, `a = b⏎in_progress =
+true`, `foo()⏎in1.x()`, `class A { x⏎in_y = 1; }`, `interface I { a: string⏎in_b: number }` (N7, #17); `let` + line
+break + a binding, `let⏎ordinary: number[] = [];`, `let⏎{ x } = obj;`, `let⏎await` (N7, owner decisions 22 and 25).
 
 Entries of `test/examples/known-failures.txt` cleared by these: 15 (S6), 3 (S4), 1 (N3), 8 (N1) and 15 (N1b; one of
 them, `copilotcliSession.spec.ts`, needed N1 and N1b), 42 in all; 14 remain. The 6 entries for constructs this release
@@ -247,8 +276,14 @@ The owner decisions are numbered as in the release's decision record.
   field and `get`/`set` + line break + `x() {}` as one accessor; the grammar reads two members, for every line-break
   form (1.0.0 already did for LF). A grammar change, not a scanner change, would be needed.
 - **A class or type member named `in`/`instanceof` after a line break, and the other shapes above (N5, owner
-  decisions 20, 23, 24 and 27).** Rejected for every line-break form, LF included; see "Valid input that is an error
+  decisions 20, 23, 24 and 27).** Only a member named `in` or `instanceof` itself; names that start with them parse
+  since N7. Rejected for every line-break form, LF included; see "Valid input that is an error
   now". `for (var x⏎in y)` keeps its `in`.
+- **Words starting with `in` after a line break (N7).** Accepted although tsc rejects them: after `a = b` and a line
+  break, `in💩 = 1;`, `in\u0021 = 1;`, `in\u0073tanceof = 1;` (the grammar's identifier token takes any non-space
+  character; the same words not starting with `in` were accepted at 1.0.0). `set⏎in_x(v) {}` reads as two members, as
+  `set⏎x(v) {}` already did (owner decision 12). U+0085 (NEL) is white space for tsc but an identifier character for the
+  grammar, as at 1.0.0: `a⏎in<U+0085> b;` is an `ERROR`.
 - **ASI leniency (N5, owner decisions 10 and 26).** Accepted although tsc rejects, each the same defect 1.0.0 already
   has for the LF form (or, for U+2060, for the empty pattern): `yield` then `*x` on the next line, a ternary after `/?`
   that loses its `/` (also on one line: `a /? b : c;`), a missing required `;` in a `for` header, an automatic
@@ -288,9 +323,8 @@ The owner decisions are numbered as in the release's decision record.
   import the bindings as `github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go`. The functions are unchanged.
 - **Shared library name.** The CMake `SOVERSION` is `15.2` (was `15.1`) and the Makefile `SONAME_MINOR` is 2: it
   follows the MAJOR version.
-- **Parser size.** At `d4c5286` + the version bump (S1-S6, N1-N5, N1b) `typescript/src/parser.c` is 9,394,428 bytes
-  and `tsx/src/parser.c` 9,423,320 bytes. Record the final sizes after N7, and a paired timing (1.0.0 and 2.0.0
-  alternating in one run, one slot, CPU load recorded at start and end), in the release PR.
+- **Parser size.** `typescript/src/parser.c` is 9,403,434 bytes and `tsx/src/parser.c` 9,432,380 bytes (1.0.0:
+  8,762,937 and 8,786,828).
 - **Error recovery** of invalid input is not a contract; trees of rejected input may differ inside `ERROR` nodes.
 - **Pins.** `go-treesitter` pins a commit (ADR-0001, ADR-0024 rule 7). Bump it on the release commit and re-run its
   schema and corpus comparisons; the node-kind snapshot differs by the lines listed under Schema.

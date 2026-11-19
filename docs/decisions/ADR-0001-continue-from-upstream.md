@@ -104,3 +104,6 @@ fixes land") and refines Decision 4. Everything else in this record stands.
 9. **Go module path.** From v2.0.0 the module is `github.com/wotjr1649/tree-sitter-typescript/v2`, as Go requires for
    a major version above 1; the bindings import as `github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go`. A later
    MAJOR release moves the suffix (`/v3`, ...). CI checks that the manifests and the latest CHANGELOG version agree.
+10. **Oracle.** The oracle of Decision 7 is set up in `oracle/`: `typescript` 7.0.2 `tsc` with `--noEmit --noCheck`
+    gives each case's verdict, and CI replays the committed cases against both grammars; the committed cases have no
+    mismatch with tsc. Checker-only errors are out of scope.
