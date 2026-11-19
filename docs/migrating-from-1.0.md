@@ -222,6 +222,8 @@ for empty lists) are out of scope: `--noCheck` drops them.
 
 - **Generated files.** `typescript/src/parser.c` and `tsx/src/parser.c` carry `metadata` 2.0.0 (1.0.0 carried 0.23.2);
   ABI is still 15 and the runtime lower bounds are unchanged (0.25 line, Python 3.10).
+- **Go module path.** The module is `github.com/wotjr1649/tree-sitter-typescript/v2` (Go semantic import versioning);
+  import the bindings as `github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go`. The functions are unchanged.
 - **Shared library name.** The CMake `SOVERSION` is `15.2` (was `15.1`) and the Makefile `SONAME_MINOR` is 2: it
   follows the MAJOR version.
 - **Parser size.** At `fdd6dd2` (S1-S6, N2, N3) `typescript/src/parser.c` is 9,287,805 bytes and `tsx/src/parser.c`

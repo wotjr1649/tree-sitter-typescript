@@ -46,7 +46,8 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 - The inherited publication workflow is gone; test, lint and fuzz CI stay. The test workflow uses CLI 0.27.2 and
   checks that the committed parsers match it.
 - Binding consumers need tree-sitter runtime 0.25 or later, and Python consumers Python 3.10 or later.
-- The Go module path is `github.com/wotjr1649/tree-sitter-typescript` (owner decision, 2026-11-18).
+- The Go module path is `github.com/wotjr1649/tree-sitter-typescript` (owner decision, 2026-11-18); from v2.0.0 it is
+  `github.com/wotjr1649/tree-sitter-typescript/v2` (amendment below, Decision 9).
 - CI parses example repositories at pinned commits; the files the baseline grammar cannot parse are listed in
   `test/examples/known-failures.txt`, which may only shrink as the v1.1 grammar fixes land (owner decision,
   2026-11-18). CI fails a pull request that adds a path to it without changing the pins in `test/examples/repos.txt`.
@@ -100,3 +101,6 @@ fixes land") and refines Decision 4. Everything else in this record stands.
    "v1.1" landed as v2.0.0. The entries for constructs the release does not fix are marked `candidate:`; they may be
    fixed in a later MINOR (error to ok) or MAJOR release. The list still may only shrink, and a pull request that adds a
    path still needs a change to `test/examples/repos.txt`.
+9. **Go module path.** From v2.0.0 the module is `github.com/wotjr1649/tree-sitter-typescript/v2`, as Go requires for
+   a major version above 1; the bindings import as `github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go`. A later
+   MAJOR release moves the suffix (`/v3`, ...). CI checks that the manifests and the latest CHANGELOG version agree.

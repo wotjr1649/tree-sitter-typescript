@@ -19,7 +19,8 @@ arguments, `accessor` followed by a line break, a block comment before a ternary
 a TSX attribute string, `f<typeof import('m')>(x)`, line breaks other than LF in automatic semicolon insertion), and
 some invalid inputs that were accepted are errors now (`type D<in> = number;`, `<A t="a&" b="/>;` in TSX,
 `a⏎/* c */ +? b : c;`); no node kind or field is removed or renamed. Schema additions: a `type_arguments` child of
-`member_expression`, the anonymous node `out`, `type_parameters` children no longer required. See
+`member_expression`, the anonymous node `out`, `type_parameters` children no longer required. The Go module path is
+`github.com/wotjr1649/tree-sitter-typescript/v2`. See
 [docs/migrating-from-1.0.md](docs/migrating-from-1.0.md).
 
 ### Fixed
