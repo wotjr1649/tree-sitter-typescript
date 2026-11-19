@@ -104,6 +104,7 @@
 "number"
 "object"
 "of"
+"out"
 "override"
 "private"
 "protected"

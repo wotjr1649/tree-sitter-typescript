@@ -272,6 +272,10 @@
         "named": true
       },
       {
+        "type": "call_expression",
+        "named": true
+      },
+      {
         "type": "conditional_type",
         "named": true
       },
@@ -305,6 +309,10 @@
       },
       {
         "type": "lookup_type",
+        "named": true
+      },
+      {
+        "type": "member_expression",
         "named": true
       },
       {
@@ -3393,6 +3401,16 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "type_arguments",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -5073,7 +5091,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "type_parameter",
@@ -5839,6 +5857,10 @@
   },
   {
     "type": "of",
+    "named": false
+  },
+  {
+    "type": "out",
     "named": false
   },
   {

@@ -7,6 +7,7 @@ module.exports = function defineGrammar(dialect) {
     externals: ($, previous) => previous.concat([
       $._function_signature_automatic_semicolon,
       $.__error_recovery,
+      $._lexical_declaration_binding,
     ]),
 
     supertypes: ($, previous) => previous.concat([
@@ -52,7 +53,8 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_type_identifier, $.generic_type, $.primary_type, $.lookup_type, $.index_type_query, $.type],
       [$.as_expression, $.satisfies_expression, $.primary_type],
       [$._type_query_member_expression, $.member_expression],
-      [$.member_expression, $._type_query_member_expression_in_type_annotation],
+      [$.member_expression, $._type_query_import_member_expression_in_type_annotation],
+      [$.member_expression, $._type_query_other_member_expression_in_type_annotation],
       [$._type_query_member_expression, $.primary_expression],
       [$._type_query_subscript_expression, $.subscript_expression],
       [$._type_query_subscript_expression, $.primary_expression],
@@ -64,13 +66,15 @@ module.exports = function defineGrammar(dialect) {
       [$.literal_type, $.pattern],
       [$.predefined_type, $.pattern],
       [$.call_expression, $._type_query_call_expression],
-      [$.call_expression, $._type_query_call_expression_in_type_annotation],
+      [$.call_expression, $._type_query_import_call_expression_in_type_annotation],
+      [$.call_expression, $._type_query_member_call_expression_in_type_annotation],
       [$.new_expression, $.primary_expression],
       [$.meta_property, $.primary_expression],
       [$.construct_signature, $._property_name],
     ]),
 
     conflicts: ($, previous) => previous.concat([
+      [$.expression, $._typed_template_call],
       [$.call_expression, $.instantiation_expression, $.binary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
@@ -82,8 +86,12 @@ module.exports = function defineGrammar(dialect) {
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
 
-      [$._call_signature, $.function_type],
-      [$._call_signature, $.constructor_type],
+      // The arrow function's own signature (see arrow_function) takes over these conflicts from _call_signature.
+      [$._arrow_call_signature, $.function_type],
+      [$._arrow_call_signature, $.constructor_type],
+      ...(dialect === 'typescript' ? [
+        [$.type_parameters, $._nonempty_type_parameters],
+      ] : []),
 
       [$.primary_expression, $._parameter_name],
       [$.primary_expression, $._parameter_name, $.primary_type],
@@ -115,7 +123,9 @@ module.exports = function defineGrammar(dialect) {
       dialect === 'typescript' ? [
         [$.primary_type, $.type_parameter],
       ] : [
-        [$.jsx_opening_element, $.type_parameter],
+        [$.jsx_opening_element, $._arrow_type_parameter],
+        [$.jsx_opening_element, $.type_parameter, $._arrow_type_parameter],
+        [$.type_parameter, $._arrow_type_parameter],
         [$.jsx_namespace_name, $.primary_type],
       ],
     ),
@@ -141,8 +151,18 @@ module.exports = function defineGrammar(dialect) {
           seq(optional('static'), optional($.override_modifier), optional('readonly')),
           seq(optional('abstract'), optional('readonly')),
           seq(optional('readonly'), optional('abstract')),
-          optional('accessor'),
         ),
+        // `accessor` is a modifier that COMPOSES with the ones above, not a fourth
+        // alternative to them. As an arm of that choice it was mutually exclusive with
+        // `static`, `override`, `abstract` and `readonly`, so `static accessor x = 1`
+        // and `abstract accessor x: number` were rejected outright. Accessibility
+        // modifiers and decorators are matched in earlier clauses, which is why
+        // `public accessor` and `@dec accessor` were the only two that ever worked.
+        //
+        // `readonly accessor` is over-accepted here: TypeScript rejects it (TS1243).
+        // Excluding it would need the readonly-bearing arms split, and a grammar that
+        // accepts a little more than the type checker is harmless.
+        optional('accessor'),
         field('name', $._property_name),
         optional(choice('?', '!')),
         field('type', optional($.type_annotation)),
@@ -171,15 +191,16 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       call_expression: $ => choice(
-        prec('call', seq(
+        prec.dynamic(2, prec('call', seq(
           field('function', choice($.expression, $.import)),
           field('type_arguments', optional($.type_arguments)),
           field('arguments', $.arguments),
-        )),
+        ))),
         prec('template_call', seq(
           field('function', choice($.primary_expression, $.new_expression)),
           field('arguments', $.template_string),
         )),
+        $._typed_template_call,
         prec('member', seq(
           field('function', $.primary_expression),
           '?.',
@@ -187,6 +208,20 @@ module.exports = function defineGrammar(dialect) {
           field('arguments', $.arguments),
         )),
       ),
+
+      // A tagged template with type arguments, `sql<{ a: string }>`x``. The callee
+      // is a primary_expression, as for the template above, so a prefix, binary or
+      // update operator in front binds to the whole tagged template, as in tsc
+      // (`await sql<T>`x`` is await (sql<T>`x`)). It conflicts with reducing the
+      // callee to an `expression` for a call or an instantiation. Dynamic
+      // precedence settles the readings that both parse: the template wins over
+      // the comparison `(a < b) > template`, and a plain call outranks the
+      // template reading so `c ? f<R<S>>(d) : e` still reads as a call.
+      _typed_template_call: $ => prec.dynamic(1, seq(
+        field('function', choice($.primary_expression, $.new_expression)),
+        field('type_arguments', $.type_arguments),
+        field('arguments', $.template_string),
+      )),
 
       new_expression: $ => prec.right('new', seq(
         'new',
@@ -269,6 +304,35 @@ module.exports = function defineGrammar(dialect) {
         '/>',
       )),
 
+      // A `&` that starts no complete html_character_reference is text, as tsc reads it (`"E&xit"`, `"a&"`).
+      _jsx_string: $ => choice(
+        seq(
+          '"',
+          repeat(choice(
+            alias($.unescaped_double_jsx_string_fragment, $.string_fragment),
+            $.html_character_reference,
+            alias($._jsx_string_ampersand, $.string_fragment),
+          )),
+          '"',
+        ),
+        seq(
+          '\'',
+          repeat(choice(
+            alias($.unescaped_single_jsx_string_fragment, $.string_fragment),
+            $.html_character_reference,
+            alias($._jsx_string_ampersand, $.string_fragment),
+          )),
+          '\'',
+        ),
+      ),
+
+      // No precedence: a complete html_character_reference is longer and wins. A regex, not '&', keeps it a leaf.
+      _jsx_string_ampersand: _ => token.immediate(/&/),
+
+      // As in tree-sitter-javascript, but `&` no longer takes the closing quote with it.
+      unescaped_double_jsx_string_fragment: _ => token.immediate(prec(1, /([^"&]|&[^"#A-Za-z])+/)),
+      unescaped_single_jsx_string_fragment: _ => token.immediate(prec(1, /([^'&]|&[^'#A-Za-z])+/)),
+
       export_specifier: (_, previous) => seq(
         optional(choice('type', 'typeof')),
         previous,
@@ -336,6 +400,15 @@ module.exports = function defineGrammar(dialect) {
       non_null_expression: $ => prec.left('unary', seq(
         $.expression, '!',
       )),
+
+      // The scanner never produces `_lexical_declaration_binding`; its validity tells it that `let` may go on
+      // with a binding on the next line (`let⏎in_x = 1`), where `let` alone could also end a statement.
+      lexical_declaration: $ => seq(
+        field('kind', choice('let', 'const')),
+        optional($._lexical_declaration_binding),
+        commaSep1($.variable_declarator),
+        $._semicolon,
+      ),
 
       variable_declarator: $ => choice(
         seq(
@@ -694,11 +767,12 @@ module.exports = function defineGrammar(dialect) {
       // required beforehand. This allows for parsing of annotations such as
       // foo: import('x').y.z;
       // but was a nightmare to get working.
-      _type_query_member_expression_in_type_annotation: $ => seq(
+      // A member chain that is not a pure `import(...)` dot chain: it has a bare `import` or a call in it.
+      _type_query_other_member_expression_in_type_annotation: $ => seq(
         field('object', choice(
           $.import,
-          alias($._type_query_member_expression_in_type_annotation, $.member_expression),
-          alias($._type_query_call_expression_in_type_annotation, $.call_expression),
+          alias($._type_query_other_member_expression_in_type_annotation, $.member_expression),
+          alias($._type_query_member_call_expression_in_type_annotation, $.call_expression),
         )),
         '.',
         field('property', choice(
@@ -706,10 +780,32 @@ module.exports = function defineGrammar(dialect) {
           alias($.identifier, $.property_identifier),
         )),
       ),
-      _type_query_call_expression_in_type_annotation: $ => seq(
+      // A dot chain that starts at `import(...)`, with no call in between and no bare `import`: the only
+      // chain that may end in type arguments (ours, on top of upstream #365).
+      _type_query_import_member_expression_in_type_annotation: $ => seq(
+        field('object', choice(
+          alias($._type_query_import_call_expression_in_type_annotation, $.call_expression),
+          alias($._type_query_import_member_expression_in_type_annotation, $.member_expression),
+        )),
+        '.',
+        field('property', choice(
+          $.private_property_identifier,
+          alias($.identifier, $.property_identifier),
+        )),
+      ),
+      // Type arguments only on the outermost member, not on an object or callee (ours, on top of upstream #365).
+      _type_query_instantiated_member_expression_in_type_annotation: $ => seq(
+        $._type_query_import_member_expression_in_type_annotation,
+        $.type_arguments,
+      ),
+      _type_query_import_call_expression_in_type_annotation: $ => seq(
+        field('function', $.import),
+        field('arguments', $.arguments),
+      ),
+      _type_query_member_call_expression_in_type_annotation: $ => seq(
         field('function', choice(
-          $.import,
-          alias($._type_query_member_expression_in_type_annotation, $.member_expression),
+          alias($._type_query_import_member_expression_in_type_annotation, $.member_expression),
+          alias($._type_query_other_member_expression_in_type_annotation, $.member_expression),
         )),
         field('arguments', $.arguments),
       ),
@@ -729,8 +825,8 @@ module.exports = function defineGrammar(dialect) {
         $.readonly_type,
         $.constructor_type,
         $.infer_type,
-        prec(-1, alias($._type_query_member_expression_in_type_annotation, $.member_expression)),
-        prec(-1, alias($._type_query_call_expression_in_type_annotation, $.call_expression)),
+        prec(-1, alias($._type_query_other_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_member_call_expression_in_type_annotation, $.call_expression)),
       ),
 
       tuple_parameter: $ => seq(
@@ -776,6 +872,13 @@ module.exports = function defineGrammar(dialect) {
         $.flow_maybe_type,
         $.type_query,
         $.index_type_query,
+        // `import(...)` types that may be followed by `[]` or an index (`import('x').Y[]`, `import('x')['k']`): a
+        // member chain that starts at `import(...)` and the bare `import(...)`. They are primary types, not only
+        // `type`s, because `array_type`, `lookup_type`, `keyof` and the like take a primary type. The chains with a
+        // call or a bare `import` stay in `type` (below): tsc rejects `import('x').A()[]` and `import.A[]`.
+        prec(-1, alias($._type_query_import_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_instantiated_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_import_call_expression_in_type_annotation, $.call_expression)),
         alias($.this, $.this_type),
         $.existential_type,
         $.literal_type,
@@ -1001,16 +1104,93 @@ module.exports = function defineGrammar(dialect) {
         )),
       ),
 
+      // tsc's parser accepts an empty list (`type A<> = number;`); TS1098 is a checker error.
       type_parameters: $ => seq(
+        '<', optional(seq(commaSep1($.type_parameter), optional(','))), '>',
+      ),
+
+      // tsc reads `<>(x) => x` as a type assertion with no type (TS1110), so an arrow function needs a non-empty list.
+      arrow_function: $ => seq(
+        optional('async'),
+        choice(
+          field('parameter', choice(
+            alias($._reserved_identifier, $.identifier),
+            $.identifier,
+          )),
+          $._arrow_call_signature,
+        ),
+        '=>',
+        field('body', choice(
+          $.expression,
+          $.statement_block,
+        )),
+      ),
+
+      _arrow_call_signature: $ => seq(
+        field('type_parameters', optional(alias($._nonempty_type_parameters, $.type_parameters))),
+        field('parameters', $.formal_parameters),
+        field('return_type', optional(
+          choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+        )),
+      ),
+
+      _nonempty_type_parameters: $ => seq(
         '<', commaSep1($.type_parameter), optional(','), '>',
       ),
 
       type_parameter: $ => seq(
         optional('const'),
-        field('name', $._type_identifier),
+        optional(choice('in', seq(optional('in'), 'out'))),
+        // `out` is contextual: `type A<out> = out` names a type parameter `out` (tsc accepts it).
+        field('name', choice($._type_identifier, alias('out', $.type_identifier))),
         field('constraint', optional($.constraint)),
         field('value', optional($.default_type)),
       ),
+
+      // tsx only. tsc reads `<in` and `<out` after an expression-start `<` as a JSX tag name and rejects a
+      // variance modifier on the first type parameter of an arrow function, so that one takes none; `in` and `out`
+      // stay plain names and tags, as before variance annotations existed. Later parameters (`<T, in U>`) are
+      // unambiguous and keep them.
+      ...(dialect === 'tsx' ? {
+        arrow_function: $ => seq(
+          optional('async'),
+          choice(
+            field('parameter', choice(
+              alias($._reserved_identifier, $.identifier),
+              $.identifier,
+            )),
+            $._arrow_call_signature,
+          ),
+          '=>',
+          field('body', choice(
+            $.expression,
+            $.statement_block,
+          )),
+        ),
+
+        _arrow_call_signature: $ => seq(
+          field('type_parameters', optional(alias($._arrow_type_parameters, $.type_parameters))),
+          field('parameters', $.formal_parameters),
+          field('return_type', optional(
+            choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+          )),
+        ),
+
+        _arrow_type_parameters: $ => seq(
+          '<',
+          alias($._arrow_type_parameter, $.type_parameter),
+          repeat(seq(',', $.type_parameter)),
+          optional(','),
+          '>',
+        ),
+
+        _arrow_type_parameter: $ => seq(
+          optional('const'),
+          field('name', $._type_identifier),
+          field('constraint', optional($.constraint)),
+          field('value', optional($.default_type)),
+        ),
+      } : {}),
 
       default_type: $ => seq(
         '=',
@@ -1085,6 +1265,13 @@ module.exports = function defineGrammar(dialect) {
         'protected',
         'override',
         'readonly',
+        // `accessor` is contextual, not reserved: a class member may be named
+        // `accessor`, and in the method form that is plain ECMAScript predating
+        // TypeScript. Without this row the anonymous `accessor` modifier token wins
+        // at the start of a member and the following `(`, `;`, `=` or `:` has no
+        // name to attach to. This is the same mechanism `static`, `readonly`,
+        // `override` and `declare` already rely on to be nameable.
+        'accessor',
         'module',
         'any',
         'number',

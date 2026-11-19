@@ -13,6 +13,166 @@
   - `test/examples/known-failures.txt`: no entry cleared (no listed file uses this form).
   - Credit: upstream tree-sitter/tree-sitter-typescript PR #358 by @gthb, head commit
     `8a43a912d4a941767829a00ff0be80318762a4f1` (grammar hunk and corpus test taken unchanged).
+- TSX: a bare `&` in JSX text (`<p>Shipping & Handling</p>`, `<p>&</p>`, `<p>&foo</p>`, `<p>&한글</p>`) is part of the
+  `jsx_text` node instead of an `ERROR`. Only a complete character reference still ends the text and becomes an
+  `html_character_reference` node, as before; "complete" means the shapes the existing `html_character_reference`
+  token accepts (`&name;` with 1 to 30 ASCII letters, `&#` 1 to 5 ASCII digits `;`, `&#x` 1 to 6 ASCII hex digits
+  `;`), so `&amp;`, `&#38;` and `&#x26;` are references while `&frac12;` (a digit in the name), `&#123456;` and
+  `&#١;` (a non-ASCII digit) are text. The change is in the external scanner (`common/scanner.h`); the generated
+  parsers are unchanged, and the typescript grammar is not affected.
+  - Node kinds and fields added: none.
+  - Error-free tree changes: none found (existing corpus inputs, the P112 JSX inputs and the P105 `&` inputs, both
+    grammars).
+  - `test/examples/known-failures.txt`: 15 entries cleared (`v1.1: bare & in JSX text`), all under
+    `examples/vscode/extensions/copilot/src/extension/prompt{,s}/`. The desktop entry
+    `app/test/unit/ui/structural-and-text-components-test.tsx` stays: its `&` is in a JSX attribute string
+    (`text="E&xit"`), which this change does not cover.
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #371 by @pmeredit, head commit
+    `f8637eb92272dd9c2c69ebc62e5f72c016e0b6b7` (scanner change and corpus test taken unchanged). Ours on top: the
+    reference check uses ASCII digit ranges instead of `iswdigit` / `iswxdigit`, which accept other digits on some
+    platforms (with MSYS2 gcc on Windows `<p>&#١;</p>` was an `ERROR`), and the corpus test has the non-ASCII digit
+    and length-limit inputs.
+- An `import(...)` type whose member takes type arguments parses without error in both grammars (issues #322, #352):
+  `type Foo = import('foo').Foo<F>`, `let x: import('m').C<string, number>`, `type T = import('m').A.B<string>`.
+  Before, the `<...>` part was an `ERROR` (or a `MISSING ";"` followed by a stray type assertion). The type arguments
+  are a child of the `member_expression` that the grammar already uses for `import('m').X` in type position, and only
+  of the outermost one: type arguments on an inner member or on a callee stay errors, as in tsc (TS1005), e.g.
+  `import('m').A<string>.B` and `import('m').A<string>()`.
+  - Node kinds and fields added: `member_expression` may now have a `type_arguments` child (no field name), in both
+    grammars. No node kind or field removed or renamed.
+  - Error-free tree changes: none found (existing corpus inputs and the P112 `importtype-*` inputs, both grammars).
+  - `test/examples/known-failures.txt`: 3 entries cleared (`v1.1: import(...) type followed by a member, type
+    arguments, index or []`). Not fixed by this change, still listed: an `import(...)` type followed by `[]` or an
+    index (`import('x').Y[]`, `import('x').Y['k']`; 8 entries) and `typeof import(...)` as a type argument
+    (`importOriginal<typeof import('vscode')>()`; 15 entries).
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #365 by @elecnix, head commit
+    `92634edfbf75963f8b47c6740e9e89ee289ae3df` (corpus test taken unchanged; the grammar change starts from its hunk).
+  - Ours on top of #365: #365 adds `optional($.type_arguments)` to the recursive member rule, which is also the
+    `object` of a member and the `function` of a call, so it accepted `import('m').A<string>.B`,
+    `import('m').A<string>.B<number>`, `import('m').A<string>()` and `import('m').A<string>().B<number>`. We put the
+    type arguments in a separate rule used only for the outermost member (aliased to the same `member_expression`) and
+    drop #365's conflict entry. That rule first wrapped the whole member rule, whose `object` can be a call or a bare
+    `import`, so `import('m').A().B<string>`, `import('m').A.B().C<string>` and `import.A<string>` (tsc rejects all
+    three) parsed clean. The type arguments now go only on a dot chain that starts at `import(...)`, with no call in
+    between and no bare `import`: the member and call rules are split into that chain and the rest (hidden rules, same
+    aliases; each of the two conflict entries for the member and call rules is split in two). Trees of the inputs #365 fixes are unchanged.
+  - Known differences from tsc (not fixed here): ten inputs that tsc 7.0.2 rejects parse clean in both grammars with this
+    change (error at the base). In each case the same defect without type arguments after `import(...)` was already
+    accepted at the base (`3061888`, both grammars, tsc rejects it), so this change extends existing leniency to the new
+    type-arguments path and adds no new kind of leniency:
+    - `import(...)` with invalid arguments followed by a member and type arguments: `type T = import().A<string>;`
+      (TS1110), `import('m' + '/sub').A<string>`, `import('m', opts).A<string>`, `import('m', {}, {}).A<string>`,
+      `import(getModule()).A<string>`, `import('m', { wrong: {} }).A<string>`, `import('m',).A<string>` (TS1005) and
+      `import(...args).A<string>` (TS1110). Base accepts `type T = import().A;`, `import('m' + '/sub').A`, and the same
+      six other argument forms without `<string>`.
+    - `let x: import('m').A.B` and, on the next line, `<string>;`: tsc reports TS1109 (typescript) and TS17008
+      (tsx), because type arguments cannot follow a line break; the grammar attaches `<string>` to the type. Base
+      accepts `let x: Foo` + line break + `<string>;` and `let x: a.B` + line break + `<string>;`.
+    - `type T = import('m').A<typeof import('n').B().C<string>>;` (TS1005): the call inside the nested `typeof` path.
+      Base accepts `type T = typeof import('n').B().C<string>;` and `type T = X<typeof import('n').B().C<string>>;`.
+    These stay open for a later change.
+- The `accessor` modifier composes with `static`, `override`, `abstract` and `readonly` in both grammars
+  (issue #369): `static accessor x = 1`, `abstract accessor x: number`, `override accessor x = 1`,
+  `static override accessor x = 1`, `@dec static accessor x = 1`, `private static accessor x = 1`. A class member may
+  also be named `accessor`: `accessor() {}`, `accessor;`, `accessor = 1`, `accessor: number = 1`. Before, these were
+  `ERROR`s. `readonly accessor x` is accepted too (tsc rejects it only in the checker, TS1243). `declare accessor x`
+  already parsed before this change and is unchanged.
+  - Node kinds and fields added: none (`node-types.json` unchanged in both grammars).
+  - Error-free tree change: `accessor` followed by a line break and a member name, `class A { accessor` + newline +
+    `x = 1 }`, was one field `x` with the `accessor` modifier; it is now two fields, `accessor` and `x = 1`, as tsc
+    reads it (automatic semicolon insertion; tsc emits `accessor;` and `x = 1;`). On such input the JavaScript
+    highlights query gains one `@property` capture for `accessor`.
+  - Known differences from tsc (recorded, not fixed here):
+    - Nine literal/expression inputs that tsc rejects are now accepted after `static accessor`, because the field
+      rules already accept the same text without `accessor` (the grammar does not validate literals). Each is one
+      file, `class A { static accessor <member> }`, with `<member>` = `012 = 1` (TS1121), `08 = 1` (TS1489),
+      `0_1 = 1` (TS6188), `01n = 1` (TS1121, TS1005), `"\8" = 1` (TS1488), `"\1" = 1` (TS1487),
+      `"\u{110000}" = 1` (TS1198), `x = 01` (TS1121), `x = (y: number)` (TS1005, `'=>' expected`). Base: `ERROR`;
+      now: no error. Control: the same inputs without `accessor` (`class A { static 012 = 1; }` and so on) are
+      already accepted at base and now. Validating literals is a later candidate.
+    - Automatic semicolon insertion after `accessor` is not complete. When the line break after `static accessor`
+      is a newline inside a block comment (`static accessor /*` + newline + `*/ x = 1`), a lone CR, U+2028 or
+      U+2029, or when `in` follows the line break, the scanner does not insert the semicolon, so the input is one
+      static auto-accessor where tsc reads two fields (`static accessor;` and `x = 1;`). Base: `ERROR`; now: no
+      error, wrong tree. A plain LF, CRLF or `//` comment line break gives the same two fields in base, now and tsc.
+      Without `static`, the block-comment input was already one field at base. Fixed separately (N5).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses these forms).
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #381 by @jhoward321, head commit
+    `affacccfb08d6370a488df542de257017f38be28` (grammar hunks and corpus tests taken unchanged; the line-break test is
+    ours).
+- A tagged template with type arguments parses as a `call_expression` with `type_arguments` in both grammars
+  (issue #341): ``f<T>`x` ``, ``a.b<T>`x` ``, ``sql<{ a: string }>`select` ``, ``f<T[]>`x` ``, ``f<[A, B]>`x` ``,
+  ``f<() => void>`x` ``. Object, array, function and tuple-of-type-keyword type arguments (``f<[string, number]>`x` ``) were `ERROR`s
+  before; simple ones, including a tuple of identifiers (``f<[A, B]>`x` ``, read as an `array`), were misread without
+  error as comparisons, ``(f < T) > `x` ``. A prefix, binary or update operator in front binds to the
+  whole tagged template, as in tsc (``await sql<T>`x` `` is `await (sql<T>`x`)`), and calls, instantiation expressions
+  and comparisons such as `f<T>(x)`, `a < b > c` and `c ? f<R<S>>(d) : e` keep their trees.
+  - Node kinds and fields added: none (`call_expression` already has the `type_arguments` field;
+    `node-types.json` unchanged in both grammars).
+  - Error-free tree changes (intended, the base trees were misparses): ``f<T>`x` ``, ``a.b<T>`x` ``,
+    ``f<A, B>`x` ``, ``f<[A, B]>`x` ``, ``f<Array<T>>`x` ``, ``f<T>`a${b}c` ``, ``a < b > `x` ``, ``a<b>`x`.y``, ``f<T>`x``y` ``,
+    ``await sql<T>`x` `` and ``new Foo<T>`x` `` (now `new (Foo<T>`x`)`), and the same forms after `+`, `*`, `typeof`,
+    `void`, `delete`, `!`, `-` and `++`, change from `binary_expression` / `sequence_expression` trees to
+    `call_expression` + `type_arguments`. tsc reads all of them as tagged templates. Highlight and tag queries match
+    accordingly (for example `@function` and `@reference.call` on the tag).
+  - `test/examples/known-failures.txt`: no entry cleared.
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #382 by @jhoward321, head commit
+    `3517fdf4b0de94c7abc48df803a1118d7286ca4e` (grammar hunks and corpus tests taken unchanged). PR #342 and #350 are
+    not used (#350 changes generated files and a corpus test only, and only for typescript).
+- Variance annotations on type parameters parse without error in both grammars (issue #370): `interface I<in T>`,
+  `type B<out T>`, `class C<in out T>`, `class D<const in T>`, `declare class C<in out T>`,
+  `type G<in A, out B>`, `interface Q<out A extends string = 'a'>`. Before, `in`/`out` there was an `ERROR`. The
+  modifiers are anonymous tokens before the `name` field of `type_parameter`. A type parameter may still be named
+  `out`: `type A<out> = out`, `type B<out = string> = out` and `type C<T, out> = out` keep parsing as before, and `out` stays
+  an ordinary identifier elsewhere (`const out = 1; out.x;`, `let x: out;`). `type E<in out> = number` (an `in`
+  modifier on a parameter named `out`) was an error before and now parses.
+  - tsx: `<in` and `<out` after an expression-start `<` stay JSX tags: `<in />`, `<out />`, `<in y />`,
+    `<out in T />`, `<in out>text</in>`, `<out in><in out /></out>` parse as `jsx_self_closing_element` /
+    `jsx_element` exactly as before (tsc reads them as JSX). To keep that, an arrow function takes no variance
+    modifier on its *first* type parameter in tsx (tsc rejects `<in T,>(x: T) => x` and `<out T,>(x: T) => x` in
+    .tsx files too); later parameters keep them (`<T, in U>(x: U) => x`), and `<T,>`, `<T extends X>`, `<out,>`,
+    `<out = X>`, `<const T,>` and `async <T,>` parse as before. `typescript` is not affected. This adds the
+    hidden rules `_arrow_call_signature`, `_arrow_type_parameters` and `_arrow_type_parameter` (aliased to
+    `type_parameters` / `type_parameter`) to the tsx grammar: no visible node kind or field changes.
+  - Node kinds and fields added: the anonymous node `out`, in both grammars. No node kind or field removed or renamed.
+  - Error-free tree changes: one, in `typescript` only: `const f = async <in>(x: T) => x;` (tsc rejects it, TS1109)
+    was an `arrow_function` and is now a `binary_expression` chain. Nothing else among the corpus inputs, the P112
+    inputs, the review probes and the 710 `.tsx` example files.
+  - Intended new errors (tsc rejects them, TS1359): `type D<in> = number;` and `type L<in, T> = T;` parsed without
+    error before and now report an error.
+  - Kept as they are (owner decision, 2026-11-19): `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
+    `<in const T>` still report an error, although tsc's parser accepts them (it rejects them only in the checker,
+    TS1030 / TS1029); `type E<out extends string> = out;` still parses without error (a parameter named `out` with a
+    constraint), although tsc rejects it (TS1359).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses variance annotations).
+  - Credit: upstream tree-sitter/tree-sitter-typescript PR #364 by @tomerwave, head commit
+    `465aa162d077093dc5ad4f46a9463bde6274425e` (grammar hunk and corpus test taken unchanged). Keeping `out` usable
+    as a type parameter name (`alias('out', $.type_identifier)` in `name`) is ours; with #364 alone those inputs
+    become errors.
+- In the `tsx` grammar, a `&` in a JSX attribute string that does not start a complete character reference parses
+  without error: `<A text="E&xit" />`, `'E&xit'`, `"&#"`, `"&#65"`, `"&ab;cd&ef"`, and a `&` right before the closing
+  quote (`"a&"`, `'a&'`). `tsc` 7.0.2 accepts all of these. Before, `&` followed by `#` or an ASCII letter had to start
+  an `html_character_reference`, so `"E&xit"` gave `(string (string_fragment) (ERROR (identifier)))`; and a `&` before
+  the closing quote took the quote into the `string_fragment`, so the string ran on to the next quote. A complete
+  reference (the shapes the existing `html_character_reference` token accepts: an ASCII name of 1-30 letters, `&#` and
+  1-5 ASCII digits, `&#x` or `&#X` and 1-6 ASCII hex digits, then `;`) is still an `html_character_reference`; a `&`
+  that starts an incomplete reference is now its own `string_fragment` (`"E&xit"` gives three: `E`, `&`, `xit`). The
+  JSX text rules and the `typescript` grammar are unchanged (its generated `parser.c` and both `node-types.json` are byte-identical).
+  - Node kinds and fields added: none.
+  - Error-free tree changes: two kinds of input that parsed without error before this change.
+    - Now an error, as intended: a `&` before the closing quote of one attribute string followed by an unterminated
+      string, for example `<A t="a&" b="/>;` (before: one string `"a&" b="`; `tsc` reports TS1002, unterminated
+      string literal).
+    - Still error-free, but the tree is corrected (the same swallowed-attribute defect on valid input):
+      `<A t="&" b="/>//"/>;` and `<A t='&' b='/>// '/>;`. Before, the string of `t` swallowed `" b="` (it ran from
+      its opening quote to the quote opening `b`'s value), the element closed at the first `/>` (bytes 12-14) and the
+      rest was a `comment`. Now `t="&"` and `b="/>//"` are two `jsx_attribute` nodes and the element closes at the
+      later `/>` (bytes 17-19; 18-20 in the single-quoted input). Schema: no change. Queries: the JSX `@attribute`
+      capture gains `b`, the `@comment` range of the old tree is gone, `@string` follows the two string nodes. `tsc`
+      7.0.2 accepts both inputs; both are oracle accept cases (`n3/attr-swallow-regression-double.tsx`,
+      `n3/attr-swallow-regression-single.tsx`).
+  - `test/examples/known-failures.txt`: `examples/desktop/app/test/unit/ui/structural-and-text-components-test.tsx`
+    cleared (`text="E&xit"`).
 - A block comment that starts a line before a ternary `?` is kept in the tree, in both grammars: in `a⏎/* c */ ? b : c;`
   the `comment` node was missing (no `ERROR`, no `MISSING`, the comment's bytes simply belonged to no node). The
   external scanner, deciding whether to insert a semicolon after `a`, skipped the comment and then read the `?` as the
@@ -20,51 +180,188 @@
   block comment (`common/scanner.h`; the port of tree-sitter-javascript `e7d9759` in upstream `52f79e4` had kept only
   the line-comment half). `tsc` 7.0.2 accepts these inputs.
   - Node kinds and fields added: none (no generated file changes).
-  - Error-free tree changes: inputs of this shape gain the `comment` node they lacked; nothing else in their trees
-    changes. Among the pinned example files exactly one has this shape,
+  - Error-free tree changes: valid inputs of this shape gain the `comment` node they lacked; nothing else in their
+    trees changes. Among the pinned example files exactly one has this shape,
     `examples/vscode/src/vs/platform/userDataSync/common/abstractSynchronizer.ts` (line 575), and it gains one
-    `comment` node. Queries: `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
+    `comment` node (`[574, 5] - [574, 54]`; measured by parsing all 17,665 pinned example files and comparing the full
+    CST of the one candidate file the scanner path can reach). Queries:
+    `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
+  - Error-flag changes (error-free before, an error now, in both grammars; intended): a block comment before an
+    operator that is directly followed by `?`: `a⏎/* c */ +? b : c;` and the same with `-?`, `/?`, `in?` and
+    `instanceof?`. At the base the automatic-semicolon check consumed the comment and part of the operator, the
+    ternary `?` was then read from there, and the input parsed with exit 0 as a plain ternary expression (comment and
+    operator in no node). Now the comment is kept as a `comment` node, the `?` is read normally and the tree has an
+    `ERROR` node starting at the `?`. `tsc` 7.0.2 rejects all five inputs (TS1109, first diagnostic at the `?`), so
+    the new error is correct.
+  - Not changed, recorded: the same shapes without the block comment (`a⏎+? b : c;`, `-?`, `/?`, `in?`,
+    `instanceof?`) and with a line comment instead (`a⏎// c⏎+? b : c;` and the others) are rejected by `tsc`
+    (TS1109) and accepted by the grammar before and after this change, with the operator in no node. This is an
+    older mismatch (the automatic-semicolon check consumes the operator before the ternary `?` is read), left open.
   - `test/examples/known-failures.txt`: no entry cleared (the affected inputs had no error before).
+- An `import(...)` type followed by `[]` or an index parses without error in both grammars: `import('x').Y[]`,
+  `import('x').Y['k']`, `import('x')['k']`, `import('x')[]`, `import('x').Y<T>[]`, and the same types as operands of
+  `readonly`, `keyof`, `?` in a tuple, a conditional type and so on (tsc accepts all of them). Before, the `[...]`
+  part was an `ERROR`. The member chain that starts at `import(...)` and the bare `import(...)` (hidden rules from
+  S4, aliased to `member_expression` and `call_expression` as before) are now primary types, which is what
+  `array_type`, `lookup_type` and `keyof` take; they were only `type`s. The chains with a call or a bare `import`
+  (`import('x').A()`, `import.A`) stay `type`s, so `import('x').A()[]` and `import.A[]` stay errors, as in tsc.
+  - Node kinds and fields added: none. The `primary_type` supertype lists `call_expression` and `member_expression` as
+    subtypes (`node-types.json`, both grammars); `test/node-kinds` is unchanged.
+  - Error-free tree change: an `as` or `satisfies` expression whose type is an `import(...)` member chain or a bare
+    `import(...)`, followed on the same line by an index: `const x = v as import('x').Y['k'];`,
+    `v satisfies import('x')['k']`, `v as import('x').Y[0]`, `v as import('x').Y[a.b]` (tsc 7.0.2 accepts all of them
+    and reads the index as part of the type: it erases it from the emit). At the base the index was read as an
+    expression: a `subscript_expression` around the `as_expression` (or `satisfies_expression`); now it is a
+    `lookup_type` inside the type, as tsc reads it. A consumer that matched `subscript_expression` over an `as`
+    expression on such input must match `lookup_type` instead. Same change in both grammars; the oracle record
+    `n1/lookup-string` covers `let x: import('x').Y['k']`, the corpus test `Import type with an index after as or
+    satisfies, on one line` (and its TSX copy) pins the `as` / `satisfies` form. No query in `queries/` or in the
+    inherited JavaScript queries names `subscript_expression`, `lookup_type`, `as_expression` or `array_type`; the
+    `string` / `number` index is a `literal_type` around the same `string` / `number` node, so the highlight captures
+    on it are unchanged.
+  - Same input, index on the next line: `const x = v as import('x').Y` + line break + `[a + b];` (also `satisfies`,
+    `[f()]`, `[a?.b]`) is an `ERROR` since this change, a `subscript_expression` at the base; tsc accepts it (a type
+    index must start on the same line) and reads two statements. The base already reads every other type the same
+    way (`v as Foo` + line break + `[a + b];` is an `ERROR` at the base, and `['k']`, `[0]` or `[a.b]` on the next line is
+    silently absorbed into the type), so this change extends that existing limitation to `import(...)` types and
+    adds no new kind of difference. Not fixed here; a separate change for all types.
+  - `test/examples/known-failures.txt`: 8 entries cleared (`v1.1: import(...) type followed by a member, type
+    arguments, index or []`).
+  - Not fixed, still errors although tsc accepts them (they were errors at the base too): an `import(...)` member
+    type inside parentheses or after `...` in a tuple (`(import('x').Y)[]`, `[...import('x').Y[]]`), `import('x')<T>`, and `f<import('x').B>()`.
+  - Not part of this change: `typeof import('m')` as a type argument of a call (`importOriginal<typeof import('vscode')>()`,
+    15 `known-failures.txt` entries), a separate cause fixed in its own change. One of those files,
+    `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`, also
+    uses `import('vscode').ChatResultUsage[]` (line 211): it needs both changes, and whichever is merged second removes
+    its entry.
+  - Ours, no upstream pull request.
+- An empty type parameter list (`type A<> = number;`, `class C<> {}`, `interface I<> {}`, `function f<>() {}`,
+  `m<>() {}`, `type F = <>() => void;`) parses without error in both grammars. `tsc` 7.0.2 reports nothing for these
+  with `--noCheck` (TS1098 "Type parameter list cannot be empty" is a checker error, and `tsc` does not report it at all
+  for type aliases and interfaces). Before, both grammars put a zero-width `type_parameter` holding a `MISSING
+  type_identifier` inside `type_parameters`; now `type_parameters` has no children.
+  - Node kinds and fields added: none. `node-types.json` in both grammars: the children of `type_parameters` are no
+    longer `required` (it may be empty); nothing removed or renamed.
+  - Error-free tree changes: none found (existing corpus inputs, the probe inputs, and all 17,664 `.ts`/`.tsx` files
+    of the pinned examples, whose trees are byte-identical to the base).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses this form).
+  - An arrow function still needs a non-empty list: `const g = <>(x) => x;` and `<>() => 1` stay errors in the
+    `typescript` grammar, as `tsc` reads `<>` there as a type assertion with no type (TS1110). The arrow function has
+    its own signature rule for this; the conflicts `[_call_signature, function_type]` and
+    `[_call_signature, constructor_type]` move to it. In `tsx` the arrow function's signature is the one the variance
+    entry above defines (`_arrow_type_parameters`: a first parameter without a variance modifier, then any number,
+    so the list is non-empty there too); only `typescript` uses `_nonempty_type_parameters`.
+  - Error trees only: with an empty list allowed, error recovery for a variance modifier alone changes, e.g.
+    `type D<in> = number;` (tsc TS1359 at 7) now gives `type_parameters` holding an `ERROR` that is exactly the `in`
+    token `[7,9)`, where it was a `type_parameter` with a `MISSING type_identifier` at 9. The four oracle cases for
+    these (`s1/neg-in-alone.*`, `s1/p112-variance-in-alone.*`) are re-registered with `errorAt` 7, `7-9:ERROR`.
+  - Known difference: an empty type argument list (`f<>(x)`, `new C<>()`, `let x: A<>;`), which `tsc` also accepts
+    with `--noCheck` (TS1099 is a checker error), still gives an error; it is not part of this release.
 - Automatic semicolon insertion treats every ECMAScript line terminator as a line break, in both grammars, as `tsc`
   does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
   scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or
   `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
-  not count as a line break either. Also, after a line break, `in` or `instanceof` followed by `=`, `:`, `?`, `;` or
-  `}` where no binary operator may follow now starts the next class or type member (`class A { x⏎in = 1; }`,
-  `interface I { a: string⏎in: number }`) instead of giving `ERROR`; `a⏎in b` and `for (var x⏎in y)` are unchanged.
-  `tsc` 7.0.2 accepts all these inputs.
+  not count as a line break either (the scanner read on to the next LF). After a line break, `in` or `instanceof`
+  where no binary operator may follow now starts the next class or type member when `=`, `:`, `?`, `;`, `}`, a
+  same-line block comment and then one of these, or a parameter list and then `{`, `:`, `;` or `}` follows
+  (`class A { x⏎in = 1; }`, `class A { a⏎in() {} }`, `interface I { a: string⏎in(): void }`), and so does a word that
+  only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)` and `for (var x⏎in (y))` are
+  unchanged. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
+  its object pattern, as on one line) and before import attributes (`import x from "x"⏎with { type: "json" };`).
+  `tsc` 7.0.2 accepts all these inputs. The scanner classifies white space and word characters by code point on these
+  paths (the grammar's extras; U+0085 is an identifier character there, as in the lexer), so the result does not
+  depend on the C library; with `ucrtbase.dll` and `msvcrt.dll` it is the same. Each call scans at most one block
+  comment that holds no line terminator, so a run of N comments costs O(N), not O(N²).
   - Node kinds and fields added: none (no generated file changes).
-  - Error-free tree changes: an input whose line break has one of these forms now gets the tree the same input gets
-    with LF. Where that tree differs from the old one: `return`, `break`, `continue`, `readonly`, `async` (class
-    member), `type` and `declare` followed by such a line break end there (`return;` then `x;`, as `tsc` reads them;
-    before, `return /*⏎*/ x` returned `x`). `static`, `get` and `set` followed by such a line break now also give two
-    members, like the LF form; `tsc` reads one member there (see the known difference below). A
-    block comment holding the line break now follows the inserted semicolon (a sibling of the statement or member)
-    instead of sitting inside it. Queries follow these trees (for example `@keyword` -> `@property` for `static`, and
-    in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`). None of the 17,665 pinned example files
-    changes its tree.
+  - Error-free tree changes. An input whose line break has one of these forms now gets the tree the same input gets
+    with LF; queries follow the trees. Where that tree differs from the old one (`⏎` here is a block comment holding a
+    line terminator, a lone CR, U+2028 or U+2029):
+    - Toward `tsc` (it reads two statements or two members):
+      - `return`, `break`, `continue` + `⏎` + operand or label: `return /*⏎*/ x` was `return x`, now `return;` then
+        `x;` (also `[x]`, `(x)`, `{x: 1}`, a tagged template, a ternary, and inside an arrow function or a JSX
+        expression). A label becomes an expression (`@variable`, `local.reference`).
+      - `yield` + `⏎` + `x`: one `yield_expression` with an operand, now `yield` then `x;`.
+      - `type` + `⏎` + `A = number;`: a type alias, now `type;` then an assignment. `declare` + `⏎` +
+        `const a: T;`: an `ambient_declaration`, now `declare;` then the declaration. `async` + `⏎` +
+        `function f() {}`: an async function, now `async;` then the function. The keyword gets `@variable` instead of
+        `@keyword`.
+      - Class members: `readonly`, `accessor`, `public`, `private`, `protected`, `declare`, `override` or `async` +
+        `⏎` + member: one member with that modifier, now a field named by the keyword and then the member (the
+        modifier node, such as `accessibility_modifier` or `override_modifier`, goes away). The keyword gets
+        `@property` (JavaScript highlights) instead of `@keyword` (TypeScript highlights); for `async`/`override` +
+        method the `definition.method` tag and `local.scope` start at the method name.
+      - `type T = A ⏎ [B];`: a `lookup_type`, now `type T = A;` then the array `[B]`.
+    - Same as the LF form, which `tsc` reads differently (recorded known differences, unchanged for LF):
+      - `static`, `get`, `set` + `⏎` + member: one static member or accessor, now two members (a field named
+        `static`, `get` or `set`, then the member); `tsc` reads one member (owner decision 12). `@keyword` ->
+        `@property`; in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`.
+    - A line comment ended by U+2028, U+2029 or a lone CR after an LF (`a⏎// c<U+2028>…`): before, the scanner read
+      the comment on to the next LF and decided there. Now the text after the comment decides, as with LF:
+      `a⏎// c<U+2028>+b`, `-b`, `(b)`, `[b]`, `` `x` ``, `<T>(x)` and `function f(): U⏎// c<U+2028>{ … }`
+      continue the expression or declaration (as `tsc` reads them; before, two statements or a `function_signature` and a block;
+      the callee or tag now gets `@function`, and `function f` its `definition.function` from the JavaScript tags).
+      `return⏎// c<U+2028>+x`, `return⏎// c<U+2028>/r/.test(s)`, `yield⏎// c<U+2028>(x)` and
+      `yield⏎// c<U+2028>/r/.test(s)` now attach the operand and `class A { async⏎// c<U+2028>*x() {} }` is one
+      async generator method, as their LF forms; `tsc` splits all five. `const f = async⏎// c<U+2028>(x) => x;` is
+      an async arrow function, as its LF form; `tsc` rejects it (TS1005).
+    - Unchanged, as their LF forms: `return /*⏎*/ +x`, `return /*⏎*/ /r/.test(s)`, `yield /*⏎*/ (x)` keep the
+      operand; `tsc` splits them.
+    - Comment placement: a block comment that holds the line break now follows the inserted semicolon (a sibling of
+      the statement or member) instead of sitting inside it; a line comment after such a comment likewise
+      (`a /* a␍*/ /* c */<U+2029>/* d */ ⏎// line<U+2028>b;`).
+    None of the 17,665 pinned example files changes its tree.
   - `test/examples/known-failures.txt`: no entry cleared.
   - Known difference kept: `static`, `get` or `set` followed by a line break (any form, LF included) and a member name
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known difference kept: `in()` or `in<T>()` as a method name after a line break still gives `ERROR` (the scanner
-    cannot tell it from `for (var x⏎in (y))`).
-- Automatic semicolon insertion before a word that starts with `in` or `instanceof` after a line break, in both
-  grammars, as `tsc` does: `in_progress`, `in1`, `in$`, `instanceof_x`, a word with a non-ASCII or `\u`-escaped
-  character after `in` (`in·x`, `in` + U+0301, `ina`). The external scanner (`common/scanner.h`) took such a word for the
-  keyword `in` or `instanceof` when the next character was not a letter by the C library's `iswalpha()` (which also
-  depends on the platform and locale), and inserted no semicolon: `a = b⏎in_progress = true`, `foo()⏎in1.x()`,
-  `class A { x⏎in_y = 1 }` and `interface I { a: string⏎in_b: number }` gave `ERROR`. Now a word continues after `in`
-  or `instanceof` on an ASCII letter, digit, `_`, `$` or `\`, or on any non-ASCII character that is not white space
-  (the grammar's own identifier characters). Also, the white space between the keyword `in` and a member's `=`, `:`,
-  `?`, `;` or `}` is matched by code point, so U+FEFF and U+200B there (`class A { x⏎in<U+FEFF>= 1 }`) no longer give
-  `ERROR`. `a⏎in b`, `a⏎instanceof B` and `for (var x⏎in y)` are unchanged. `tsc` 7.0.2 accepts all these inputs.
-  - Node kinds and fields added: none (no generated file changes).
-  - Error-free tree changes: `return`, `break`, `readonly`, `async` (class member) and `type` followed by
-    a line break and such a word now end there, as they already did before any other identifier (`return;` then
-    `in_x;`, as `tsc` reads them; before, `return⏎in_x` returned `in_x`). `static` and `get` followed by a line break
-    and such a word now give two members, as before any other identifier (the known difference above; `tsc` reads
-    one member). Queries follow these trees (for example `@keyword` -> `@property` for `readonly`). None
-    of the 17,665 pinned example files changes its tree.
+  - Known differences kept: `in<T>()` as a method name after a line break still gives `ERROR`. Four inputs that parsed
+    without error only because the old scanner read a line comment past U+2028 now give `ERROR`, as their LF forms
+    did before: `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line,
+    the known v1.1 gap) and `a as T⏎// c<U+2028>[b + c];` (a type cannot take `[` after a line break), both
+    grammars; `tsc` accepts both. The scanner cannot tell these from `class A { a⏎<T>() {} }` and `a⏎[b]`; fixing
+    them needs a grammar change. In a `(...)` after `in`, a parenthesis inside a string or template is counted.
+  - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
+    `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
+    automatic semicolon after a Flow-style ambient module type annotation.
+- Automatic semicolon insertion before a word that starts with `in` or `instanceof` after a line break where a binary
+  operator may follow, in both grammars, as `tsc` does: `a = b⏎in_progress = true`, `foo()⏎in1.x()`,
+  `c = d⏎instanceof$ = 2`, `e = f⏎inφ = 3`, `g = h⏎ina = 4` gave `ERROR`. The external scanner
+  (`common/scanner.h`) took such a word for the keyword `in` or `instanceof` when the character after it was not a
+  letter by the C library's `iswalpha()` (which also depends on the platform and locale). Now the word goes on after
+  `in` or `instanceof` on an ASCII letter, digit, `_`, `$` or `\`, or on any non-ASCII character that is not in the
+  grammar's extras (the grammar's own identifier characters), as already in class and type members (above). `a⏎in b`,
+  `a⏎instanceof B`, `for (var x⏎in y)` and `let⏎in b` are unchanged. `tsc` 7.0.2 accepts all these inputs.
+  - Right after `let`, such a word still continues the declaration, as in `tsc` and as before: `let⏎in_x = 1;`,
+    `let⏎in_x: number[];`, `let⏎in_x!: number;`, `let⏎instanceof_x, y;`. For this, `lexical_declaration` takes an
+    optional hidden external token `_lexical_declaration_binding` after its `let` or `const`; the scanner never
+    produces it, its validity only tells the scanner where it is. Other next-line words after `let` (`let⏎x = 1`,
+    `let⏎inx = 1`) still end the statement at `let`, as before (`tsc` reads one declaration; a known difference).
+  - Node kinds and fields added: none. `grammar.json` and `parser.c` change (the hidden external token);
+    `node-types.json` does not.
+  - Error-free tree changes, all toward `tsc` (it reads two statements), as before any other identifier (`ordinary`):
+    - `yield⏎in_x`: a `yield_expression` with the operand `in_x`, now `yield` then the statement `in_x;`. No query
+      capture changes.
+    - `type⏎in_x = number;`: a `type_alias_declaration`, now `type;` then an assignment. `type` loses `@keyword`, `in_x`
+      `@type` and `number` `@type.builtin` (own highlights); all three get `@variable` and `local.reference`.
+    - `async⏎in_x => in_x` and `const f = async⏎in_x => in_x;`: an async arrow function, now the identifier `async`
+      (a statement, or the initializer of `f`) then an arrow function. `async`: `@keyword` -> `@variable` and
+      `local.reference`; `local.scope` starts at the arrow function; `f` loses `@function` and its
+      `definition.function` tag.
+    - Already so with N5 (above), unchanged here; listed because the N7 review found them against `62e7b3c`, the N5
+      revision before its own fix: `continue⏎in_x` (a labelled `continue_statement`, now `continue;` then `in_x;`);
+      `public`, `private`, `protected`, `declare` or `override` + `⏎in_x = 1` in a class (one field with the modifier,
+      now a field named by the keyword then `in_x`; `@keyword` -> `@property`); `readonly⏎in_x: number` in an
+      interface (one readonly property, now two properties; `@keyword` -> `@property`). These follow `tsc`. `set⏎in_x(v)
+      {}` in a class (a setter, now a field `set` then a method; `@keyword` -> `@property`, `local.scope` and
+      `definition.method` start at `in_x`) moves away from `tsc`, as `static` and `get`: the known difference above
+      (owner decision 12).
+    None of the 17,665 pinned example files changes its tree.
+  - Newly accepted inputs that `tsc` rejects (the grammar's identifier token takes any non-space character, as for
+    words that do not start with `in`, which the same inputs already showed): `in💩 = 1`, `in! = 1` and
+    `instanceof = 1` on a new line.
+  - Known difference (pre-existing): U+0085 (NEL) is white space for `tsc` and for the C library's `iswspace()`, but
+    not in the grammar's extras, and the lexer reads it as an identifier character. The scanner follows the lexer, so
+    `class C { x⏎in<U+0085>=1 }` is a field named `in<U+0085>` (`tsc`: a field `in`), and `a⏎in<U+0085> b;` gives
+    `ERROR` (`tsc` accepts it), as before.
   - `test/examples/known-failures.txt`: no entry cleared.

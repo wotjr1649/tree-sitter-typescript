@@ -141,19 +141,19 @@ func TestParseExpect(t *testing.T) {
 }
 
 func TestWideErrorDoesNotHoldAWellFormedToken(t *testing.T) {
-	// tsc: TS1359 at byte 7 (the `in`), then TS1110 at the end. The grammar keeps `in` as a type_identifier inside one
-	// wide ERROR [0,12): that ERROR must not make a complaint about `in` agree.
-	src := "type A<in> ="
+	// tsc: TS1359 at byte 11 (the `extends`), then TS1110 at the end. The grammar keeps `extends` as a well-formed
+	// constraint keyword inside one wide ERROR [0,28): that ERROR must not make a complaint about `extends` agree.
+	src := "type A<out extends string> ="
 	nodes, r := parse(t, "typescript", src)
 	if !r.HasError() {
 		t.Fatalf("want an error tree, got %s", r)
 	}
 	at := func(n int) bool { return errorAtHolds(nodes, []byte(src), n) }
-	if at(7) {
-		t.Error("errorAt 7 lies inside the well-formed token `in` of a wide ERROR: must not hold")
+	if at(11) {
+		t.Error("errorAt 11 lies inside the well-formed token `extends` of a wide ERROR: must not hold")
 	}
-	if !at(12) {
-		t.Error("errorAt 12 (the end, where the right-hand side is missing) must hold")
+	if !at(28) {
+		t.Error("errorAt 28 (the end, where the right-hand side is missing) must hold")
 	}
 	// An ERROR that is exactly the offending token is still the error at that token.
 	nodes, r = parse(t, "tsx", "<p>></p>")
@@ -297,21 +297,21 @@ func TestLoadRefusesInconsistentInputs(t *testing.T) {
 }
 
 func TestExactAssertionIsNeverASubstituteForErrorAt(t *testing.T) {
-	// `type A<in> =`: tsc reports TS1359 at the `in` (byte 7) and TS1110 at the end (byte 12). The grammar reads `in`
-	// normally inside one ERROR [0,12). Asserting that ERROR does not turn byte 7 into an agreement: the assertion shows
-	// the recovery node exists, not that `in` was read as an error.
-	src := "type A<in> ="
+	// `type A<out extends string> =`: tsc reports TS1359 at the `extends` (byte 11) and TS1110 at the end (byte 28). The
+	// grammar reads `extends` normally inside one ERROR [0,28). Asserting that ERROR does not turn byte 11 into an
+	// agreement: the assertion shows the recovery node exists, not that `extends` was read as an error.
+	src := "type A<out extends string> ="
 	nodes, r := parse(t, "typescript", src)
-	seven := 7
-	c := Case{Source: src, ErrorAt: &seven, Expect: []string{"0-12:ERROR"}}
-	if d := check(c, "syntax", nodes, r); len(d) != 1 || !strings.Contains(d[0], "no ERROR or MISSING node holds byte 7") {
-		t.Errorf("an exact assertion must not rescue errorAt 7: %v", d)
+	eleven := 11
+	c := Case{Source: src, ErrorAt: &eleven, Expect: []string{"0-28:ERROR"}}
+	if d := check(c, "syntax", nodes, r); len(d) != 1 || !strings.Contains(d[0], "no ERROR or MISSING node holds byte 11") {
+		t.Errorf("an exact assertion must not rescue errorAt 11: %v", d)
 	}
 	// the assertion is an additional check: with errorAt at the second diagnostic it passes, and a false one still differs
-	twelve := 12
-	c = Case{Source: src, ErrorAt: &twelve, Expect: []string{"0-12:ERROR"}}
+	end := 28
+	c = Case{Source: src, ErrorAt: &end, Expect: []string{"0-28:ERROR"}}
 	if d := check(c, "syntax", nodes, r); len(d) != 0 {
-		t.Errorf("errorAt 12 with the true assertion must pass: %v", d)
+		t.Errorf("errorAt 28 with the true assertion must pass: %v", d)
 	}
 	c.Expect = []string{"0-11:ERROR"}
 	if d := check(c, "syntax", nodes, r); len(d) != 1 {
