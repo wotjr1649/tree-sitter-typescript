@@ -73,6 +73,7 @@ module.exports = function defineGrammar(dialect) {
     ]),
 
     conflicts: ($, previous) => previous.concat([
+      [$.expression, $._typed_template_call],
       [$.call_expression, $.instantiation_expression, $.binary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
@@ -143,8 +144,18 @@ module.exports = function defineGrammar(dialect) {
           seq(optional('static'), optional($.override_modifier), optional('readonly')),
           seq(optional('abstract'), optional('readonly')),
           seq(optional('readonly'), optional('abstract')),
-          optional('accessor'),
         ),
+        // `accessor` is a modifier that COMPOSES with the ones above, not a fourth
+        // alternative to them. As an arm of that choice it was mutually exclusive with
+        // `static`, `override`, `abstract` and `readonly`, so `static accessor x = 1`
+        // and `abstract accessor x: number` were rejected outright. Accessibility
+        // modifiers and decorators are matched in earlier clauses, which is why
+        // `public accessor` and `@dec accessor` were the only two that ever worked.
+        //
+        // `readonly accessor` is over-accepted here: TypeScript rejects it (TS1243).
+        // Excluding it would need the readonly-bearing arms split, and a grammar that
+        // accepts a little more than the type checker is harmless.
+        optional('accessor'),
         field('name', $._property_name),
         optional(choice('?', '!')),
         field('type', optional($.type_annotation)),
@@ -173,15 +184,16 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       call_expression: $ => choice(
-        prec('call', seq(
+        prec.dynamic(2, prec('call', seq(
           field('function', choice($.expression, $.import)),
           field('type_arguments', optional($.type_arguments)),
           field('arguments', $.arguments),
-        )),
+        ))),
         prec('template_call', seq(
           field('function', choice($.primary_expression, $.new_expression)),
           field('arguments', $.template_string),
         )),
+        $._typed_template_call,
         prec('member', seq(
           field('function', $.primary_expression),
           '?.',
@@ -189,6 +201,20 @@ module.exports = function defineGrammar(dialect) {
           field('arguments', $.arguments),
         )),
       ),
+
+      // A tagged template with type arguments, `sql<{ a: string }>`x``. The callee
+      // is a primary_expression, as for the template above, so a prefix, binary or
+      // update operator in front binds to the whole tagged template, as in tsc
+      // (`await sql<T>`x`` is await (sql<T>`x`)). It conflicts with reducing the
+      // callee to an `expression` for a call or an instantiation. Dynamic
+      // precedence settles the readings that both parse: the template wins over
+      // the comparison `(a < b) > template`, and a plain call outranks the
+      // template reading so `c ? f<R<S>>(d) : e` still reads as a call.
+      _typed_template_call: $ => prec.dynamic(1, seq(
+        field('function', choice($.primary_expression, $.new_expression)),
+        field('type_arguments', $.type_arguments),
+        field('arguments', $.template_string),
+      )),
 
       new_expression: $ => prec.right('new', seq(
         'new',
@@ -1113,6 +1139,13 @@ module.exports = function defineGrammar(dialect) {
         'protected',
         'override',
         'readonly',
+        // `accessor` is contextual, not reserved: a class member may be named
+        // `accessor`, and in the method form that is plain ECMAScript predating
+        // TypeScript. Without this row the anonymous `accessor` modifier token wins
+        // at the start of a member and the following `(`, `;`, `=` or `:` has no
+        // name to attach to. This is the same mechanism `static`, `readonly`,
+        // `override` and `declare` already rely on to be nameable.
+        'accessor',
         'module',
         'any',
         'number',
