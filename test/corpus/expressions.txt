@@ -926,3 +926,88 @@ a ? function(){ return true } : b;
           (return_statement
             (true))))
       (identifier))))
+
+==========================================================
+JSX elements named in and out
+:language(tsx)
+==========================================================
+
+<in />;
+<out />;
+<in y />;
+<out y />;
+<out in T />;
+<in out />;
+<out in />;
+<in out>text</in>;
+<out in T>text</out>;
+<out in><in out /></out>;
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)))
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)))
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier))))
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier))))
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier))
+      attribute: (jsx_attribute
+        (property_identifier))))
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier))))
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier))))
+  (expression_statement
+    (jsx_element
+      open_tag: (jsx_opening_element
+        name: (identifier)
+        attribute: (jsx_attribute
+          (property_identifier)))
+      (jsx_text)
+      close_tag: (jsx_closing_element
+        name: (identifier))))
+  (expression_statement
+    (jsx_element
+      open_tag: (jsx_opening_element
+        name: (identifier)
+        attribute: (jsx_attribute
+          (property_identifier))
+        attribute: (jsx_attribute
+          (property_identifier)))
+      (jsx_text)
+      close_tag: (jsx_closing_element
+        name: (identifier))))
+  (expression_statement
+    (jsx_element
+      open_tag: (jsx_opening_element
+        name: (identifier)
+        attribute: (jsx_attribute
+          (property_identifier)))
+      (jsx_self_closing_element
+        name: (identifier)
+        attribute: (jsx_attribute
+          (property_identifier)))
+      close_tag: (jsx_closing_element
+        name: (identifier)))))
