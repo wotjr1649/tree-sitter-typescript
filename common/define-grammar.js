@@ -754,10 +754,7 @@ module.exports = function defineGrammar(dialect) {
         $.readonly_type,
         $.constructor_type,
         $.infer_type,
-        prec(-1, alias($._type_query_import_member_expression_in_type_annotation, $.member_expression)),
         prec(-1, alias($._type_query_other_member_expression_in_type_annotation, $.member_expression)),
-        prec(-1, alias($._type_query_instantiated_member_expression_in_type_annotation, $.member_expression)),
-        prec(-1, alias($._type_query_import_call_expression_in_type_annotation, $.call_expression)),
         prec(-1, alias($._type_query_member_call_expression_in_type_annotation, $.call_expression)),
       ),
 
@@ -804,6 +801,13 @@ module.exports = function defineGrammar(dialect) {
         $.flow_maybe_type,
         $.type_query,
         $.index_type_query,
+        // `import(...)` types that may be followed by `[]` or an index (`import('x').Y[]`, `import('x')['k']`): a
+        // member chain that starts at `import(...)` and the bare `import(...)`. They are primary types, not only
+        // `type`s, because `array_type`, `lookup_type`, `keyof` and the like take a primary type. The chains with a
+        // call or a bare `import` stay in `type` (below): tsc rejects `import('x').A()[]` and `import.A[]`.
+        prec(-1, alias($._type_query_import_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_instantiated_member_expression_in_type_annotation, $.member_expression)),
+        prec(-1, alias($._type_query_import_call_expression_in_type_annotation, $.call_expression)),
         alias($.this, $.this_type),
         $.existential_type,
         $.literal_type,

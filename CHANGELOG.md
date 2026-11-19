@@ -71,3 +71,24 @@
     - `type T = import('m').A<typeof import('n').B().C<string>>;` (TS1005): the call inside the nested `typeof` path.
       Base accepts `type T = typeof import('n').B().C<string>;` and `type T = X<typeof import('n').B().C<string>>;`.
     These stay open for a later change.
+- An `import(...)` type followed by `[]` or an index parses without error in both grammars: `import('x').Y[]`,
+  `import('x').Y['k']`, `import('x')['k']`, `import('x')[]`, `import('x').Y<T>[]`, and the same types as operands of
+  `readonly`, `keyof`, `?` in a tuple, a conditional type and so on (tsc accepts all of them). Before, the `[...]`
+  part was an `ERROR`. The member chain that starts at `import(...)` and the bare `import(...)` (hidden rules from
+  S4, aliased to `member_expression` and `call_expression` as before) are now primary types, which is what
+  `array_type`, `lookup_type` and `keyof` take; they were only `type`s. The chains with a call or a bare `import`
+  (`import('x').A()`, `import.A`) stay `type`s, so `import('x').A()[]` and `import.A[]` stay errors, as in tsc.
+  - Node kinds and fields added: none. The `primary_type` supertype lists `call_expression` and `member_expression` as
+    subtypes (`node-types.json`, both grammars); `test/node-kinds` is unchanged.
+  - Error-free tree changes: none (the 114 corpus inputs, the 199 earlier oracle sources and the probe inputs, both
+    grammars; every changed tree was an `ERROR` tree before).
+  - `test/examples/known-failures.txt`: 8 entries cleared (`v1.1: import(...) type followed by a member, type
+    arguments, index or []`).
+  - Not fixed, still errors although tsc accepts them (they were errors at the base too): an `import(...)` member
+    type inside parentheses or after `...` in a tuple (`(import('x').Y)[]`, `[...import('x').Y[]]`), `import('x')<T>`, and `f<import('x').B>()`.
+  - Not part of this change: `typeof import('m')` as a type argument of a call (`importOriginal<typeof import('vscode')>()`,
+    15 `known-failures.txt` entries), a separate cause fixed in its own change. One of those files,
+    `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`, also
+    uses `import('vscode').ChatResultUsage[]` (line 211): it needs both changes, and whichever is merged second removes
+    its entry.
+  - Ours, no upstream pull request.
