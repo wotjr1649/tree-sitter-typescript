@@ -1609,3 +1609,48 @@ class A { accessor
       (public_field_definition
         (property_identifier)
         (number)))))
+
+==========================================================
+Class members split at a block comment line break
+==========================================================
+
+class A {
+  static accessor /*
+  */ x = 1;
+}
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (public_field_definition
+        name: (property_identifier))
+      (comment)
+      (public_field_definition
+        name: (property_identifier)
+        value: (number)))))
+
+==========================================================
+Class members split at a block comment line break (TSX)
+:language(tsx)
+==========================================================
+
+class A {
+  static accessor /*
+  */ x = 1;
+}
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (public_field_definition
+        name: (property_identifier))
+      (comment)
+      (public_field_definition
+        name: (property_identifier)
+        value: (number)))))

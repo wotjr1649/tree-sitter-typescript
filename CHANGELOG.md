@@ -299,3 +299,99 @@
   - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
     `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
   - Ours, no upstream pull request.
+- Automatic semicolon insertion treats every ECMAScript line terminator as a line break, in both grammars, as `tsc`
+  does: a lone CR, U+2028, U+2029, and a block comment that holds a line terminator (`/*⏎*/`). Before, the external
+  scanner (`common/scanner.h`) looked only for LF, so `a = b /*⏎*/ c = d;`, `x<U+2028>++y;` or
+  `class A { static accessor /*⏎*/ x = 1; }` gave `ERROR`, and a line comment ended by U+2028, U+2029 or a lone CR did
+  not count as a line break either (the scanner read on to the next LF). The rule is that each of these acts exactly
+  as LF does at `e56ad86`: the scanner makes the same decision after it as it makes after an LF, and what an LF does
+  there, they do. This includes `in` and `instanceof` after a line break: that path is the one of `e56ad86` (no lookahead
+  past the keyword), so `class A { a⏎in() {} }` is `ERROR` after an LF, a CR, U+2028, U+2029 and a line-breaking block
+  comment alike, and `for (var x⏎in y)` keeps its `in`.
+  Two additions apply to LF too (inputs `tsc` accepts and that were `ERROR` at `e56ad86`): `}` after a line break gets the
+  `}:` object-pattern guard it has on one line (`type F = ({ a⏎}: { a: number }) => number;` keeps its object
+  pattern), and `with` followed by `{` after a line break is not preceded by a semicolon (`import x from "x"⏎with {
+  type: "json" };`; a `with` statement always has `(`, and a comment between `with` and `{` is not skipped, as for LF).
+  `tsc` 7.0.2 accepts all these inputs. The paths this change adds (line terminators, the `}` guard, `with`) and the
+  existing same-line `}` check classify white space and word characters by code point (the grammar's extras; U+0085 is
+  an identifier character there, as in the lexer), not through the C library (`iswspace()` at `e56ad86`); the
+  `in`/`instanceof` path is the one of `e56ad86`. The same-line `}` check changes with no line break at all (owner
+  decision 26): `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same with U+200B, which `tsc` accepts,
+  were `ERROR` at `e56ad86` and now keep their object pattern; with U+2060, which `tsc` rejects (TS1127), the input
+  now parses too, the leniency `e56ad86` already has for `type F = ({}<U+2060>: {}) => number;` (owner decision 10).
+  Comment scanning in one call: a block comment that holds no line terminator and comes before any line break is left
+  to the lexer at once, and so is a second comment that holds one. After a first comment that holds a line terminator,
+  the comments without one that follow are all read in the same call, up to the next token or the second
+  line-breaking comment: one call over `x/*⏎*/` + N × `/*c*/` + `y;` skips 10/18/34/66 slashes for N=4/8/16/32
+  (`e56ad86`: none). That is the cost of one call, not of the whole parse. Over a whole parse a run of N comments
+  without a line terminator (`x/*c*/…;`), or of adjacent comments that hold one, costs O(N), not O(N²). A run of
+  comments that each start on a line after a line break (`x⏎/*c*/⏎/*c*/…;`) is still rescanned per comment, as at the
+  base (N=4/8/16/32: 20/72/272/1056 slash skips in base and now).
+  - Node kinds and fields added: none (no generated file changes).
+  - Error-free tree changes. An input whose line break has one of these forms now gets the tree the same input gets
+    with LF; queries follow the trees. Where that tree differs from the old one (`⏎` here is a block comment holding a
+    line terminator, a lone CR, U+2028 or U+2029):
+    - Toward `tsc` (it reads two statements or two members):
+      - `return`, `break`, `continue` + `⏎` + operand or label: `return /*⏎*/ x` was `return x`, now `return;` then
+        `x;` (also `[x]`, `(x)`, `{x: 1}`, a tagged template, a ternary, and inside an arrow function or a JSX
+        expression). A label becomes an expression (`@variable`, `local.reference`).
+      - `yield` + `⏎` + `x`: one `yield_expression` with an operand, now `yield` then `x;`.
+      - `type` + `⏎` + `A = number;`: a type alias, now `type;` then an assignment. `declare` + `⏎` +
+        `const a: T;`: an `ambient_declaration`, now `declare;` then the declaration. `async` + `⏎` +
+        `function f() {}`: an async function, now `async;` then the function. The keyword gets `@variable` instead of
+        `@keyword`.
+      - Class members: `readonly`, `accessor`, `public`, `private`, `protected`, `declare`, `override` or `async` +
+        `⏎` + member: one member with that modifier, now a field named by the keyword and then the member (the
+        modifier node, such as `accessibility_modifier` or `override_modifier`, goes away). The keyword gets
+        `@property` (JavaScript highlights) instead of `@keyword` (TypeScript highlights); for `async`/`override` +
+        method the `definition.method` tag and `local.scope` start at the method name.
+      - `type T = A ⏎ [B];`: a `lookup_type`, now `type T = A;` then the array `[B]`.
+    - Same as the LF form, which `tsc` reads differently (recorded known differences, unchanged for LF):
+      - `static`, `get`, `set` + `⏎` + member: one static member or accessor, now two members (a field named
+        `static`, `get` or `set`, then the member); `tsc` reads one member (owner decision 12). `@keyword` ->
+        `@property`; in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`.
+    - A line comment ended by U+2028, U+2029 or a lone CR after an LF (`a⏎// c<U+2028>…`): before, the scanner read
+      the comment on to the next LF and decided there. Now the text after the comment decides, as with LF:
+      `a⏎// c<U+2028>+b`, `-b`, `(b)`, `[b]`, `` `x` ``, `<T>(x)` and `function f(): U⏎// c<U+2028>{ … }`
+      continue the expression or declaration (as `tsc` reads them; before, two statements or a `function_signature` and a block;
+      the callee or tag now gets `@function`, and `function f` its `definition.function` from the JavaScript tags).
+      `return⏎// c<U+2028>+x`, `return⏎// c<U+2028>/r/.test(s)`, `yield⏎// c<U+2028>(x)` and
+      `yield⏎// c<U+2028>/r/.test(s)` now attach the operand and `class A { async⏎// c<U+2028>*x() {} }` is one
+      async generator method, as their LF forms; `tsc` splits all five. `const f = async⏎// c<U+2028>(x) => x;` is
+      an async arrow function, as its LF form; `tsc` rejects it (TS1005).
+    - Unchanged, as their LF forms: `return /*⏎*/ +x`, `return /*⏎*/ /r/.test(s)`, `yield /*⏎*/ (x)` keep the
+      operand; `tsc` splits them.
+    - Comment placement: a block comment that holds the line break now follows the inserted semicolon (a sibling of
+      the statement or member) instead of sitting inside it; a line comment after such a comment likewise
+      (`a /* a␍*/ /* c */<U+2029>/* d */ ⏎// line<U+2028>b;`).
+    None of the 17,665 pinned example files changes its tree (compared with `e56ad86`).
+  - `test/examples/known-failures.txt`: no entry cleared.
+  - Known difference kept: `static`, `get` or `set` followed by a line break (any form, LF included) and a member name
+    gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
+    or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
+    after v2.0.0.
+  - Known differences recorded (owner decisions 20, 23 and 24): an input whose line break is a CR, U+2028, U+2029 or a
+    line-breaking block comment, that `tsc` accepts and that parsed at `e56ad86` only because the old scanner did not
+    see the break, now gives `ERROR` where its LF form already gives `ERROR` at `e56ad86` (the scanner cannot tell
+    these from inputs that must keep going); fixing them needs a grammar change, a candidate after v2.0.0.
+    - A class or type member named `in`, `instanceof`, or starting with them (`in1`, `in_`, `in$`), after a line break:
+      `class A { a⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`,
+      `interface I { a: string⏎in(): void }`. `tsc` reads a member; the LF form is `ERROR` at `e56ad86`, and so is every
+      other line-break form now. Only a field or method of this name after a line break is affected; the same
+      member after `;` or on one line is not.
+    - `import x from "m"<CR>with /* c */ { type: "json" };` (a comment between `with` and `{`), and the same after
+      U+2028, U+2029 or a line comment: the LF form is `ERROR` at `e56ad86`, so the comment is not skipped.
+    - `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line: the known
+      v1.1 gap in `known-failures.txt`) and `a as T⏎// c<U+2028>[b + c];` (a type takes no `[` after a line break).
+    - Counts, over the 5,938 inputs of the reviews and the oracle that contain a CR, U+2028, U+2029 or a line-breaking
+      block comment (both grammars; `tsc` accepts, `ERROR` here, `ERROR` for the LF form at `e56ad86`): 1,080, of which
+      `e56ad86` parses the input itself without error in 170 (a CR, U+2028 or U+2029 it did not see as a line break, or a
+      line comment it read past U+2028). By shape: `in`/`instanceof` member 952, `with` comment 24, `as T⏎[` 26,
+      interface `<B>(` 26, a comment between `}` and `:` of a typed object pattern 26 (`ERROR` at `e56ad86` also with a
+      same-line comment) and `for (using a⏎of b)` 26 (`ERROR` at `e56ad86` also with an LF).
+  - Known leniency (inputs `tsc` rejects that now parse, each the same defect `e56ad86` already has for the LF form or,
+    for the U+2060 case, for the empty pattern): `yield` then `*x` on the next line, a ternary after `/?` that loses its
+    `/` (also on one line: `a /? b : c;`, as `e56ad86` reads `a⏎/? b : c;`), a missing required `;` in a `for` header,
+    an automatic semicolon after a Flow-style ambient module type annotation, `with /* c */ (y) {}` after a lone CR, a
+    `for`-`in` whose right side holds `<div>{else}</div>` (`for (var x⏎// c<U+2028>in (<div>{else}</div>)) {}`), and
+    `type F = ({ a }<U+2060>: { a: number }) => number;`.
