@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "cfdcf27e5f89f86767166f3502d999e466c94ba0d1479935cfa2fe220046500e",
+  "cases_sha256": "6f7b4076e5d87d6d68a1e853d23bb31a9bd18f85cf1f5aa0f16e1cc36943a107",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -1143,6 +1143,234 @@
     1434
    ],
    "at": 19
+  },
+  {
+   "id": "n3/attr-letter-double.tsx",
+   "sha256": "6dae97fc9eee45b5da2e9cba35ae4dd00c13e4e1afaa7c1946ff9c1b66ed6f78",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-letter-single.tsx",
+   "sha256": "3a5acfc9da3f73990e00300e8d9e097e9d5a11eace516892bfb1128f24a95054",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-before-closing-double.tsx",
+   "sha256": "f181c69d8a73c50ebbb9afe9d1c2dde31a28e76eb9d37c349c1c755fe8a24e99",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-only-ampersand.tsx",
+   "sha256": "7aa3c6ea049412809e4d32c125a8ab89b0d5cb7de20fea8331e0c7c528191085",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-hash.tsx",
+   "sha256": "b2ea13721f5e2ce99ef20f0be8c1c650f455e884005f612931527ffe5013de2d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-hash-x.tsx",
+   "sha256": "dbcd81759c31d969ac4ad29fb801270d9a5660775e2d10ab9281351decc5ef16",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-ref-named.tsx",
+   "sha256": "2d1067019d741aaf4992c69c077ee591e1e08a5a5f372448f43d06d8bb2b68a1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-ref-decimal.tsx",
+   "sha256": "6acc1d4d34a9e7719ef81c6fcd4b23a39d23bb4b3628a666427e10a8a42091d6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-ref-hex-then-text.tsx",
+   "sha256": "a2b70718adfa7b941fcc7523e78a7e5b5cdc1b11b6b9d19c8cd954ab600ea4dc",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-spaced.tsx",
+   "sha256": "be06e67e64f1cea5ff8648a42b04478589fa26f1bfeb8aa95072417cae6edd18",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-double-ampersand.tsx",
+   "sha256": "d0a85ff83f05a1c209e90a3d8987c7f5f3fa1d4b234f4e21026c03347d37ebf2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-ref-then-letter.tsx",
+   "sha256": "458d98857f069e0e61ac3036defde1210806c404661fcac548358c53f955e5a8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-semicolon.tsx",
+   "sha256": "b5736da211676643934d58268d3c8c1dd59e29db376a590409040bfdcaedcd02",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-nonascii-digit.tsx",
+   "sha256": "1c4b8031bc503172e9d48c9a4aeecd6aa812844955217775738620948b97330c",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-name-31-letters.tsx",
+   "sha256": "0908a45a555af0028e3cb09fec67ab6aac372670c888b20b22f0196c19ea0441",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-name-30-letters.tsx",
+   "sha256": "e51404e8b8789945ffeb787c2197d6fc20bf055c6951138e3826ed747db379a2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-decimal-6-digits.tsx",
+   "sha256": "1e75c73cf88f554718501362dc2975d486ed6d6dbfd31e31b9e59c48cddf0437",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-hash-semicolon.tsx",
+   "sha256": "5c30622849f7c988861ab4668f57ba643ffd7f56121aefd9276d5d3fb9e0faae",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-before-closing-single.tsx",
+   "sha256": "c3c50b38e30d6db7338dec52ba5d5240272435eed4a3305bdfa2edbf8d9226be",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-decimal-no-semicolon.tsx",
+   "sha256": "88d51faf8d9330c5c62c5223d3054664f47a801a0eb796f1f0e6525481c051c3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-nonascii-letter.tsx",
+   "sha256": "c8da534ad797ce5ada107b90e2cff593d74c66b9c06c6dcbccf0ab1482035c8e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-before-closing-then-attr.tsx",
+   "sha256": "8df3d7ec5af6445b5c389ff1bdc35ea9e98406c25783b41372dd4dcdba682eb5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/neg-attr-unterminated-after-ampersand.tsx",
+   "sha256": "d1ffae3935af5ffc5e0a6267f79bf8545fa9f4e0e97209d4ed092861fec79518",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1002
+   ],
+   "at": 16
+  },
+  {
+   "id": "n3/attr-letter-element.tsx",
+   "sha256": "a95a96a5ff80546d9a03dda01c9d32a4858713e27498869902b47b8bd8c7508d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/neg-attr-letter-unterminated.tsx",
+   "sha256": "f514544bc863004027191d224f503a00a93e4edf2e3c0e25c5fd73022b2115f5",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1002
+   ],
+   "at": 15
+  },
+  {
+   "id": "n3/attr-ampersand-then-ref.tsx",
+   "sha256": "089dc85488e3eee57994ed6725ccc595d0ed408541e895bd28a7f03d7caafd42",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/attr-ref-hex-then-named-single.tsx",
+   "sha256": "6b35e63341e77319089d59b01b4d1bc7102b3cfddcbaa5d7759eb86d07833fa3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n3/text-ref-control.tsx",
+   "sha256": "a5ccba0be1ff245611ff1ab922fbfca91191efb57a5512ba23b93035d77d67a1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
   }
  ]
 }

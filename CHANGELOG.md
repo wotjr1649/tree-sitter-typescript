@@ -13,3 +13,18 @@
   - `test/examples/known-failures.txt`: no entry cleared (no listed file uses this form).
   - Credit: upstream tree-sitter/tree-sitter-typescript PR #358 by @gthb, head commit
     `8a43a912d4a941767829a00ff0be80318762a4f1` (grammar hunk and corpus test taken unchanged).
+- In the `tsx` grammar, a `&` in a JSX attribute string that does not start a complete character reference parses
+  without error: `<A text="E&xit" />`, `'E&xit'`, `"&#"`, `"&#65"`, `"&ab;cd&ef"`, and a `&` right before the closing
+  quote (`"a&"`, `'a&'`). `tsc` 7.0.2 accepts all of these. Before, `&` followed by `#` or an ASCII letter had to start
+  an `html_character_reference`, so `"E&xit"` gave `(string (string_fragment) (ERROR (identifier)))`; and a `&` before
+  the closing quote took the quote into the `string_fragment`, so the string ran on to the next quote. A complete
+  reference (the shapes the existing `html_character_reference` token accepts: an ASCII name of 1-30 letters, `&#` and
+  1-5 ASCII digits, `&#x` and 1-6 ASCII hex digits, then `;`) is still an `html_character_reference`; such a `&` is
+  now its own `string_fragment` (`"E&xit"` gives three: `E`, `&`, `xit`). The JSX text rules and the `typescript`
+  grammar are unchanged (its generated `parser.c` and both `node-types.json` are byte-identical).
+  - Node kinds and fields added: none.
+  - Error-free tree changes: one kind of input that parsed without error before now has an error, as intended: a `&`
+    before the closing quote of one attribute string followed by an unterminated string, for example
+    `<A t="a&" b="/>;` (before: one string `"a&" b="`; `tsc` reports TS1002, unterminated string literal).
+  - `test/examples/known-failures.txt`: `examples/desktop/app/test/unit/ui/structural-and-text-components-test.tsx`
+    cleared (`text="E&xit"`).

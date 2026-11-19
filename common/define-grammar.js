@@ -269,6 +269,35 @@ module.exports = function defineGrammar(dialect) {
         '/>',
       )),
 
+      // A `&` that starts no complete html_character_reference is text, as tsc reads it (`"E&xit"`, `"a&"`).
+      _jsx_string: $ => choice(
+        seq(
+          '"',
+          repeat(choice(
+            alias($.unescaped_double_jsx_string_fragment, $.string_fragment),
+            $.html_character_reference,
+            alias($._jsx_string_ampersand, $.string_fragment),
+          )),
+          '"',
+        ),
+        seq(
+          '\'',
+          repeat(choice(
+            alias($.unescaped_single_jsx_string_fragment, $.string_fragment),
+            $.html_character_reference,
+            alias($._jsx_string_ampersand, $.string_fragment),
+          )),
+          '\'',
+        ),
+      ),
+
+      // No precedence: a complete html_character_reference is longer and wins. A regex, not '&', keeps it a leaf.
+      _jsx_string_ampersand: _ => token.immediate(/&/),
+
+      // As in tree-sitter-javascript, but `&` no longer takes the closing quote with it.
+      unescaped_double_jsx_string_fragment: _ => token.immediate(prec(1, /([^"&]|&[^"#A-Za-z])+/)),
+      unescaped_single_jsx_string_fragment: _ => token.immediate(prec(1, /([^'&]|&[^'#A-Za-z])+/)),
+
       export_specifier: (_, previous) => seq(
         optional(choice('type', 'typeof')),
         previous,
