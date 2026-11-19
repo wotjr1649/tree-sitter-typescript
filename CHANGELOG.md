@@ -78,8 +78,20 @@
   block comment (`common/scanner.h`; the port of tree-sitter-javascript `e7d9759` in upstream `52f79e4` had kept only
   the line-comment half). `tsc` 7.0.2 accepts these inputs.
   - Node kinds and fields added: none (no generated file changes).
-  - Error-free tree changes: inputs of this shape gain the `comment` node they lacked; nothing else in their trees
-    changes. Among the pinned example files exactly one has this shape,
+  - Error-free tree changes: valid inputs of this shape gain the `comment` node they lacked; nothing else in their
+    trees changes. Among the pinned example files exactly one has this shape,
     `examples/vscode/src/vs/platform/userDataSync/common/abstractSynchronizer.ts` (line 575), and it gains one
-    `comment` node. Queries: `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
+    `comment` node (the only difference in the full CST of the pinned examples, `[574, 5] - [574, 54]`). Queries:
+    `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
+  - Error-flag changes (error-free before, an error now, in both grammars; intended): a block comment before an
+    operator that is directly followed by `?`: `a⏎/* c */ +? b : c;` and the same with `-?`, `/?`, `in?` and
+    `instanceof?`. At the base the automatic-semicolon check consumed the comment and part of the operator, the
+    ternary `?` was then read from there, and the input parsed with exit 0 as a plain ternary expression (comment and
+    operator in no node). Now the comment is kept as a `comment` node, the `?` is read normally and the tree has an
+    `ERROR` node starting at the `?`. `tsc` 7.0.2 rejects all five inputs (TS1109, first diagnostic at the `?`), so
+    the new error is correct.
+  - Not changed, recorded: the same shapes without the block comment (`a⏎+? b : c;`, `-?`, `/?`, `in?`,
+    `instanceof?`) and with a line comment instead (`a⏎// c⏎+? b : c;` and the others) are rejected by `tsc`
+    (TS1109) and accepted by the grammar before and after this change, with the operator in no node. This is an
+    older mismatch (the automatic-semicolon check consumes the operator before the ternary `?` is read), left open.
   - `test/examples/known-failures.txt`: no entry cleared (the affected inputs had no error before).
