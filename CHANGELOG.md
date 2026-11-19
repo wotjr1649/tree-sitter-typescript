@@ -218,3 +218,104 @@ some invalid inputs that were accepted are errors now (`type D<in> = number;`, `
     (TS1109) and accepted by the grammar before and after this change, with the operator in no node. This is an
     older mismatch (the automatic-semicolon check consumes the operator before the ternary `?` is read), left open.
   - `test/examples/known-failures.txt`: no entry cleared (the affected inputs had no error before).
+- An `import(...)` type followed by `[]` or an index parses without error in both grammars: `import('x').Y[]`,
+  `import('x').Y['k']`, `import('x')['k']`, `import('x')[]`, `import('x').Y<T>[]`, and the same types as operands of
+  `readonly`, `keyof`, `?` in a tuple, a conditional type and so on (tsc accepts all of them). Before, the `[...]`
+  part was an `ERROR`. The member chain that starts at `import(...)` and the bare `import(...)` (hidden rules from
+  S4, aliased to `member_expression` and `call_expression` as before) are now primary types, which is what
+  `array_type`, `lookup_type` and `keyof` take; they were only `type`s. The chains with a call or a bare `import`
+  (`import('x').A()`, `import.A`) stay `type`s, so `import('x').A()[]` and `import.A[]` stay errors, as in tsc.
+  - Node kinds and fields added: none. The `primary_type` supertype lists `call_expression` and `member_expression` as
+    subtypes (`node-types.json`, both grammars); `test/node-kinds` is unchanged.
+  - Error-free tree change: an `as` or `satisfies` expression whose type is an `import(...)` member chain or a bare
+    `import(...)`, followed on the same line by an index: `const x = v as import('x').Y['k'];`,
+    `v satisfies import('x')['k']`, `v as import('x').Y[0]`, `v as import('x').Y[a.b]` (tsc 7.0.2 accepts all of them
+    and reads the index as part of the type: it erases it from the emit). At the base the index was read as an
+    expression: a `subscript_expression` around the `as_expression` (or `satisfies_expression`); now it is a
+    `lookup_type` inside the type, as tsc reads it. A consumer that matched `subscript_expression` over an `as`
+    expression on such input must match `lookup_type` instead. Same change in both grammars; the oracle record
+    `n1/lookup-string` covers `let x: import('x').Y['k']`, the corpus test `Import type with an index after as or
+    satisfies, on one line` (and its TSX copy) pins the `as` / `satisfies` form. No query in `queries/` or in the
+    inherited JavaScript queries names `subscript_expression`, `lookup_type`, `as_expression` or `array_type`; the
+    `string` / `number` index is a `literal_type` around the same `string` / `number` node, so the highlight captures
+    on it are unchanged.
+  - Same input, index on the next line: `const x = v as import('x').Y` + line break + `[a + b];` (also `satisfies`,
+    `[f()]`, `[a?.b]`) is an `ERROR` since this change, a `subscript_expression` at the base; tsc accepts it (a type
+    index must start on the same line) and reads two statements. The base already reads every other type the same
+    way (`v as Foo` + line break + `[a + b];` is an `ERROR` at the base, and `['k']`, `[0]` or `[a.b]` on the next line is
+    silently absorbed into the type), so this change extends that existing limitation to `import(...)` types and
+    adds no new kind of difference. Not fixed here; a separate change for all types.
+  - `test/examples/known-failures.txt`: 8 entries cleared (`v1.1: import(...) type followed by a member, type
+    arguments, index or []`).
+  - Not fixed, still errors although tsc accepts them (they were errors at the base too): an `import(...)` member
+    type inside parentheses or after `...` in a tuple (`(import('x').Y)[]`, `[...import('x').Y[]]`), `import('x')<T>`, and `f<import('x').B>()`.
+  - Not part of this change: `typeof import('m')` as a type argument of a call (`importOriginal<typeof import('vscode')>()`,
+    15 `known-failures.txt` entries), a separate cause fixed in its own change. One of those files,
+    `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`, also
+    uses `import('vscode').ChatResultUsage[]` (line 211): it needs both changes, and whichever is merged second removes
+    its entry.
+  - Ours, no upstream pull request.
+- An empty type parameter list (`type A<> = number;`, `class C<> {}`, `interface I<> {}`, `function f<>() {}`,
+  `m<>() {}`, `type F = <>() => void;`) parses without error in both grammars. `tsc` 7.0.2 reports nothing for these
+  with `--noCheck` (TS1098 "Type parameter list cannot be empty" is a checker error, and `tsc` does not report it at all
+  for type aliases and interfaces). Before, both grammars put a zero-width `type_parameter` holding a `MISSING
+  type_identifier` inside `type_parameters`; now `type_parameters` has no children.
+  - Node kinds and fields added: none. `node-types.json` in both grammars: the children of `type_parameters` are no
+    longer `required` (it may be empty); nothing removed or renamed.
+  - Error-free tree changes: none found (existing corpus inputs, the probe inputs, and all 17,664 `.ts`/`.tsx` files
+    of the pinned examples, whose trees are byte-identical to the base).
+  - `test/examples/known-failures.txt`: no entry cleared (no listed file uses this form).
+  - An arrow function still needs a non-empty list: `const g = <>(x) => x;` and `<>() => 1` stay errors in the
+    `typescript` grammar, as `tsc` reads `<>` there as a type assertion with no type (TS1110). The arrow function has
+    its own signature rule for this; the conflicts `[_call_signature, function_type]` and
+    `[_call_signature, constructor_type]` move to it. In `tsx` the arrow function's signature is the one the variance
+    entry above defines (`_arrow_type_parameters`: a first parameter without a variance modifier, then any number,
+    so the list is non-empty there too); only `typescript` uses `_nonempty_type_parameters`.
+  - Error trees only: with an empty list allowed, error recovery for a variance modifier alone changes, e.g.
+    `type D<in> = number;` (tsc TS1359 at 7) now gives `type_parameters` holding an `ERROR` that is exactly the `in`
+    token `[7,9)`, where it was a `type_parameter` with a `MISSING type_identifier` at 9. The four oracle cases for
+    these (`s1/neg-in-alone.*`, `s1/p112-variance-in-alone.*`) are re-registered with `errorAt` 7, `7-9:ERROR`.
+  - Known difference: an empty type argument list (`f<>(x)`, `new C<>()`, `let x: A<>;`), which `tsc` also accepts
+    with `--noCheck` (TS1099 is a checker error), still gives an error; it is not part of this release.
+- `f<typeof import('m')>(...)`: the type query `typeof import('m')` as the first type argument of a call is read as
+  type arguments, not as the binary expression `f < typeof import('m') > (...)` (for example
+  `importOriginal<typeof import('vscode')>()`, `f<typeof import('m')>(1, 2)`, `f<typeof import('m').x, string>()`).
+  Before, `f<typeof import('m')>()` and `f<typeof import('m')>;` had an `ERROR`, and with arguments the call was
+  silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
+  resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
+  so both readings stay alive and the one that fits the following tokens wins.
+  The type query call `import('m')` or `import('m', { with: ... })` (a string literal and an optional object, no trailing
+  comma: the hidden rule `_type_query_import_arguments`, aliased to `arguments`) also carries dynamic precedence 1: with
+  the tagged-template change merged, the plain call has dynamic precedence 2, so in `f<typeof import('m')>(1, 2)` the
+  comparison reading (which holds the call `import('m')`) tied with the call reading and won. The precedence is only on
+  that production, not on every type query call, and the argument is a string, as in tsc's import type:
+  ``sql<A, typeof f(x)>`text` `` (also `typeof obj.f(x)`, `typeof obj?.f(x)`), `f<typeof import('m', 'n')>(1)`,
+  `f<typeof import(...m)>(1)`, `f<typeof import(g(x))>(1)`, `f<typeof import('m' + suffix)>(1, 2)` and
+  `f<typeof import(x ? 'm' : 'n')>(1, 2)` stay comparisons, as for tsc (no error either way, only the tree differs).
+  `f<typeof import('vscode', { with: { 'resolution-mode': 'import' } })>(1, 2)` is a call, as for tsc.
+  - Node kinds and fields added: none. Child types added: `arguments` lists `object` and `string` among its children in
+    `node-types.json` (both grammars; no kind or field is added, removed or renamed, and `test/node-kinds` is unchanged).
+  - Error-free tree changes: 36 of the 17,665 files of the pinned example repositories change their (error-free) tree,
+    all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
+    (`importAMDNodeModule<typeof import('jschardet')>('jschardet', 'dist/jschardet.min.js')`): the base tree is a chain
+    of `binary_expression` (comparison, comparison, a `sequence_expression` of the arguments); the new tree is a
+    `call_expression` with `type_arguments` (a `type_query`) and `arguments`, which is what tsc builds. Regression
+    input kept: `f<typeof import('vscode')>(1, 2);` in `test/corpus/types.txt`. Queries: `highlights.scm` gains the
+    `type_arguments` brackets, and the JavaScript `highlights.scm` and `tags.scm` call patterns now match these calls;
+    no query pattern loses a match.
+  - `test/examples/known-failures.txt`: 15 entries cleared (`v1.1: typeof import(...) type query as a type argument`),
+    14 left. One of the 15, `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`,
+    also uses `import('vscode').ChatResultUsage[]` (line 211) and needed the `import(...)` followed by `[]` change,
+    which is already in main; it parses and is no longer listed.
+  - Remaining differences from tsc: an import type argument other than a string literal (`f<typeof import(m)>(1, 2)`,
+    `import({ a: 'm' })`, `import(42)` and similar) is a call for tsc and a comparison chain here, as at the base;
+    ``sql<typeof import('m')>`text` `` (one type argument) is a comparison here and at the base, a tagged template for
+    tsc; `f<typeof import('m',)>(1, 2)` (TS1005) and `f<typeof import()>(1)` (TS1110) are comparisons without an error,
+    as at the base. New with this change: the second argument is any `object`, so `f<typeof import('m', { x: 1 })>(1, 2)`
+    (a comparison for tsc, which wants `{ with: ... }`) and `f<typeof import('m', {})>(1, 2)` (TS1005) are calls without
+    an error here, comparisons at the base.
+  - `f < typeof import('m') > +x;` (two comparisons and a unary `+` for tsc) keeps its base tree, nested
+    `binary_expression`s: the comparison reading wins there, so this change leaves it alone.
+  - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
+    `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
+  - Ours, no upstream pull request.

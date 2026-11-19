@@ -2,39 +2,16 @@
 # Format: path<TAB>construct. The list may only shrink: CI fails on a new failure and on a listed file that parses.
 # A pull request that adds a path fails CI unless it also changes repos.txt (check-known-failures-shrink.sh).
 examples/redux/src/types/store.ts	candidate: interface call signature starting with < on the line after a member without ;
-examples/redux/website/plugins/remark-typescript-tools/linkDocblocks/plugin.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/.eslint-plugin-local/tests/code-translation-remind.test.ts	candidate: \u not followed by hex digits in a template literal, e.g. String.raw`C:\unregistered`
-examples/vscode/build/next/index.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
-examples/vscode/extensions/copilot/src/extension/byok/vscode-node/test/geminiNativeProvider.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/byok/vscode-node/test/legacyHost.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/vscode-node/test/chatSessionMetadataStoreImpl.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/vscode-node/test/lockFile.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/chatSessions/vscode-node/test/legacySessionMetadataBackfill.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/mcp/test/vscode-node/setupFlow.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/otel/vscode-node/test/otelContrib.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/prompt/node/test/promptCategorizer.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/extension/prompts/node/agent/test/copilotCLIPrompt.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
 examples/vscode/extensions/copilot/src/extension/prompts/node/test/fixtures/5710.selection.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/prompts/node/test/fixtures/extHost.api.impl.selection.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/prompts/node/test/fixtures/extHost.api.impl.summarized.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/prompts/node/test/fixtures/strings.test-example.3.summarized.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/prompts/node/test/fixtures/vscode.proposed.chatParticipantAdditions.d.selection.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
-examples/vscode/extensions/copilot/src/extension/survey/vscode-node/test/surveyCommands.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
 examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/fixtures/context/p1/source/f4.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/fixtures/context/p14/source/f2.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/src/common/typescripts.ts	candidate: property named abstract in an object type, e.g. { abstract: Set<string> }
-examples/vscode/extensions/copilot/src/extension/typescriptContext/vscode-node/test/structuralDiffContribution.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/platform/authentication/test/node/session.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/platform/telemetry/test/node/assignmentFilters.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
-examples/vscode/extensions/copilot/src/platform/telemetry/vscode-node/test/microsoftExperimentationService.spec.ts	v1.1: typeof import(...) type query as a type argument, e.g. importOriginal<typeof import('vscode')>()
 examples/vscode/extensions/vscode-colorize-perf-tests/test/colorize-fixtures/test-checker.ts	not complete TypeScript: test fixture truncated in the middle of an expression
 examples/vscode/src/vs/platform/agentHost/node/agentHostDatabase.ts	candidate: identifier unique after < read as the unique type operator, e.g. i < unique.length
-examples/vscode/src/vs/platform/agentHost/node/claude/claudeSubagentSignals.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
-examples/vscode/src/vs/platform/agentHost/test/node/codex/codexChatDiscovery.test.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/platform/browserView/electron-browser/preload-browserView.ts	candidate: identifier unique after < read as the unique type operator, e.g. i < unique.length
-examples/vscode/src/vs/platform/tunnel/test/node/tunnelProxy.test.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
-examples/vscode/src/vs/workbench/contrib/chat/test/common/promptSyntax/hookSchema.test.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
-examples/vscode/src/vs/workbench/contrib/issue/browser/issueFormService.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
-examples/vscode/src/vs/workbench/contrib/terminal/test/browser/terminalProfileService.integrationTest.ts	v1.1: import(...) type followed by a member, type arguments, index or [], e.g. import('x').Y[]
 examples/vscode/src/vs/workbench/contrib/terminalContrib/voice/browser/terminalVoice.ts	candidate: symbol as a labeled tuple element name, e.g. [spoken: string, symbol: string]
