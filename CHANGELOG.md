@@ -310,8 +310,11 @@
   `interface I { a: string⏎in(): void }`), and so does a word that
   only starts with `in` there (`in1`, `in_`, `in$`); `a⏎in b`, `for (var x⏎in y)`, `for (var x⏎in (y))` and
   `for (var x⏎in ("a);"))` are unchanged: a bracket inside a string, template, regular expression or comment of the
-  parameter list is not counted, and where a literal cannot be skipped (a template with `${`) the scanner answers
-  as before. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
+  parameter list is not counted, but only where the scanner can tell what is code. At anything it cannot tell with
+  certainty (a `/` after `)`, `}`, `>`, `+`, `-`, `!`, `.` or a word, which may be a division or a regular expression; a
+  template with `${`; a string with a line continuation or a line terminator; an unterminated literal; the end of the
+  input) it counts every parenthesis, as it did before literals were skipped, so it never answers worse than that
+  count. The same line-break handling now applies before `}` (`type F = ({ a⏎}: { a: number }) => number;` keeps
   its object pattern, as on one line) and before import attributes, also with comments between `with` and `{`
   (`import x from "x"⏎with { type: "json" };`, `import x from "x"<CR>with /* c */ { type: "json" };`).
   `tsc` 7.0.2 accepts all these inputs. The scanner classifies white space and word characters by code point on these
@@ -358,7 +361,7 @@
     - Comment placement: a block comment that holds the line break now follows the inserted semicolon (a sibling of
       the statement or member) instead of sitting inside it; a line comment after such a comment likewise
       (`a /* a␍*/ /* c */<U+2029>/* d */ ⏎// line<U+2028>b;`).
-    None of the 17,665 pinned example files changes its tree.
+    None of the 17,665 pinned example files changes its tree (compared with `e56ad86`).
   - `test/examples/known-failures.txt`: no entry cleared.
   - Known difference kept: `static`, `get` or `set` followed by a line break (any form, LF included) and a member name
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
@@ -368,8 +371,13 @@
     did before: `interface A { a: T⏎// c<U+2028><B>(b: B): V; }` (a call signature starting with `<` on a new line,
     the known v1.1 gap) and `a as T⏎// c<U+2028>[b + c];` (a type cannot take `[` after a line break), both
     grammars; `tsc` accepts both. The scanner cannot tell these from `class A { a⏎<T>() {} }` and `a⏎[b]`; fixing
-    them needs a grammar change (owner decision 20). A regular expression after a keyword (`return /)/`) in the `(...)`
-    after `in` reads as a division there, so its brackets are counted.
+    them needs a grammar change (owner decision 20).
+  - Known limit of the `in` member lookahead: where it cannot tell code from a literal (above), such as a regular
+    expression after `)`, `}` or a keyword (`if (b) /\)/.test(b)`, `return /\)/`) or a template with `${` (also in
+    a type, ``in<T extends `x${string}`>()``) inside the parameters or type parameters, the member after the line
+    break is still `ERROR`, as it is at `e56ad86`. Fourteen inputs (both grammars, `tsc` accepts) parse at `e56ad86` only
+    after a line comment ended by U+2028 (`a⏎// c<U+2028>in(b = (() => { if (b) /\)/.test(b); })()) {}`), because it
+    reads the comment on to the next LF; the same inputs with an LF there are `ERROR` at `e56ad86`, and are here.
   - Known leniency (inputs `tsc` rejects that now parse, each the same defect the LF form already had): `yield` then
     `*x` on the next line, a ternary after `/?` that loses its `/`, a missing required `;` in a `for` header, and an
     automatic semicolon after a Flow-style ambient module type annotation.
