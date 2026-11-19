@@ -11332,6 +11332,10 @@
     ],
     [
       "call_expression",
+      "_type_query_call_expression"
+    ],
+    [
+      "call_expression",
       "instantiation_expression",
       "binary_expression"
     ],
@@ -12033,16 +12037,6 @@
       {
         "type": "SYMBOL",
         "name": "pattern"
-      }
-    ],
-    [
-      {
-        "type": "SYMBOL",
-        "name": "call_expression"
-      },
-      {
-        "type": "SYMBOL",
-        "name": "_type_query_call_expression"
       }
     ],
     [

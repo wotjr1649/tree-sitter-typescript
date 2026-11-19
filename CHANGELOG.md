@@ -71,3 +71,27 @@
     - `type T = import('m').A<typeof import('n').B().C<string>>;` (TS1005): the call inside the nested `typeof` path.
       Base accepts `type T = typeof import('n').B().C<string>;` and `type T = X<typeof import('n').B().C<string>>;`.
     These stay open for a later change.
+- `f<typeof import('m')>(...)`: the type query `typeof import('m')` as the first type argument of a call is read as
+  type arguments, not as the binary expression `f < typeof import('m') > (...)` (for example
+  `importOriginal<typeof import('vscode')>()`, `f<typeof import('m')>(1, 2)`, `f<typeof import('m').x, string>()`).
+  Before, `f<typeof import('m')>()` and `f<typeof import('m')>;` had an `ERROR`, and with arguments the call was
+  silently read as two comparisons. `precedences` ordered `call_expression` above `_type_query_call_expression`, which
+  resolved the conflict between them statically at `)` followed by `>`; the pair is now a declared `conflicts` entry,
+  so both readings stay alive and the one that fits the following tokens wins.
+  - Node kinds and fields added: none; `node-types.json` unchanged by this part.
+  - Error-free tree changes: 36 of the 17,664 files of the pinned example repositories change their (error-free) tree,
+    all in `examples/vscode` and all the same construct, `f<typeof import('m')>(args)` with at least one argument
+    (`importAMDNodeModule<typeof import('jschardet')>('jschardet', 'dist/jschardet.min.js')`): the base tree is a chain
+    of `binary_expression` (comparison, comparison, a `sequence_expression` of the arguments); the new tree is a
+    `call_expression` with `type_arguments` (a `type_query`) and `arguments`, which is what tsc builds. Regression
+    input kept: `f<typeof import('vscode')>(1, 2);` in `test/corpus/types.txt`. Queries: `highlights.scm` gains the
+    `type_arguments` brackets, and the JavaScript `highlights.scm` and `tags.scm` call patterns now match these calls;
+    no query pattern loses a match.
+  - `test/examples/known-failures.txt`: 14 entries cleared (`v1.1: typeof import(...) type query as a type argument`).
+    `examples/vscode/extensions/copilot/src/extension/chatSessions/copilotcli/node/test/copilotcliSession.spec.ts`
+    stays listed: besides `importOriginal<typeof import('../cliHelpers')>()` it uses `import('vscode').ChatResultUsage[]`
+    (line 211), which needs the separate fix for an `import(...)` type followed by `[]`; whichever of the two changes is
+    merged second removes the entry.
+  - Known limit, same at the base: `await f<typeof import('m')>()` is a `call_expression` whose function is the
+    `await_expression` (the same shape as `await f<A>()`), a separate upstream quirk this change does not touch.
+  - Ours, no upstream pull request.

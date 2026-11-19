@@ -64,7 +64,6 @@ module.exports = function defineGrammar(dialect) {
       [$.decorator_call_expression, $.decorator],
       [$.literal_type, $.pattern],
       [$.predefined_type, $.pattern],
-      [$.call_expression, $._type_query_call_expression],
       [$.call_expression, $._type_query_import_call_expression_in_type_annotation],
       [$.call_expression, $._type_query_member_call_expression_in_type_annotation],
       [$.new_expression, $.primary_expression],
@@ -73,6 +72,9 @@ module.exports = function defineGrammar(dialect) {
     ]),
 
     conflicts: ($, previous) => previous.concat([
+      // `f<typeof import('m')>()`: with the call_expression ordered above it in `precedences`, the type query lost
+      // to the call and the type arguments were read as a binary `<` and `>`.
+      [$.call_expression, $._type_query_call_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],

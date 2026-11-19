@@ -2285,3 +2285,105 @@ const foo: import('bar').Bar<string> = 'baz';
             (predefined_type))))
       (string
         (string_fragment)))))
+
+============================================
+typeof import() as a type argument of a call
+============================================
+
+f<typeof import('vscode')>();
+f<typeof import('vscode')>(1, 2);
+f<typeof import('vscode').x, string>();
+const m = { ...f<typeof import('vscode')>() };
+
+---
+
+(program
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_query
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))
+      (arguments)))
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_query
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))
+      (arguments
+        (number)
+        (number))))
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_query
+          (member_expression
+            (call_expression
+              (import)
+              (arguments
+                (string
+                  (string_fragment))))
+            (property_identifier)))
+        (predefined_type))
+      (arguments)))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (object
+        (spread_element
+          (call_expression
+            (identifier)
+            (type_arguments
+              (type_query
+                (call_expression
+                  (import)
+                  (arguments
+                    (string
+                      (string_fragment))))))
+            (arguments)))))))
+
+==================================================
+typeof import() as a type argument of a call (TSX)
+:language(tsx)
+==================================================
+
+f<typeof import('vscode')>();
+f<typeof import('vscode')>(1, 2);
+
+---
+
+(program
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_query
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))
+      (arguments)))
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_query
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))
+      (arguments
+        (number)
+        (number)))))
