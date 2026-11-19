@@ -149,6 +149,55 @@
     `465aa162d077093dc5ad4f46a9463bde6274425e` (grammar hunk and corpus test taken unchanged). Keeping `out` usable
     as a type parameter name (`alias('out', $.type_identifier)` in `name`) is ours; with #364 alone those inputs
     become errors.
+- In the `tsx` grammar, a `&` in a JSX attribute string that does not start a complete character reference parses
+  without error: `<A text="E&xit" />`, `'E&xit'`, `"&#"`, `"&#65"`, `"&ab;cd&ef"`, and a `&` right before the closing
+  quote (`"a&"`, `'a&'`). `tsc` 7.0.2 accepts all of these. Before, `&` followed by `#` or an ASCII letter had to start
+  an `html_character_reference`, so `"E&xit"` gave `(string (string_fragment) (ERROR (identifier)))`; and a `&` before
+  the closing quote took the quote into the `string_fragment`, so the string ran on to the next quote. A complete
+  reference (the shapes the existing `html_character_reference` token accepts: an ASCII name of 1-30 letters, `&#` and
+  1-5 ASCII digits, `&#x` or `&#X` and 1-6 ASCII hex digits, then `;`) is still an `html_character_reference`; a `&`
+  that starts an incomplete reference is now its own `string_fragment` (`"E&xit"` gives three: `E`, `&`, `xit`). The
+  JSX text rules and the `typescript` grammar are unchanged (its generated `parser.c` and both `node-types.json` are byte-identical).
+  - Node kinds and fields added: none.
+  - Error-free tree changes: two kinds of input that parsed without error before this change.
+    - Now an error, as intended: a `&` before the closing quote of one attribute string followed by an unterminated
+      string, for example `<A t="a&" b="/>;` (before: one string `"a&" b="`; `tsc` reports TS1002, unterminated
+      string literal).
+    - Still error-free, but the tree is corrected (the same swallowed-attribute defect on valid input):
+      `<A t="&" b="/>//"/>;` and `<A t='&' b='/>// '/>;`. Before, the string of `t` swallowed `" b="` (it ran from
+      its opening quote to the quote opening `b`'s value), the element closed at the first `/>` (bytes 12-14) and the
+      rest was a `comment`. Now `t="&"` and `b="/>//"` are two `jsx_attribute` nodes and the element closes at the
+      later `/>` (bytes 17-19; 18-20 in the single-quoted input). Schema: no change. Queries: the JSX `@attribute`
+      capture gains `b`, the `@comment` range of the old tree is gone, `@string` follows the two string nodes. `tsc`
+      7.0.2 accepts both inputs; both are oracle accept cases (`n3/attr-swallow-regression-double.tsx`,
+      `n3/attr-swallow-regression-single.tsx`).
+  - `test/examples/known-failures.txt`: `examples/desktop/app/test/unit/ui/structural-and-text-components-test.tsx`
+    cleared (`text="E&xit"`).
+- A block comment that starts a line before a ternary `?` is kept in the tree, in both grammars: in `a⏎/* c */ ? b : c;`
+  the `comment` node was missing (no `ERROR`, no `MISSING`, the comment's bytes simply belonged to no node). The
+  external scanner, deciding whether to insert a semicolon after `a`, skipped the comment and then read the `?` as the
+  ternary question mark from there. It already refused to do that after a line comment; it now does the same after a
+  block comment (`common/scanner.h`; the port of tree-sitter-javascript `e7d9759` in upstream `52f79e4` had kept only
+  the line-comment half). `tsc` 7.0.2 accepts these inputs.
+  - Node kinds and fields added: none (no generated file changes).
+  - Error-free tree changes: valid inputs of this shape gain the `comment` node they lacked; nothing else in their
+    trees changes. Among the pinned example files exactly one has this shape,
+    `examples/vscode/src/vs/platform/userDataSync/common/abstractSynchronizer.ts` (line 575), and it gains one
+    `comment` node (`[574, 5] - [574, 54]`; measured by parsing all 17,665 pinned example files and comparing the full
+    CST of the one candidate file the scanner path can reach). Queries:
+    `(comment) @comment` (highlights) and the JSDoc injection now also match such comments.
+  - Error-flag changes (error-free before, an error now, in both grammars; intended): a block comment before an
+    operator that is directly followed by `?`: `a⏎/* c */ +? b : c;` and the same with `-?`, `/?`, `in?` and
+    `instanceof?`. At the base the automatic-semicolon check consumed the comment and part of the operator, the
+    ternary `?` was then read from there, and the input parsed with exit 0 as a plain ternary expression (comment and
+    operator in no node). Now the comment is kept as a `comment` node, the `?` is read normally and the tree has an
+    `ERROR` node starting at the `?`. `tsc` 7.0.2 rejects all five inputs (TS1109, first diagnostic at the `?`), so
+    the new error is correct.
+  - Not changed, recorded: the same shapes without the block comment (`a⏎+? b : c;`, `-?`, `/?`, `in?`,
+    `instanceof?`) and with a line comment instead (`a⏎// c⏎+? b : c;` and the others) are rejected by `tsc`
+    (TS1109) and accepted by the grammar before and after this change, with the operator in no node. This is an
+    older mismatch (the automatic-semicolon check consumes the operator before the ternary `?` is read), left open.
+  - `test/examples/known-failures.txt`: no entry cleared (the affected inputs had no error before).
 - An empty type parameter list (`type A<> = number;`, `class C<> {}`, `interface I<> {}`, `function f<>() {}`,
   `m<>() {}`, `type F = <>() => void;`) parses without error in both grammars. `tsc` 7.0.2 reports nothing for these
   with `--noCheck` (TS1098 "Type parameter list cannot be empty" is a checker error, and `tsc` does not report it at all
