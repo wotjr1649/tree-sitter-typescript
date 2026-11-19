@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "b0e44517c71ae470bc895006f3500b9a714c8b24261596c909d78d803fcbd3d9",
+  "cases_sha256": "7293ebddc7fc1bd48c15dce471bd2f2c3b9815558f39641756aa09379059073d",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -2731,6 +2731,1478 @@
     1005
    ],
    "at": 12
+  },
+  {
+   "id": "n7/assign-in_us.ts",
+   "sha256": "342dd6069cf4c3f936117178610471e3d4ddcc8625b69fba5f1cab6c4d9d2f9d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_us.tsx",
+   "sha256": "342dd6069cf4c3f936117178610471e3d4ddcc8625b69fba5f1cab6c4d9d2f9d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_digit.ts",
+   "sha256": "e5eb1778248d04fab394853dd5034aa039de9b5cb19a931db6c028a6c0547eb9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_digit.tsx",
+   "sha256": "e5eb1778248d04fab394853dd5034aa039de9b5cb19a931db6c028a6c0547eb9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_dollar.ts",
+   "sha256": "dee34afb3b1d2dc5461d2eb159231fe66449158b62feb4914c8d594ae149da8c",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_dollar.tsx",
+   "sha256": "dee34afb3b1d2dc5461d2eb159231fe66449158b62feb4914c8d594ae149da8c",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_greek.ts",
+   "sha256": "a3e5b7fe7807f6fdc4de65cf7ee7070338f8184ee50bdd120e8387936faaee99",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_greek.tsx",
+   "sha256": "a3e5b7fe7807f6fdc4de65cf7ee7070338f8184ee50bdd120e8387936faaee99",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_esc.ts",
+   "sha256": "3aee83894558cc7ddbfedfc48d5f541304410f63f92676cc51019ee8bba4ce01",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-in_esc.tsx",
+   "sha256": "3aee83894558cc7ddbfedfc48d5f541304410f63f92676cc51019ee8bba4ce01",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-inst_us.ts",
+   "sha256": "53e0ce5b1133b374336a17f9852dc76db7431f89f5af865646e0a785acdbd0a6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-inst_us.tsx",
+   "sha256": "53e0ce5b1133b374336a17f9852dc76db7431f89f5af865646e0a785acdbd0a6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-inst_digit.ts",
+   "sha256": "a8ab4befc799639609f878deb0e96b19235b7f3e3fd55f1f44cb911d19a13057",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/assign-inst_digit.tsx",
+   "sha256": "a8ab4befc799639609f878deb0e96b19235b7f3e3fd55f1f44cb911d19a13057",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_us.ts",
+   "sha256": "dac21bfaa2fa40b10671d792538ec6c1ec2d46a5d01df90b234074c5c5f5f185",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_us.tsx",
+   "sha256": "dac21bfaa2fa40b10671d792538ec6c1ec2d46a5d01df90b234074c5c5f5f185",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_digit.ts",
+   "sha256": "d997712232f24d056c0e483a547b9de49b1f225af85690f8f3603b637fa75d72",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_digit.tsx",
+   "sha256": "d997712232f24d056c0e483a547b9de49b1f225af85690f8f3603b637fa75d72",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_dollar.ts",
+   "sha256": "6b63349dd267d160e3dc74cb94b68094551f25c35053e1ef39c0649b6e1df581",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_dollar.tsx",
+   "sha256": "6b63349dd267d160e3dc74cb94b68094551f25c35053e1ef39c0649b6e1df581",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_greek.ts",
+   "sha256": "8230b107fd781d553a265dacc525cf54aa37cfcca8754d43e2763bc097c9dd35",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_greek.tsx",
+   "sha256": "8230b107fd781d553a265dacc525cf54aa37cfcca8754d43e2763bc097c9dd35",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_esc.ts",
+   "sha256": "72b8cfbe895e4bf2b5ca3db2d40e5347e63b7327bb2e3982489f4819e4b5267d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-in_esc.tsx",
+   "sha256": "72b8cfbe895e4bf2b5ca3db2d40e5347e63b7327bb2e3982489f4819e4b5267d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-inst_us.ts",
+   "sha256": "ec99b3db0706b67fd193b3c87f9b94e107a2c369fbdb6c9a2075712c90366307",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-inst_us.tsx",
+   "sha256": "ec99b3db0706b67fd193b3c87f9b94e107a2c369fbdb6c9a2075712c90366307",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-inst_digit.ts",
+   "sha256": "68230bb987324416eeab6a55e45c27b38e05728b2a89b55fc4f389fdaebb0448",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/call-inst_digit.tsx",
+   "sha256": "68230bb987324416eeab6a55e45c27b38e05728b2a89b55fc4f389fdaebb0448",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_us.ts",
+   "sha256": "b6f396d3ee76f5b74c63ad5c431c5b385265567cca423f6c1d040cba1cf166fa",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_us.tsx",
+   "sha256": "b6f396d3ee76f5b74c63ad5c431c5b385265567cca423f6c1d040cba1cf166fa",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_digit.ts",
+   "sha256": "bf4d2ca17a5520fb83db9114919c1a419df364bfcd26ceb7e387fc21cbfd26fe",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_digit.tsx",
+   "sha256": "bf4d2ca17a5520fb83db9114919c1a419df364bfcd26ceb7e387fc21cbfd26fe",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_dollar.ts",
+   "sha256": "2383e72647ae52b63aafeb10399b9a6f3803918b83a750f1edab3ac0266a6230",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_dollar.tsx",
+   "sha256": "2383e72647ae52b63aafeb10399b9a6f3803918b83a750f1edab3ac0266a6230",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_greek.ts",
+   "sha256": "01d9704e68819675d6352f747d7727d61f919791e681ced274f345d294e2b4d8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_greek.tsx",
+   "sha256": "01d9704e68819675d6352f747d7727d61f919791e681ced274f345d294e2b4d8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_esc.ts",
+   "sha256": "34c0b64a203acb943d3ad01d9ae94708faa830e35f6459eadc15a4e899b9142d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-in_esc.tsx",
+   "sha256": "34c0b64a203acb943d3ad01d9ae94708faa830e35f6459eadc15a4e899b9142d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-inst_us.ts",
+   "sha256": "dc6190f43d69928df5a4f86ca450fd727693464a2a89a1548cbeb3d47819b5e7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-inst_us.tsx",
+   "sha256": "dc6190f43d69928df5a4f86ca450fd727693464a2a89a1548cbeb3d47819b5e7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-inst_digit.ts",
+   "sha256": "3dcf3e3c055c6b4b968240b89bff51f55b01ea123d90a4647cc0d0a1ff3303cf",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/let-inst_digit.tsx",
+   "sha256": "3dcf3e3c055c6b4b968240b89bff51f55b01ea123d90a4647cc0d0a1ff3303cf",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_us.ts",
+   "sha256": "3179ed58bf6a0545f0a20f34ee77be587a330126b5e9f932d804a81679bb69a9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_us.tsx",
+   "sha256": "3179ed58bf6a0545f0a20f34ee77be587a330126b5e9f932d804a81679bb69a9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_digit.ts",
+   "sha256": "be4952b562e5651a00fb1be7f880b7442fa0dfb1568e9ceec99b5388ad5cc768",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_digit.tsx",
+   "sha256": "be4952b562e5651a00fb1be7f880b7442fa0dfb1568e9ceec99b5388ad5cc768",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_dollar.ts",
+   "sha256": "601887e6c3e73e17597c05d462825d19535473147714f92b626dd9fe2efeab6d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_dollar.tsx",
+   "sha256": "601887e6c3e73e17597c05d462825d19535473147714f92b626dd9fe2efeab6d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_greek.ts",
+   "sha256": "4ab065e8cfe730c625f2ee35ce478c213cebb8ec7dc6a750d8a643d7a1bbd2dd",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_greek.tsx",
+   "sha256": "4ab065e8cfe730c625f2ee35ce478c213cebb8ec7dc6a750d8a643d7a1bbd2dd",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_esc.ts",
+   "sha256": "0af42275f8fdbfda1e1cf2bd1b8813afd6da11b6383f9e9d54e233d187bb3728",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-in_esc.tsx",
+   "sha256": "0af42275f8fdbfda1e1cf2bd1b8813afd6da11b6383f9e9d54e233d187bb3728",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-inst_us.ts",
+   "sha256": "0b279cae853291a5fe661e8d90dac972b63e7eae65822f10d4252793adfa1e4e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-inst_us.tsx",
+   "sha256": "0b279cae853291a5fe661e8d90dac972b63e7eae65822f10d4252793adfa1e4e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-inst_digit.ts",
+   "sha256": "d113c88e9d3ba6ffbe2f629e550d56b47f4971572e334e1e3593e72dca00449f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/ret-inst_digit.tsx",
+   "sha256": "d113c88e9d3ba6ffbe2f629e550d56b47f4971572e334e1e3593e72dca00449f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_us.ts",
+   "sha256": "1a297cb78a0e182e7c1cb838db64ea4f4e7408205af2e0de8f7609b3203f0372",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_us.tsx",
+   "sha256": "1a297cb78a0e182e7c1cb838db64ea4f4e7408205af2e0de8f7609b3203f0372",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_digit.ts",
+   "sha256": "8c2eda16bc0df9dd44ca472944541fb21925af6b36d40b5fd4a23251074824e2",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_digit.tsx",
+   "sha256": "8c2eda16bc0df9dd44ca472944541fb21925af6b36d40b5fd4a23251074824e2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_dollar.ts",
+   "sha256": "18a769171e9e8013338352a8922eaa90bfa8f2814e5357e7fb90c95895246009",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_dollar.tsx",
+   "sha256": "18a769171e9e8013338352a8922eaa90bfa8f2814e5357e7fb90c95895246009",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_greek.ts",
+   "sha256": "f1dbe5628dca7b1b98ddd4b40697283643a99fe943b11e4f83727ff33e59f45e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_greek.tsx",
+   "sha256": "f1dbe5628dca7b1b98ddd4b40697283643a99fe943b11e4f83727ff33e59f45e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_esc.ts",
+   "sha256": "6f2f4b3e074a0e809b3f8d224ef8e3f7e0f4b334d6c3569fdeae8b1804c242da",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-in_esc.tsx",
+   "sha256": "6f2f4b3e074a0e809b3f8d224ef8e3f7e0f4b334d6c3569fdeae8b1804c242da",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-inst_us.ts",
+   "sha256": "8ca641d0c3de8cd8cc2b2eb929954061062e55fd138fe83aa857b2f6e0b135eb",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-inst_us.tsx",
+   "sha256": "8ca641d0c3de8cd8cc2b2eb929954061062e55fd138fe83aa857b2f6e0b135eb",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-inst_digit.ts",
+   "sha256": "4c0f2672287c9c5fcf43ad9283eeacf2b7daf7ef2cd84a6cc7676486ed4b871f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/brk-inst_digit.tsx",
+   "sha256": "4c0f2672287c9c5fcf43ad9283eeacf2b7daf7ef2cd84a6cc7676486ed4b871f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_us.ts",
+   "sha256": "fee52cca553cb6ed28387d3382b803ced5430b7d02d38cc81bd59a18060c2688",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_us.tsx",
+   "sha256": "fee52cca553cb6ed28387d3382b803ced5430b7d02d38cc81bd59a18060c2688",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_digit.ts",
+   "sha256": "0df5883c61e505d21e0f529e6440d02140bdb65002bf246785e823e5c8d470f4",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_digit.tsx",
+   "sha256": "0df5883c61e505d21e0f529e6440d02140bdb65002bf246785e823e5c8d470f4",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_dollar.ts",
+   "sha256": "72e2ff647fc75555eb218e148fe06bc9ed78d28a86bb64f05e03269610a63f3d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_dollar.tsx",
+   "sha256": "72e2ff647fc75555eb218e148fe06bc9ed78d28a86bb64f05e03269610a63f3d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_greek.ts",
+   "sha256": "b4696c9ff0addcb8075ae1fac90a66b0c934d25c527fd38512af6c4cbb590a26",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_greek.tsx",
+   "sha256": "b4696c9ff0addcb8075ae1fac90a66b0c934d25c527fd38512af6c4cbb590a26",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_esc.ts",
+   "sha256": "0d98c36ab7b726e629defe17af7b0a487ef0dbefa69a40bd82bdebfa9685f58f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-in_esc.tsx",
+   "sha256": "0d98c36ab7b726e629defe17af7b0a487ef0dbefa69a40bd82bdebfa9685f58f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-inst_us.ts",
+   "sha256": "9966fd8c05fa46a2b52e78993ce308aeb8de6ce33f9aff7117b68896fefc66cc",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-inst_us.tsx",
+   "sha256": "9966fd8c05fa46a2b52e78993ce308aeb8de6ce33f9aff7117b68896fefc66cc",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-inst_digit.ts",
+   "sha256": "9a19d93d3b2ef93cf8843e2ab3f362f7d39c7a70b6986e6d3de46615235b0e10",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/type_kw-inst_digit.tsx",
+   "sha256": "9a19d93d3b2ef93cf8843e2ab3f362f7d39c7a70b6986e6d3de46615235b0e10",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_us.ts",
+   "sha256": "c52b8a9c65d8ab39dc8d63e02249b3bf48a8f22121710bf4ac6ae4f89654f6c5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_us.tsx",
+   "sha256": "c52b8a9c65d8ab39dc8d63e02249b3bf48a8f22121710bf4ac6ae4f89654f6c5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_digit.ts",
+   "sha256": "4d4f64856166efdc084dfbb8f723cf4c58cc42583347fd92d38b5a73f79923f5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_digit.tsx",
+   "sha256": "4d4f64856166efdc084dfbb8f723cf4c58cc42583347fd92d38b5a73f79923f5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_dollar.ts",
+   "sha256": "5858e262e333bccfb35b108fb57430620483e456fce550a1a231479978c1fdf3",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_dollar.tsx",
+   "sha256": "5858e262e333bccfb35b108fb57430620483e456fce550a1a231479978c1fdf3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_greek.ts",
+   "sha256": "743ffe52bde1290cacdfeaaf160a77b39b0418788281db25c70f39a017d6de19",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_greek.tsx",
+   "sha256": "743ffe52bde1290cacdfeaaf160a77b39b0418788281db25c70f39a017d6de19",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_esc.ts",
+   "sha256": "6696cd54c733d3a97e99a9e634466b6ceea833f6ac6787f595295968041b664c",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-in_esc.tsx",
+   "sha256": "6696cd54c733d3a97e99a9e634466b6ceea833f6ac6787f595295968041b664c",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-inst_us.ts",
+   "sha256": "33b083156a5a44d1f2772f74a32f7fa8b2b4997190710020abd6560053e258a1",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-inst_us.tsx",
+   "sha256": "33b083156a5a44d1f2772f74a32f7fa8b2b4997190710020abd6560053e258a1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-inst_digit.ts",
+   "sha256": "dea6be1660e0a355aa14dd594b68e32dcbb19268b6a64d38e879571c0c9d85b8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/field-inst_digit.tsx",
+   "sha256": "dea6be1660e0a355aa14dd594b68e32dcbb19268b6a64d38e879571c0c9d85b8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_us.ts",
+   "sha256": "31ad5a628586c0eae22e2c4c6d12d0a4cca9c05f3433e8895cb36fe8af5230fa",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_us.tsx",
+   "sha256": "31ad5a628586c0eae22e2c4c6d12d0a4cca9c05f3433e8895cb36fe8af5230fa",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_digit.ts",
+   "sha256": "3c6784aa5e2c61902e1e05bb90bdec9272a60c7d567328671bf1d03e9ecf7323",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_digit.tsx",
+   "sha256": "3c6784aa5e2c61902e1e05bb90bdec9272a60c7d567328671bf1d03e9ecf7323",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_dollar.ts",
+   "sha256": "82f4af3fb5d6ee3c75c8157dc77859842d75357a3c5708345c7c8bae3750a061",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_dollar.tsx",
+   "sha256": "82f4af3fb5d6ee3c75c8157dc77859842d75357a3c5708345c7c8bae3750a061",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_greek.ts",
+   "sha256": "467e1dc2932d0873d8877dde31296c923fa257fa4f22240949e851d4371f63e5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_greek.tsx",
+   "sha256": "467e1dc2932d0873d8877dde31296c923fa257fa4f22240949e851d4371f63e5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_esc.ts",
+   "sha256": "6de1c9525e2463a75be2f2e827a89912ab3cc62205a8fd9e4863677e2e09ae84",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-in_esc.tsx",
+   "sha256": "6de1c9525e2463a75be2f2e827a89912ab3cc62205a8fd9e4863677e2e09ae84",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-inst_us.ts",
+   "sha256": "0a120ab6111fde9e2cf7f7e1634060b99a610721fdc831b88c4d9c9b0531addc",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-inst_us.tsx",
+   "sha256": "0a120ab6111fde9e2cf7f7e1634060b99a610721fdc831b88c4d9c9b0531addc",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-inst_digit.ts",
+   "sha256": "79d865d77092177337f45f381fea99fad384fb37c718e48c0ab937bffe4c5cc2",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/method-inst_digit.tsx",
+   "sha256": "79d865d77092177337f45f381fea99fad384fb37c718e48c0ab937bffe4c5cc2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_us.ts",
+   "sha256": "e96000e15a5f9eb36969743f68ea501986f6c21e1a1f6b7ce1366241175493f4",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_us.tsx",
+   "sha256": "e96000e15a5f9eb36969743f68ea501986f6c21e1a1f6b7ce1366241175493f4",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_digit.ts",
+   "sha256": "46d458246d0a331e96e6b1cff86e8d75a4b213d8bf6589cd7ede47e77245fa53",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_digit.tsx",
+   "sha256": "46d458246d0a331e96e6b1cff86e8d75a4b213d8bf6589cd7ede47e77245fa53",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_dollar.ts",
+   "sha256": "adb98300f2edffa6789fd85bebcadb7a6fe775ef1b8ec184ccdf369170d2dc3e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_dollar.tsx",
+   "sha256": "adb98300f2edffa6789fd85bebcadb7a6fe775ef1b8ec184ccdf369170d2dc3e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_greek.ts",
+   "sha256": "8c77e1067298b0eef4680c0673419b04c5d0df37db01b8252313ee8d2d6a0a7e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_greek.tsx",
+   "sha256": "8c77e1067298b0eef4680c0673419b04c5d0df37db01b8252313ee8d2d6a0a7e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_esc.ts",
+   "sha256": "f5938bb1be95f634f8e9c97b20b4182ad4509f402eb83d26f157e77e11d31a51",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-in_esc.tsx",
+   "sha256": "f5938bb1be95f634f8e9c97b20b4182ad4509f402eb83d26f157e77e11d31a51",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-inst_us.ts",
+   "sha256": "a456a60a3190eed4312aa70ff27d1852928c16f41e22159f1d3828b524d2fd30",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-inst_us.tsx",
+   "sha256": "a456a60a3190eed4312aa70ff27d1852928c16f41e22159f1d3828b524d2fd30",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-inst_digit.ts",
+   "sha256": "6f592cfbb9752a7d5ed31717df860c58be9e63568936b974a742e20197e94836",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/readonly-inst_digit.tsx",
+   "sha256": "6f592cfbb9752a7d5ed31717df860c58be9e63568936b974a742e20197e94836",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_us.ts",
+   "sha256": "c5a8541a983bf653b58b4d4b01691b2fe8f7fd5820beb244ac70390c1757e4a1",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_us.tsx",
+   "sha256": "c5a8541a983bf653b58b4d4b01691b2fe8f7fd5820beb244ac70390c1757e4a1",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_digit.ts",
+   "sha256": "166c34a1ac736d44882e7f56ad0e1dcc5052480358224a17b122f06ed8bf6637",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_digit.tsx",
+   "sha256": "166c34a1ac736d44882e7f56ad0e1dcc5052480358224a17b122f06ed8bf6637",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_dollar.ts",
+   "sha256": "a05bce31a577b848d300157c0846851db4f81c7724851957e337a15a34da4f31",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_dollar.tsx",
+   "sha256": "a05bce31a577b848d300157c0846851db4f81c7724851957e337a15a34da4f31",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_greek.ts",
+   "sha256": "3331c2e36eba927a2048f026e6587470562a57916780cd054c61c4eb955cb88e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_greek.tsx",
+   "sha256": "3331c2e36eba927a2048f026e6587470562a57916780cd054c61c4eb955cb88e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_esc.ts",
+   "sha256": "92b529ea11f295d1b48b206b7cc89682e58e24d41f2f9d6158375276344fb8b8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-in_esc.tsx",
+   "sha256": "92b529ea11f295d1b48b206b7cc89682e58e24d41f2f9d6158375276344fb8b8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-inst_us.ts",
+   "sha256": "c0fa9ad90298e642164f16a97d205e26d59b5d4e1ea03cac01483ff2e37a0d16",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-inst_us.tsx",
+   "sha256": "c0fa9ad90298e642164f16a97d205e26d59b5d4e1ea03cac01483ff2e37a0d16",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-inst_digit.ts",
+   "sha256": "93e1c6ef3a1d42a909ec7bfb8e747296f57942611eedc53a3d4353bacc562293",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/async_m-inst_digit.tsx",
+   "sha256": "93e1c6ef3a1d42a909ec7bfb8e747296f57942611eedc53a3d4353bacc562293",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_us.ts",
+   "sha256": "3629758006d136569ed4ab80e1a4f8850a7c8ff7eb118dd83a15dc5682de9eb3",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_us.tsx",
+   "sha256": "3629758006d136569ed4ab80e1a4f8850a7c8ff7eb118dd83a15dc5682de9eb3",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_digit.ts",
+   "sha256": "acf05fd74b7b8cab53beafb2e1eee9d8c2998b1b3e93dc999e88d2664f7e3c43",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_digit.tsx",
+   "sha256": "acf05fd74b7b8cab53beafb2e1eee9d8c2998b1b3e93dc999e88d2664f7e3c43",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_dollar.ts",
+   "sha256": "3e1e578b496987395d4f1b6b200b8841162029609d23924abdb259ae0ea4ee0f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_dollar.tsx",
+   "sha256": "3e1e578b496987395d4f1b6b200b8841162029609d23924abdb259ae0ea4ee0f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_greek.ts",
+   "sha256": "6dfe1bece7b6845258d447d3d32b61165d37253fa9be05dfcc444a28d587b4f6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_greek.tsx",
+   "sha256": "6dfe1bece7b6845258d447d3d32b61165d37253fa9be05dfcc444a28d587b4f6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_esc.ts",
+   "sha256": "5dbb7c2cd45f7d6c3f4d429ffb1ee5de5b779bd4b2bf8e629645e28430c7ae98",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-in_esc.tsx",
+   "sha256": "5dbb7c2cd45f7d6c3f4d429ffb1ee5de5b779bd4b2bf8e629645e28430c7ae98",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-inst_us.ts",
+   "sha256": "14c9379022b32aabb81286bd34ea35f77624310a8710add2804402971630818d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-inst_us.tsx",
+   "sha256": "14c9379022b32aabb81286bd34ea35f77624310a8710add2804402971630818d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-inst_digit.ts",
+   "sha256": "bd5443f8f4a7733d1c6cae7c1e8e3348fe7925b5798333db32d93ea3f093bc5d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/iface-inst_digit.tsx",
+   "sha256": "bd5443f8f4a7733d1c6cae7c1e8e3348fe7925b5798333db32d93ea3f093bc5d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_us.ts",
+   "sha256": "1c9f026587bb89e1a8ee1f479ae4510128dd18ce6b6b2c517aa8258293a21871",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_us.tsx",
+   "sha256": "1c9f026587bb89e1a8ee1f479ae4510128dd18ce6b6b2c517aa8258293a21871",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_digit.ts",
+   "sha256": "a0a544357acb6db21fca958ce724661a7771c4203e9a802d2da13514ded777a6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_digit.tsx",
+   "sha256": "a0a544357acb6db21fca958ce724661a7771c4203e9a802d2da13514ded777a6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_dollar.ts",
+   "sha256": "3f70c1a2af0f7813af5d9bff6353a68ea52130cef797cd14b83d883a975b6c9b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_dollar.tsx",
+   "sha256": "3f70c1a2af0f7813af5d9bff6353a68ea52130cef797cd14b83d883a975b6c9b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_greek.ts",
+   "sha256": "4d30c4b61ad9a84f75ebe93093d2e5fc5850b9597616b69cd60a4e85d13fdfc6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_greek.tsx",
+   "sha256": "4d30c4b61ad9a84f75ebe93093d2e5fc5850b9597616b69cd60a4e85d13fdfc6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_esc.ts",
+   "sha256": "f9724e919436c8b70654b4085771199f18a815ed49d4a19afc33fe50ff3188a8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-in_esc.tsx",
+   "sha256": "f9724e919436c8b70654b4085771199f18a815ed49d4a19afc33fe50ff3188a8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-inst_us.ts",
+   "sha256": "4508c26907e96b7d99f8234aca2442fa913657f8268d5a7cb985dbaf62d7d4ca",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-inst_us.tsx",
+   "sha256": "4508c26907e96b7d99f8234aca2442fa913657f8268d5a7cb985dbaf62d7d4ca",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-inst_digit.ts",
+   "sha256": "5b59f4ece7ebac9833ef5406840ad4575512c0aa64e3ec90d39aa106cb9e0569",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/objtype-inst_digit.tsx",
+   "sha256": "5b59f4ece7ebac9833ef5406840ad4575512c0aa64e3ec90d39aa106cb9e0569",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-bin_in.ts",
+   "sha256": "e11e150702b9ca72b6594aa8ef41714b1eae692b49ee37e4480a84337df07e81",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-bin_in.tsx",
+   "sha256": "e11e150702b9ca72b6594aa8ef41714b1eae692b49ee37e4480a84337df07e81",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-bin_instanceof.ts",
+   "sha256": "811479c6c6d88534aff0cbc03ec8996a231f02190e9c8bbef62d8635456127db",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-bin_instanceof.tsx",
+   "sha256": "811479c6c6d88534aff0cbc03ec8996a231f02190e9c8bbef62d8635456127db",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-for_var_in.ts",
+   "sha256": "4556b2975ad9136c0a366edb65fff12b9debc02c6973eb4e86fc528a30490f2e",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-for_var_in.tsx",
+   "sha256": "4556b2975ad9136c0a366edb65fff12b9debc02c6973eb4e86fc528a30490f2e",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_nbsp.ts",
+   "sha256": "619cfb99828a720a41581f3308b5d574666922419d3b52d48dcf6bd0684ec8f4",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_nbsp.tsx",
+   "sha256": "619cfb99828a720a41581f3308b5d574666922419d3b52d48dcf6bd0684ec8f4",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_bom.ts",
+   "sha256": "716e098f2d356cb8a5b74203e4939261fd30476f6dd3bc6d1fd8179a6c04b77b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_bom.tsx",
+   "sha256": "716e098f2d356cb8a5b74203e4939261fd30476f6dd3bc6d1fd8179a6c04b77b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_zwsp.ts",
+   "sha256": "aba71aa8eeeae38ba9e82ab179ddf0d47f762469462cb53771df66e2d953a646",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_zwsp.tsx",
+   "sha256": "aba71aa8eeeae38ba9e82ab179ddf0d47f762469462cb53771df66e2d953a646",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_ideo.ts",
+   "sha256": "5cca9d23ac11fd65e52d6f20eee264bbc2905579d9cd18cec010262b243f9a2f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-field_in_ideo.tsx",
+   "sha256": "5cca9d23ac11fd65e52d6f20eee264bbc2905579d9cd18cec010262b243f9a2f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-iface_in_nbsp.ts",
+   "sha256": "6bd32eb13aa599e94c7b5f5e0c59c7043143e5b7da70ce14245609372562ef3d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "n7/guard-iface_in_nbsp.tsx",
+   "sha256": "6bd32eb13aa599e94c7b5f5e0c59c7043143e5b7da70ce14245609372562ef3d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
   }
  ]
 }

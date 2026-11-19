@@ -50,3 +50,21 @@
     after v2.0.0.
   - Known difference kept: `in()` or `in<T>()` as a method name after a line break still gives `ERROR` (the scanner
     cannot tell it from `for (var x⏎in (y))`).
+- Automatic semicolon insertion before a word that starts with `in` or `instanceof` after a line break, in both
+  grammars, as `tsc` does: `in_progress`, `in1`, `in$`, `instanceof_x`, a word with a non-ASCII or `\u`-escaped
+  character after `in` (`in·x`, `in` + U+0301, `ina`). The external scanner (`common/scanner.h`) took such a word for the
+  keyword `in` or `instanceof` when the next character was not a letter by the C library's `iswalpha()` (which also
+  depends on the platform and locale), and inserted no semicolon: `a = b⏎in_progress = true`, `foo()⏎in1.x()`,
+  `class A { x⏎in_y = 1 }` and `interface I { a: string⏎in_b: number }` gave `ERROR`. Now a word continues after `in`
+  or `instanceof` on an ASCII letter, digit, `_`, `$` or `\`, or on any non-ASCII character that is not white space
+  (the grammar's own identifier characters). Also, the white space between the keyword `in` and a member's `=`, `:`,
+  `?`, `;` or `}` is matched by code point, so U+FEFF and U+200B there (`class A { x⏎in<U+FEFF>= 1 }`) no longer give
+  `ERROR`. `a⏎in b`, `a⏎instanceof B` and `for (var x⏎in y)` are unchanged. `tsc` 7.0.2 accepts all these inputs.
+  - Node kinds and fields added: none (no generated file changes).
+  - Error-free tree changes: `return`, `break`, `readonly`, `async` (class member) and `type` followed by
+    a line break and such a word now end there, as they already did before any other identifier (`return;` then
+    `in_x;`, as `tsc` reads them; before, `return⏎in_x` returned `in_x`). `static` and `get` followed by a line break
+    and such a word now give two members, as before any other identifier (the known difference above; `tsc` reads
+    one member). Queries follow these trees (for example `@keyword` -> `@property` for `readonly`). None
+    of the 17,665 pinned example files changes its tree.
+  - `test/examples/known-failures.txt`: no entry cleared.

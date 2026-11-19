@@ -91,13 +91,32 @@ static bool scan_whitespace_and_comments(TSLexer *lexer, bool *scanned_comment) 
     }
 }
 
+// Non-ASCII white space the grammar's extras skip (Unicode White_Space, U+200B, U+2060, U+FEFF), by code point:
+// iswspace() of these depends on the C library and locale.
+static bool is_unicode_space(int32_t c) {
+    return c == 0x85 || c == 0xA0 || c == 0x1680 || (c >= 0x2000 && c <= 0x200B) || c == 0x2028 || c == 0x2029 ||
+           c == 0x202F || c == 0x205F || c == 0x2060 || c == 0x3000 || c == 0xFEFF;
+}
+
+// Whether `c` continues the word after `in` or `instanceof` (then it is an identifier such as `in_progress`). ASCII as
+// tsc: letters, digits, `_`, `$`, and `\` of a `\u` escape. Other code points as the grammar's identifier token: all
+// but white space (where tsc accepts the input, such a character is ID_Continue, ZWNJ or ZWJ).
+static bool is_identifier_part(int32_t c) {
+    if (c < 0x80) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$' ||
+               c == '\\';
+    }
+    return !is_unicode_space(c);
+}
+
 // After a line break, `in` or `instanceof` names the next class or type member (as in tsc) when no binary operator may
 // follow and the next character can only follow a member name; `for (var x⏎in y)` keeps its `in`.
 static bool keyword_starts_member(TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[LOGICAL_OR]) {
         return false;
     }
-    while (iswspace(lexer->lookahead) && !is_line_terminator(lexer->lookahead)) {
+    while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\v' || lexer->lookahead == '\f' ||
+           (is_unicode_space(lexer->lookahead) && !is_line_terminator(lexer->lookahead))) {
         skip(lexer);
     }
     switch (lexer->lookahead) {
@@ -231,7 +250,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
             }
             skip(lexer);
 
-            if (!iswalpha(lexer->lookahead)) {
+            if (!is_identifier_part(lexer->lookahead)) {
                 return keyword_starts_member(lexer, valid_symbols);
             }
 
@@ -242,7 +261,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
                 skip(lexer);
             }
 
-            if (!iswalpha(lexer->lookahead)) {
+            if (!is_identifier_part(lexer->lookahead)) {
                 return keyword_starts_member(lexer, valid_symbols);
             }
             break;
