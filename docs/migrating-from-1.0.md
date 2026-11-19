@@ -1,9 +1,9 @@
 # Moving from 1.0.0 to 2.0.0
 
-> **Release-PR note (remove before merging the release PR).** Built on 2026-11-19 from `main` = `fdd6dd2`. Merged:
-> #3 (S2), #4 (S6), #5 (S4), #6 (S3), #7 (S5), #9 (S1), #10 (N3), #11 (N2). Not merged, marked **[pending]** below:
-> #13 (N1), #14 (N1b), #12 (N4), #15 (N5) and N7 (no pull request yet). Every **[pending]** item is taken from its pull
-> request's description and changes if the pull request changes; complete it when that pull request merges. Counts are
+> **Release-PR note (remove before merging the release PR).** Updated on 2026-11-20 from `main` = `d4c5286`. Merged:
+> #3 (S2), #4 (S6), #5 (S4), #6 (S3), #7 (S5), #9 (S1), #10 (N3), #11 (N2), #13 (N1), #12 (N4), #14 (N1b), #15 (N5).
+> Not merged, marked **[pending]** below: #17 (N7). The **[pending]** item is taken from its pull request's description
+> and changes if the pull request changes; complete it when that pull request merges. Counts are
 > from the pull request that carries them, measured against its own base, not against `v1.0.0` (`59fc4ed`) directly:
 > replace this note by one measurement of the final `main` against `v1.0.0` (corpus, oracle sources and the pinned
 > examples, deduplicated), as mssql's guide does.
@@ -22,8 +22,9 @@ Nothing removed, nothing renamed. Added or relaxed, in both grammars unless note
 | --- | --- | --- |
 | `member_expression` may have a `type_arguments` child (no field name) | S4, #5 | `import('m').X<T>` in type position |
 | anonymous node `out` | S1, #9 | variance modifier; a parameter named `out` is still a `type_identifier`. `in` was an anonymous node already. |
-| the `children` of `type_parameters` go from `required: true` to `required: false` | N4, #12 **[pending]** | `type A<> = number;`; a relaxation, nothing removed. A consumer that trusts `required` must allow an empty list. |
-| the `primary_type` supertype lists `call_expression` and `member_expression` as subtypes | N1, #13 **[pending]** | `import('x').Y[]`; the trees of existing input do not change |
+| the `children` of `type_parameters` go from `required: true` to `required: false` | N4, #12 | `type A<> = number;`; a relaxation, nothing removed. A consumer that trusts `required` must allow an empty list. |
+| the `primary_type` supertype lists `call_expression` and `member_expression` as subtypes | N1, #13 | `import('x').Y[]`; trees change only for an index after `as`/`satisfies` (below) |
+| `arguments` lists `object` and `string` among its children | N1b, #14 | `typeof import('m', { with: ... })` in a type query (hidden `_type_query_import_arguments`, aliased to `arguments`) |
 
 No new node kind, no new field name. `test/node-kinds/{typescript,tsx}.txt` (the snapshot) gains the line `"out"`
 (S1) and nothing else.
@@ -87,9 +88,21 @@ Queries: the JSX `@attribute` capture gains `b`, the `@comment` range of the old
 two string nodes. A `&` that starts no complete character reference is now its own `string_fragment` (`"E&xit"` gives
 three: `E`, `&`, `xit`; it was an `ERROR` before).
 
-### `f<typeof import('m')>(args)` (N1b, #14) **[pending]**
+### An index after `as`/`satisfies import(...)` (N1, #13)
 
-36 of the 17,664 `.ts`/`.tsx` files of the pinned examples change (all in `examples/vscode`), all the same construct:
+`const x = v as import('x').Y['k'];`, `v satisfies import('x')['k']`, `v as import('x').Y[0]`, `v as import('x').Y[a.b]`
+(index on the same line; tsc accepts them and reads the index as part of the type):
+- 1.0.0: a `subscript_expression` around the `as_expression` (or `satisfies_expression`).
+- 2.0.0: a `lookup_type` inside the type, as tsc reads it.
+
+Same change in both grammars. A consumer that matched `subscript_expression` over an `as` expression on such input
+must match `lookup_type` instead. No query in `queries/` or in the inherited JavaScript queries names
+`subscript_expression`, `lookup_type`, `as_expression` or `array_type`; the highlight captures on a `string`/`number`
+index are unchanged. With the index on the next line see "Valid input that is an error now" below.
+
+### `f<typeof import('m')>(args)` (N1b, #14)
+
+36 of the 17,665 files of the pinned examples change (all in `examples/vscode`), all the same construct:
 `importAMDNodeModule<typeof import('jschardet')>('jschardet', 'dist/jschardet.min.js')`.
 
 - 1.0.0: `binary_expression(binary_expression(identifier, unary_expression(typeof, call_expression(import, arguments))), parenthesized_expression(sequence_expression(...)))`, two comparisons.
@@ -114,12 +127,12 @@ Every changed tree differs only by added `(comment)` nodes. In the pinned exampl
 (`abstractSynchronizer.ts`, one `(comment [574, 5] - [574, 54])`). Queries: `(comment) @comment` and the JSDoc
 injection now also match these comments.
 
-### Line terminators in automatic semicolon insertion (N5, #15) **[pending]**
+### Line terminators in automatic semicolon insertion (N5, #15)
 
 The external scanner treated only LF as a line break. Now a lone CR, U+2028, U+2029 and a block comment that holds a
-line terminator count too (a `//` comment ended by one of these as well), as in tsc. After the change every one of the
-11 forms of a line break gives the same tree as the LF form, which is what 1.0.0 gave for LF. Trees that change for
-each non-LF form:
+line terminator count too (a `//` comment ended by one of these as well), as in tsc. Each of them acts exactly as LF
+does at `e56ad86` (owner decision 24): the scanner makes the same decision after it as after an LF, so the input gets
+the tree its LF form gets. Trees that change for each non-LF form (where that tree differs from the old one):
 
 | input (line break between the parts) | 1.0.0 | 2.0.0 (= the LF form) | tsc |
 | --- | --- | --- | --- |
@@ -130,24 +143,34 @@ each non-LF form:
 | `declare` and `const x: number;` | ambient declaration | `declare;` + `const ...` | two statements |
 | `static` and `x = 1` | one static field | fields `static`, `x` | one static field (see known differences) |
 | `get`/`set` and `x() {}` | getter / setter | field `get`/`set`, method `x` | one accessor (see known differences) |
+| `yield` and `x` | `yield x` | `yield;` + `x;` | two statements |
+| `public`/`private`/`protected`/`declare`/`override`/`accessor` and a member | one member with the modifier | a field named by the keyword, then the member | two members |
+| `type T = A` and `[B];` | `lookup_type` | `type T = A;` + `[B];` | two statements |
 
-In the same scanner path, `in` or `instanceof` after a line break now starts the next class or type member when no
-binary operator may follow and the next character is `=`, `:`, `?`, `;` or `}`
-(`class A { x` + newline + `in = 1; }`, `interface I { a: string` + newline + `in: number }`); these were `ERROR`s.
-`for (var x` + newline + `in y)` keeps its `in`. Queries: `static`, `get`, `set`, `readonly` move from `@keyword`
-to `@property`; `type`, `declare` and labels get `@variable`; in `get /*` + newline + `*/ x()` the `definition.method`
-tag covers only `x(...)`. Counts and oracle cases: take them from #15 when it merges.
+The same holds for a line comment ended by U+2028, U+2029 or a lone CR after an LF (`a⏎// c<U+2028>+b`): 1.0.0 read
+the comment on to the next LF and decided there; now the text after the comment decides, as with LF. So
+`a⏎// c<U+2028>+b`, `-b`, `(b)`, `[b]`, `` `x` ``, `<T>(x)` continue the expression (as tsc reads them; before, two
+statements), and `return⏎// c<U+2028>+x`, `yield⏎// c<U+2028>(x)` attach the operand as their LF forms do (tsc splits
+them). A block comment that holds the line break now follows the inserted semicolon (a sibling of the statement or
+member) instead of sitting inside it.
 
-### Identifiers starting with `in` after a line break (N7) **[pending]**
+Queries follow the trees: the keyword of a split modifier gets `@property` (JavaScript highlights) instead of
+`@keyword`; `type`, `declare`, `async` and labels get `@variable`; for `async`/`override` + method the
+`definition.method` tag and `local.scope` start at the method name; in `set /*⏎*/ x(v) {}` the comment becomes the
+`@doc` of method `x`. None of the 17,665 pinned example files changes its tree (compared with `e56ad86`).
 
-The scanner's `in`/`instanceof` check misreads identifiers such as `in_progress`, `in1`, `in$` after a line break.
-No pull request yet: add the before/after trees, the tsc verdicts and the counts from it.
+### Identifiers starting with `in` and `let` across a line break (N7, #17) **[pending]**
+
+#17 tells `in`/`instanceof` from identifiers that start with them (`in_progress`, `in1`, `in$`) after a line break
+(owner decision 12), and keeps a `let`/`const` declaration across a line break before an ordinary identifier or `{`, as
+tsc reads it (owner decisions 22 and 25; `let⏎x = 1` was `let;` + an assignment at 1.0.0). Not merged yet: add the
+before/after trees, the tsc verdicts and the counts from #17's CHANGELOG entry when it merges.
 
 ## Previously error-free input that is an error now (intended)
 
 | input | 1.0.0 | 2.0.0 | tsc |
 | --- | --- | --- | --- |
-| `type D<in> = number;` (S1, #9) | ok | `MISSING type_identifier` | TS1359 |
+| `type D<in> = number;` (S1, #9) | ok | `ERROR` on the `in` token `[7,9)` (with N4; S1 alone gave a `MISSING type_identifier`) | TS1359 |
 | `type L<in, T> = T;` (S1, #9) | ok | `ERROR` | TS1359, TS1139 |
 | `<A t="a&" b="/>;` in TSX (N3, #10) | no error: `t` holds the string `"a&" b="`, the element closes at `/>` | `t="a&"` ends at its own quote, `b="/>;` is an unterminated string: error | TS1002 |
 | `a⏎/* c */ +? b : c;` and the same with `-?`, `/?`, `in?`, `instanceof?` (N2, #11) | no error: a plain ternary, comment and operator in no node | `comment` node kept, `ERROR` from the `?` | TS1109 |
@@ -156,6 +179,27 @@ All of these inputs are invalid TypeScript. The first two come from `in` becomin
 parameter named `in` was never valid. Type parameters named `out` (`type A<out> = out;`, `type B<out = string> = out;`,
 `type C<T, out> = out;`, `type E<in out> = number;`) keep parsing without error and keep `out` as a `type_identifier`.
 
+## Valid input that is an error now (recorded)
+
+tsc accepts these and the grammar now gives `ERROR`, as a related form already did before (recorded under owner
+decision 10's rule: no new kind of difference); the counts below say which of them parsed without error before.
+Fixing them needs a grammar change, a candidate after 2.0.0.
+
+- **An index on the line after an `import(...)` type (N1, owner decision 14).** `const x = v as import('x').Y` + line
+  break + `[a + b];` (also `satisfies`, `[f()]`, `[a?.b]`): a `subscript_expression` at 1.0.0, an `ERROR` now; tsc
+  reads two statements. 1.0.0 already reads every other type this way (`v as Foo` + line break + `[a + b];` is an
+  `ERROR`).
+- **A non-LF line break before a member named `in`/`instanceof`, `with /* c */ {`, `<B>(` or `as T⏎[` (N5, owner
+  decisions 20, 23, 24 and 27).** With a lone CR, U+2028, U+2029 or a line-breaking block comment as the line break:
+  `class A { a⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`, `interface I { a: string⏎in(): void }`
+  (also `instanceof` and names starting with them: `in1`, `in_`, `in$`); `import x from "m"<CR>with /* c */ { type:
+  "json" };`; `interface A { a: T⏎// c<U+2028><B>(b: B): V; }`; `a as T⏎// c<U+2028>[b + c];`. The LF form of each is an
+  `ERROR` at `e56ad86` too. Over the 5,938 review and oracle inputs that contain such a line break, 1,080 are of this kind
+  (tsc accepts, `ERROR` here, `ERROR` for the LF form at `e56ad86`); 170 of them parsed without error at `e56ad86`
+  itself. By shape: `in`/`instanceof` member 952, `with` comment 24, `as T⏎[` 26, interface `<B>(` 26, a comment
+  between `}` and `:` of a typed object pattern 26, `for (using a⏎of b)` 26. N7 (#17, **[pending]**) changes the
+  `in1`/`in_`/`in$` part.
+
 ## Inputs that were errors and parse now (additions, no migration needed)
 
 `export type * from 'm'` and its three variants (S2, #3); a bare `&` in TSX JSX text, `<p>Shipping & Handling</p>`
@@ -163,18 +207,22 @@ parameter named `in` was never valid. Type parameters named `out` (`type A<out> 
 `abstract accessor`, members named `accessor` (S3, #6); variance annotations `in`, `out`, `in out` on type parameters
 (S1, #9); tagged templates with object, array, tuple or function type arguments (S5, #7); `&` that starts no character
 reference in a TSX attribute string, `text="E&xit"` (N3, #10); an empty type parameter list in declarations,
-`type A<> = number;`, `class C<> {}`, `function f<>() {}` (N4, #12 **[pending]**; an arrow function keeps requiring a
-non-empty list: `<>(x) => x` stays an error because tsc rejects it); an `import(...)` type followed by `[]` or an
-index, `import('x').Y[]`, `import('x')['k']` (N1, #13 **[pending]**); `typeof import(...)` as a type argument
-(N1b, #14 **[pending]**); `in`/`instanceof` as a class or type member name after a line break (N5, #15
-**[pending]**).
+`type A<> = number;`, `class C<> {}`, `function f<>() {}` (N4, #12; an arrow function keeps requiring a non-empty
+list: `<>(x) => x` stays an error because tsc rejects it); an `import(...)` type followed by `[]` or an index,
+`import('x').Y[]`, `import('x')['k']` (N1, #13); `typeof import(...)` as a type argument,
+`importOriginal<typeof import('vscode')>()` and `f<typeof import('m')>;` (N1b, #14); a lone CR, U+2028, U+2029 or a
+line-breaking block comment as an automatic-semicolon line break, `a = b /*⏎*/ c = d;`, `x<U+2028>++y;`,
+`class A { static accessor /*⏎*/ x = 1; }` (N5, #15); with any line break, LF included, `}` before `:` of a typed
+object pattern, `type F = ({ a⏎}: { a: number }) => number;`, and `with {` of import attributes on the next line,
+`import x from "x"⏎with { type: "json" };` (N5); `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same
+with U+200B (N5, owner decision 26).
 
-Entries of `test/examples/known-failures.txt` cleared by these: 15 (S6), 3 (S4) and 1 (N3) on `main`; N1 8 and
-N1b 15 **[pending]** (14, plus `copilotcliSession.spec.ts`, which needs N1 and N1b: whichever merges second removes
-it). The 6 entries for constructs this release does not fix were marked `v1.1:` and are marked `candidate:` now.
+Entries of `test/examples/known-failures.txt` cleared by these: 15 (S6), 3 (S4), 1 (N3), 8 (N1) and 15 (N1b; one of
+them, `copilotcliSession.spec.ts`, needed N1 and N1b), 42 in all; 14 remain. The 6 entries for constructs this release
+does not fix were marked `v1.1:` and are marked `candidate:` now.
 
 Error trees change too, which was never a contract: for example `type A<,> = number;` now gives an `ERROR` on the comma
-instead of a zero-width `type_parameter` (N4 **[pending]**).
+instead of a zero-width `type_parameter` (N4).
 
 ## Known differences from tsc
 
@@ -183,35 +231,49 @@ Recorded, not fixed in 2.0.0. "Accepts" means the grammar parses without error w
 reverse. Checker-only errors (TS1274 for `function f<in T>() {}`, TS1243 for `readonly accessor x`, TS1098 and TS1099
 for empty lists) are out of scope: `--noCheck` drops them.
 
-- **Variance (S1).** Rejects but tsc accepts: `<in in T>`, `<out in T>`, `<out out T>`, `<in const T>` (duplicate or
-  misordered modifiers). Accepts but tsc rejects (TS1359): `type E<out extends string> = out;` (read as a parameter
-  named `out` with a constraint).
-- **`accessor` literals (S3).** Nine inputs `class A { static accessor <member> }` with `<member>` = `012 = 1`,
-  `08 = 1`, `0_1 = 1`, `01n = 1`, `"\8" = 1`, `"\1" = 1`, `"\u{110000}" = 1`, `x = 01`, `x = (y: number)` are accepted
-  although tsc rejects them; the same text without `accessor` was already accepted at 1.0.0 (the grammar does not
-  validate literals). Validating literals is a candidate after 2.0.0.
+The owner decisions are numbered as in the release's decision record.
+
+- **Variance (S1, owner decision 2).** Rejects but tsc accepts: `<in in T>`, `<out in T>`, `<out out T>`, `<in const T>`
+  (duplicate or misordered modifiers). Accepts but tsc rejects (TS1359): `type E<out extends string> = out;` (read as a
+  parameter named `out` with a constraint).
+- **`accessor` literals (S3, owner decision 8).** Nine inputs `class A { static accessor <member> }` with `<member>` =
+  `012 = 1`, `08 = 1`, `0_1 = 1`, `01n = 1`, `"\8" = 1`, `"\1" = 1`, `"\u{110000}" = 1`, `x = 01`, `x = (y: number)` are
+  accepted although tsc rejects them; the same text without `accessor` was already accepted at 1.0.0 (the grammar does
+  not validate literals). Validating literals is a candidate after 2.0.0.
 - **An operator before a ternary `?` after a line break (N2).** `a⏎+? b : c;` (and `-?`, `/?`, `in?`, `instanceof?`,
   and the same after a line comment) are accepted with the operator in no node, before and after 2.0.0; tsc rejects
   them (TS1109).
-- **ASI after `static`, `get`, `set` (N5 **[pending]**).** tsc reads `static` + line break + `x = 1` as one static
-  field and `get`/`set` + line break + `x() {}` as one accessor; the grammar reads two members (as 1.0.0 did for LF). A
-  grammar change, not a scanner change, would be needed. `in()` or `in<T>()` as a method name after a line break
-  stays an `ERROR` (the scanner cannot tell it from `for (var x` + newline + `in (y))`).
-- **`import(...)` types (S4; N1, N1b **[pending]**).** Ten inputs that tsc rejects parse clean with S4's type-argument
-  path; the same defect without type arguments was already accepted at 1.0.0 (`type T = import().A<string>;`,
-  `import('m' + '/sub').A<string>`, `import('m', opts).A<string>`, `import('m', {}, {}).A<string>`,
-  `import(getModule()).A<string>`, `import('m', { wrong: {} }).A<string>`, `import('m',).A<string>`,
-  `import(...args).A<string>`, type arguments on the next line after a type,
-  `type T = import('m').A<typeof import('n').B().C<string>>;`). Import-type argument validation and type arguments
-  after a newline are candidates after 2.0.0. Still `ERROR` although tsc accepts: `(import('x').Y)`,
-  `(import('x').Y)[]`, `[...import('x').Y]`, `import('x')<T>`, `f<import('x').B>()`. Accepted although tsc rejects
-  (1.0.0 too): `let x: typeof import('x').y()[];`, `f<typeof g('a')>()`, `let x: A<typeof g('a')>;`. With N1 a `[`
-  after a line break is read as a type index after an `import()` type too, as 1.0.0 already did after every other type:
-  `v as import('x').Y⏎[a + b]` goes from error-free-but-wrong to an error. ``sql<typeof import('m')>`x`;`` still reads
-  as a comparison (1.0.0 too).
-- **Empty type argument lists** (`f<>(x)`, `new C<>()`, `A<>`; TS1099 is a checker error) are errors in the grammar. Not
-  in 2.0.0; a MINOR candidate (the `<T>x` assertion against a generic arrow needs a conflict design). `async <>(x) => x`
-  is an error in both, at different bytes.
+- **ASI after `static`, `get`, `set` (N5, owner decision 12).** tsc reads `static` + line break + `x = 1` as one static
+  field and `get`/`set` + line break + `x() {}` as one accessor; the grammar reads two members, for every line-break
+  form (1.0.0 already did for LF). A grammar change, not a scanner change, would be needed.
+- **A class or type member named `in`/`instanceof` after a line break, and the other shapes above (N5, owner
+  decisions 20, 23, 24 and 27).** Rejected for every line-break form, LF included; see "Valid input that is an error
+  now". `for (var x⏎in y)` keeps its `in`.
+- **ASI leniency (N5, owner decisions 10 and 26).** Accepted although tsc rejects, each the same defect 1.0.0 already
+  has for the LF form (or, for U+2060, for the empty pattern): `yield` then `*x` on the next line, a ternary after `/?`
+  that loses its `/` (also on one line: `a /? b : c;`), a missing required `;` in a `for` header, an automatic
+  semicolon after a Flow-style ambient module type annotation, `with /* c */ (y) {}` after a lone CR,
+  `for (var x⏎// c<U+2028>in (<div>{else}</div>)) {}`, and `type F = ({ a }<U+2060>: { a: number }) => number;`
+  (TS1127). `return /*⏎*/ +x`, `return /*⏎*/ /r/.test(s)`, `yield /*⏎*/ (x)` and their line-comment forms keep the
+  operand as their LF forms do; tsc splits them.
+- **`import(...)` types (S4, owner decision 10; N1, owner decision 14; N1b, owner decisions 15 and 21).** Ten inputs
+  that tsc rejects parse clean with S4's type-argument path; the same defect without type arguments was already accepted
+  at 1.0.0 (`type T = import().A<string>;`, `import('m' + '/sub').A<string>`, `import('m', opts).A<string>`,
+  `import('m', {}, {}).A<string>`, `import(getModule()).A<string>`, `import('m', { wrong: {} }).A<string>`,
+  `import('m',).A<string>`, `import(...args).A<string>`, type arguments on the next line after a type, `type T =
+  import('m').A<typeof import('n').B().C<string>>;`). Import-type argument validation and type arguments after a newline
+  are candidates after 2.0.0. Still `ERROR` although tsc accepts: `(import('x').Y)`, `(import('x').Y)[]`,
+  `[...import('x').Y]`, `import('x')<T>`, `f<import('x').B>()`. Accepted although tsc rejects (1.0.0 too): `let x:
+  typeof import('x').y()[];`, `f<typeof g('a')>()`, `let x: A<typeof g('a')>;`. With N1 a `[` after a line break is read
+  as a type index after an `import()` type too, as 1.0.0 already did after every other type: `v as import('x').Y⏎[a +
+  b]` goes from error-free-but-wrong to an error. ``sql<typeof import('m')>`x`;`` still reads as a comparison (1.0.0
+  too). With N1b an import type argument other than a string literal (`f<typeof import(m)>(1, 2)`, `import(42)`) stays a
+  comparison chain where tsc reads a call (1.0.0 too), and `f<typeof import('m', { x: 1 })>(1, 2)` and `f<typeof
+  import('m', {})>(1, 2)` are calls without an error where tsc reads a comparison or reports TS1005 (new with N1b;
+  decision 21).
+- **Empty type argument lists (owner decision 5)** (`f<>(x)`, `new C<>()`, `A<>`; TS1099 is a checker error) are errors
+  in the grammar. Not in 2.0.0; a MINOR candidate (the `<T>x` assertion against a generic arrow needs a conflict
+  design). `async <>(x) => x` is an error in both, at different bytes.
 - **Tagged templates (S5).** ``f<>`x` `` and `const h = f<T>?.();` are errors although tsc accepts them (unrelated to S5).
 - **Still not parsed** and listed as `candidate:` in `test/examples/known-failures.txt`: `unique` after `<` as an
   identifier (`i < unique.length`), `symbol` as a tuple label, `abstract` as an object-type property, `\u` without hex
@@ -226,9 +288,9 @@ for empty lists) are out of scope: `--noCheck` drops them.
   import the bindings as `github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go`. The functions are unchanged.
 - **Shared library name.** The CMake `SOVERSION` is `15.2` (was `15.1`) and the Makefile `SONAME_MINOR` is 2: it
   follows the MAJOR version.
-- **Parser size.** At `fdd6dd2` (S1-S6, N2, N3) `typescript/src/parser.c` is 9,287,805 bytes and `tsx/src/parser.c`
-  9,335,185 bytes; N4 adds about 20 KB to each **[pending]**. Record the final sizes, and a paired timing (1.0.0 and
-  2.0.0 alternating in one run, one slot, CPU load recorded at start and end), in the release PR.
+- **Parser size.** At `d4c5286` + the version bump (S1-S6, N1-N5, N1b) `typescript/src/parser.c` is 9,394,428 bytes
+  and `tsx/src/parser.c` 9,423,320 bytes. Record the final sizes after N7, and a paired timing (1.0.0 and 2.0.0
+  alternating in one run, one slot, CPU load recorded at start and end), in the release PR.
 - **Error recovery** of invalid input is not a contract; trees of rejected input may differ inside `ERROR` nodes.
 - **Pins.** `go-treesitter` pins a commit (ADR-0001, ADR-0024 rule 7). Bump it on the release commit and re-run its
   schema and corpus comparisons; the node-kind snapshot differs by the lines listed under Schema.
