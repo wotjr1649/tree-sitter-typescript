@@ -460,13 +460,22 @@
         statement, or the initializer of `f`) then an arrow function. `async`: `@keyword` -> `@variable` and
         `local.reference`; `local.scope` starts at the arrow function; `f` loses `@function` and its
         `definition.function` tag.
-    - Already so with N5 (above), unchanged here; listed because the N7 review found them against `62e7b3c`, the N5
-      revision before its own fix: `continue⏎in_x` (a labelled `continue_statement`, now `continue;` then `in_x;`);
-      `public`, `private`, `protected`, `declare` or `override` + `⏎in_x = 1` in a class (one field with the modifier,
-      now a field named by the keyword then `in_x`; `@keyword` -> `@property`); `readonly⏎in_x: number` in an interface
-      (one readonly property, now two properties; `@keyword` -> `@property`). These follow `tsc`. `set⏎in_x(v) {}` in a
-      class (a setter, now a field `set` then a method; `@keyword` -> `@property`, `local.scope` and `definition.method`
-      start at `in_x`) moves away from `tsc`, as `static` and `get`: the known difference above (owner decision 12).
+    - After a line break, a word that starts with `in`/`instanceof` (`in_x`) no longer joins the member or statement
+      before it. Against main `d4c5286` (the reduced N5, which has no lookahead past the keyword) these trees change;
+      `tsc` 7.0.2 accepts all of them and reads them as the head does, except `set`:
+      - `while (true) { continue⏎in_x; }`: main a `continue_statement` with the label `in_x`, now `continue;` then the
+        statement `in_x;` (`tsc` emit: `continue;` and `in_x;`). `in_x` gains `@variable` and `local.reference`.
+      - `public`, `private`, `protected`, `declare` or `override` + `⏎in_x = 1` in a class (`class C { private⏎in_x = 1 }`):
+        main one field with the modifier (`declare`: one field), now a field named by the keyword (`private;`) then the
+        field `in_x = 1;` (`tsc` emit: `private;` and `in_x = 1;`). `@keyword` -> `@property` (bundled JavaScript queries).
+      - `readonly⏎in_x: number` in an interface: main one readonly property, now two properties (`tsc` emit: `readonly;`
+        and `in_x: number;`). `@keyword` -> `@property`.
+      - `set⏎in_x(v) {}` in a class: main a setter (a `method_definition`), now a field `set` then a method `in_x`; `tsc`
+        keeps the setter (`set in_x(v) {}`), so this one moves away from `tsc`, as `static` and `get`: the known
+        difference above (owner decision 12), which main already has for `set⏎ordinary(v) {}`. Queries: `set` goes from
+        `@keyword` to `@property` (bundled JavaScript queries), and `local.scope` and `definition.method` start at `in_x`
+        instead of at `set`.
+      N5 at `5226028` (before its reduction) already gave the head trees for these; this entry compares with `d4c5286`.
     None of the 17,665 pinned example files changes its tree (S-expressions with ranges, against `main` `d4c5286`).
   - Now `ERROR`, as `tsc` rejects them (they parsed without error): a non-reserved word after `let⏎` that the old
     reading made a new statement: `let⏎ordinary();`, `let⏎ordinary.x = 1;`, `let⏎ordinary[0] = 1;`, `let⏎ordinary =>
