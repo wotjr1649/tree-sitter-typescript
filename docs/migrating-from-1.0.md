@@ -9,6 +9,21 @@ matching. Nothing is removed or renamed: no node kind and no field.
 Counts below come from the pull request that carries them (named next to each change), measured against that pull
 request's base; the CHANGELOG entry of each change gives the full lists.
 
+## The pinned example files, 1.0.0 against 2.0.0
+
+All 17,665 `.ts`/`.tsx` files of the example repositories pinned in `test/examples/repos.txt`, parsed with the
+grammars of `v1.0.0` (`59fc4ed`) and of 2.0.0 (`.tsx` files with `tsx`, the others with `typescript`); full trees with
+ranges compared, a file counting as an error when its tree has an `ERROR` or `MISSING` node:
+
+| grammar | files | identical | ok -> ok, changed | error -> ok | ok -> error | error -> error, changed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `typescript` | 16,955 | 16,888 | 37 | 26 | 0 | 4 |
+| `tsx` | 710 | 694 | 0 | 16 | 0 | 0 |
+
+The 37 changed error-free trees are the 36 `f<typeof import('m')>(args)` files (N1b) and the one block comment before
+`?` (N2) described below. The 42 error-to-ok files are the 42 cleared `known-failures.txt` entries; the 14 files that
+still have an error are the 14 remaining entries (10 of them with an unchanged tree).
+
 ## Schema (`node-types.json`)
 
 Nothing removed, nothing renamed. Added or relaxed, in both grammars unless noted:
@@ -126,7 +141,7 @@ injection now also match these comments.
 
 The external scanner treated only LF as a line break. Now a lone CR, U+2028, U+2029 and a block comment that holds a
 line terminator count too (a `//` comment ended by one of these as well), as in tsc. Each of them acts exactly as LF
-does at `e56ad86` (owner decision 24): the scanner makes the same decision after it as after an LF, so the input gets
+does at `e56ad86`: the scanner makes the same decision after it as after an LF, so the input gets
 the tree its LF form gets. Trees that change for each non-LF form (where that tree differs from the old one):
 
 | input (line break between the parts) | 1.0.0 | 2.0.0 (= the LF form) | tsc |
@@ -157,10 +172,10 @@ Queries follow the trees: the keyword of a split modifier gets `@property` (Java
 ### Identifiers starting with `in` and `let` across a line break (N7, #17)
 
 After a line break the external scanner took a word that starts with `in` or `instanceof` (`in_x`, `in1`, `in$`) for
-the keyword when the next character was not a letter by the C library's `iswalpha()`, so no semicolon was inserted
-(owner decision 12). Now such a word is an identifier: the line ends before it, as tsc reads it. `in` and `instanceof`
+the keyword when the next character was not a letter by the C library's `iswalpha()`, so no semicolon was inserted.
+Now such a word is an identifier: the line ends before it, as tsc reads it. `in` and `instanceof`
 themselves read as before. Separately, `let` + line break + a word that is not reserved, or `{`, continues the
-declaration, as tsc and the specification read it (owner decisions 22 and 25); before, `let` ended the statement after
+declaration, as tsc and the specification read it; before, `let` ended the statement after
 an LF (and, with N5 alone, after the other line breaks).
 
 | input (`⏎` = line break) | 1.0.0 | 2.0.0 | tsc |
@@ -207,16 +222,16 @@ the declaration, as tsc reads it; tsc then expects `,`. Type parameters named `o
 
 ## Valid input that is an error now (recorded)
 
-tsc accepts these and the grammar now gives `ERROR`, as a related form already did before (recorded under owner
-decision 10's rule: no new kind of difference); the counts below say which of them parsed without error before.
+tsc accepts these and the grammar now gives `ERROR`, as a related form already did before (recorded, not fixed:
+no new kind of difference); the counts below say which of them parsed without error before.
 Fixing them needs a grammar change, a candidate after 2.0.0.
 
-- **An index on the line after an `import(...)` type (N1, owner decision 14).** `const x = v as import('x').Y` + line
+- **An index on the line after an `import(...)` type (N1, #13).** `const x = v as import('x').Y` + line
   break + `[a + b];` (also `satisfies`, `[f()]`, `[a?.b]`): a `subscript_expression` at 1.0.0, an `ERROR` now; tsc
   reads two statements. 1.0.0 already reads every other type this way (`v as Foo` + line break + `[a + b];` is an
   `ERROR`).
-- **A non-LF line break before a member named `in`/`instanceof`, `with /* c */ {`, `<B>(` or `as T⏎[` (N5, owner
-  decisions 20, 23, 24 and 27).** With a lone CR, U+2028, U+2029 or a line-breaking block comment as the line break:
+- **A non-LF line break before a member named `in`/`instanceof`, `with /* c */ {`, `<B>(` or `as T⏎[` (N5, #15).**
+  With a lone CR, U+2028, U+2029 or a line-breaking block comment as the line break:
   `class A { a⏎in = 1; }`, `class A { a⏎in() {} }`, `class A { a⏎in<T>() {} }`, `interface I { a: string⏎in(): void }`
   (also `instanceof`); `import x from "m"<CR>with /* c */ { type:
   "json" };`; `interface A { a: T⏎// c<U+2028><B>(b: B): V; }`; `a as T⏎// c<U+2028>[b + c];`. The LF form of each is an
@@ -242,9 +257,9 @@ line-breaking block comment as an automatic-semicolon line break, `a = b /*⏎*/
 `class A { static accessor /*⏎*/ x = 1; }` (N5, #15); with any line break, LF included, `}` before `:` of a typed
 object pattern, `type F = ({ a⏎}: { a: number }) => number;`, and `with {` of import attributes on the next line,
 `import x from "x"⏎with { type: "json" };` (N5); `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same
-with U+200B (N5, owner decision 26); a word that starts with `in`/`instanceof` after a line break, `a = b⏎in_progress =
+with U+200B (N5, #15); a word that starts with `in`/`instanceof` after a line break, `a = b⏎in_progress =
 true`, `foo()⏎in1.x()`, `class A { x⏎in_y = 1; }`, `interface I { a: string⏎in_b: number }` (N7, #17); `let` + line
-break + a binding, `let⏎ordinary: number[] = [];`, `let⏎{ x } = obj;`, `let⏎await` (N7, owner decisions 22 and 25).
+break + a binding, `let⏎ordinary: number[] = [];`, `let⏎{ x } = obj;`, `let⏎await` (N7, #17).
 
 Entries of `test/examples/known-failures.txt` cleared by these: 15 (S6), 3 (S4), 1 (N3), 8 (N1) and 15 (N1b; one of
 them, `copilotcliSession.spec.ts`, needed N1 and N1b), 42 in all; 14 remain. The 6 entries for constructs this release
@@ -260,38 +275,36 @@ Recorded, not fixed in 2.0.0. "Accepts" means the grammar parses without error w
 reverse. Checker-only errors (TS1274 for `function f<in T>() {}`, TS1243 for `readonly accessor x`, TS1098 and TS1099
 for empty lists) are out of scope: `--noCheck` drops them.
 
-The owner decisions are numbered as in the release's decision record.
-
-- **Variance (S1, owner decision 2).** Rejects but tsc accepts: `<in in T>`, `<out in T>`, `<out out T>`, `<in const T>`
+- **Variance (S1, #9).** Rejects but tsc accepts: `<in in T>`, `<out in T>`, `<out out T>`, `<in const T>`
   (duplicate or misordered modifiers). Accepts but tsc rejects (TS1359): `type E<out extends string> = out;` (read as a
   parameter named `out` with a constraint).
-- **`accessor` literals (S3, owner decision 8).** Nine inputs `class A { static accessor <member> }` with `<member>` =
+- **`accessor` literals (S3, #6).** Nine inputs `class A { static accessor <member> }` with `<member>` =
   `012 = 1`, `08 = 1`, `0_1 = 1`, `01n = 1`, `"\8" = 1`, `"\1" = 1`, `"\u{110000}" = 1`, `x = 01`, `x = (y: number)` are
   accepted although tsc rejects them; the same text without `accessor` was already accepted at 1.0.0 (the grammar does
   not validate literals). Validating literals is a candidate after 2.0.0.
 - **An operator before a ternary `?` after a line break (N2).** `a⏎+? b : c;` (and `-?`, `/?`, `in?`, `instanceof?`,
   and the same after a line comment) are accepted with the operator in no node, before and after 2.0.0; tsc rejects
   them (TS1109).
-- **ASI after `static`, `get`, `set` (N5, owner decision 12).** tsc reads `static` + line break + `x = 1` as one static
+- **ASI after `static`, `get`, `set` (N5, #15).** tsc reads `static` + line break + `x = 1` as one static
   field and `get`/`set` + line break + `x() {}` as one accessor; the grammar reads two members, for every line-break
   form (1.0.0 already did for LF). A grammar change, not a scanner change, would be needed.
-- **A class or type member named `in`/`instanceof` after a line break, and the other shapes above (N5, owner
-  decisions 20, 23, 24 and 27).** Only a member named `in` or `instanceof` itself; names that start with them parse
+- **A class or type member named `in`/`instanceof` after a line break, and the other shapes above (N5, #15).**
+  Only a member named `in` or `instanceof` itself; names that start with them parse
   since N7. Rejected for every line-break form, LF included; see "Valid input that is an error
   now". `for (var x⏎in y)` keeps its `in`.
 - **Words starting with `in` after a line break (N7).** Accepted although tsc rejects them: after `a = b` and a line
   break, `in💩 = 1;`, `in\u0021 = 1;`, `in\u0073tanceof = 1;` (the grammar's identifier token takes any non-space
   character; the same words not starting with `in` were accepted at 1.0.0). `set⏎in_x(v) {}` reads as two members, as
-  `set⏎x(v) {}` already did (owner decision 12). U+0085 (NEL) is white space for tsc but an identifier character for the
+  `set⏎x(v) {}` already did (the known difference above). U+0085 (NEL) is white space for tsc but an identifier character for the
   grammar, as at 1.0.0: `a⏎in<U+0085> b;` is an `ERROR`.
-- **ASI leniency (N5, owner decisions 10 and 26).** Accepted although tsc rejects, each the same defect 1.0.0 already
+- **ASI leniency (N5, #15).** Accepted although tsc rejects, each the same defect 1.0.0 already
   has for the LF form (or, for U+2060, for the empty pattern): `yield` then `*x` on the next line, a ternary after `/?`
   that loses its `/` (also on one line: `a /? b : c;`), a missing required `;` in a `for` header, an automatic
   semicolon after a Flow-style ambient module type annotation, `with /* c */ (y) {}` after a lone CR,
   `for (var x⏎// c<U+2028>in (<div>{else}</div>)) {}`, and `type F = ({ a }<U+2060>: { a: number }) => number;`
   (TS1127). `return /*⏎*/ +x`, `return /*⏎*/ /r/.test(s)`, `yield /*⏎*/ (x)` and their line-comment forms keep the
   operand as their LF forms do; tsc splits them.
-- **`import(...)` types (S4, owner decision 10; N1, owner decision 14; N1b, owner decisions 15 and 21).** Ten inputs
+- **`import(...)` types (S4, #5; N1, #13; N1b, #14).** Ten inputs
   that tsc rejects parse clean with S4's type-argument path; the same defect without type arguments was already accepted
   at 1.0.0 (`type T = import().A<string>;`, `import('m' + '/sub').A<string>`, `import('m', opts).A<string>`,
   `import('m', {}, {}).A<string>`, `import(getModule()).A<string>`, `import('m', { wrong: {} }).A<string>`,
@@ -304,9 +317,8 @@ The owner decisions are numbered as in the release's decision record.
   b]` goes from error-free-but-wrong to an error. ``sql<typeof import('m')>`x`;`` still reads as a comparison (1.0.0
   too). With N1b an import type argument other than a string literal (`f<typeof import(m)>(1, 2)`, `import(42)`) stays a
   comparison chain where tsc reads a call (1.0.0 too), and `f<typeof import('m', { x: 1 })>(1, 2)` and `f<typeof
-  import('m', {})>(1, 2)` are calls without an error where tsc reads a comparison or reports TS1005 (new with N1b;
-  decision 21).
-- **Empty type argument lists (owner decision 5)** (`f<>(x)`, `new C<>()`, `A<>`; TS1099 is a checker error) are errors
+  import('m', {})>(1, 2)` are calls without an error where tsc reads a comparison or reports TS1005 (new with N1b).
+- **Empty type argument lists** (`f<>(x)`, `new C<>()`, `A<>`; TS1099 is a checker error) are errors
   in the grammar. Not in 2.0.0; a MINOR candidate (the `<T>x` assertion against a generic arrow needs a conflict
   design). `async <>(x) => x` is an error in both, at different bytes.
 - **Tagged templates (S5).** ``f<>`x` `` and `const h = f<T>?.();` are errors although tsc accepts them (unrelated to S5).

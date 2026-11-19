@@ -162,7 +162,7 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
     inputs, the review probes and the 710 `.tsx` example files.
   - Intended new errors (tsc rejects them, TS1359): `type D<in> = number;` and `type L<in, T> = T;` parsed without
     error before and now report an error.
-  - Kept as they are (owner decision, 2026-11-19): `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
+  - Kept as they are, recorded as known differences: `type A<in in T> = T;`, `<out in T>`, `<out out T>` and
     `<in const T>` still report an error, although tsc's parser accepts them (it rejects them only in the checker,
     TS1030 / TS1029); `type E<out extends string> = out;` still parses without error (a parameter named `out` with a
     constraint), although tsc rejects it (TS1359).
@@ -337,10 +337,11 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
   `tsc` 7.0.2 accepts all these inputs. The paths this change adds (line terminators, the `}` guard, `with`) and the
   existing same-line `}` check classify white space and word characters by code point (the grammar's extras; U+0085 is
   an identifier character there, as in the lexer), not through the C library (`iswspace()` at `e56ad86`); the
-  `in`/`instanceof` path is the one of `e56ad86`. The same-line `}` check changes with no line break at all (owner
-  decision 26): `type F = ({ a }<U+FEFF>: { a: number }) => number;` and the same with U+200B, which `tsc` accepts,
+  `in`/`instanceof` path is the one of `e56ad86`. The same-line `}` check changes with no line break at all (kept
+  on purpose, so that the result does not depend on the C library): `type F = ({ a }<U+FEFF>: { a: number }) => number;`
+  and the same with U+200B, which `tsc` accepts,
   were `ERROR` at `e56ad86` and now keep their object pattern; with U+2060, which `tsc` rejects (TS1127), the input
-  now parses too, the leniency `e56ad86` already has for `type F = ({}<U+2060>: {}) => number;` (owner decision 10).
+  now parses too, the leniency `e56ad86` already has for `type F = ({}<U+2060>: {}) => number;` (recorded as a known difference).
   Comment scanning in one call: a block comment that holds no line terminator and comes before any line break is left
   to the lexer at once, and so is a second comment that holds one. After a first comment that holds a line terminator,
   the comments without one that follow are all read in the same call, up to the next token or the second
@@ -370,7 +371,7 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
       - `type T = A ⏎ [B];`: a `lookup_type`, now `type T = A;` then the array `[B]`.
     - Same as the LF form, which `tsc` reads differently (recorded known differences, unchanged for LF):
       - `static`, `get`, `set` + `⏎` + member: one static member or accessor, now two members (a field named
-        `static`, `get` or `set`, then the member); `tsc` reads one member (owner decision 12). `@keyword` ->
+        `static`, `get` or `set`, then the member); `tsc` reads one member (recorded as a known difference). `@keyword` ->
         `@property`; in `set /*⏎*/ x(v) {}` the comment becomes the `@doc` of method `x`.
     - A line comment ended by U+2028, U+2029 or a lone CR after an LF (`a⏎// c<U+2028>…`): before, the scanner read
       the comment on to the next LF and decided there. Now the text after the comment decides, as with LF:
@@ -392,7 +393,7 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
     gives two class members (a field named `static`, `get` or `set`, then the member); `tsc` reads one static member
     or accessor. The LF form already did this before this change. Fixing it needs a grammar change; it is a candidate
     after v2.0.0.
-  - Known differences recorded (owner decisions 20, 23 and 24): an input whose line break is a CR, U+2028, U+2029 or a
+  - Known differences recorded: an input whose line break is a CR, U+2028, U+2029 or a
     line-breaking block comment, that `tsc` accepts and that parsed at `e56ad86` only because the old scanner did not
     see the break, now gives `ERROR` where its LF form already gives `ERROR` at `e56ad86` (the scanner cannot tell
     these from inputs that must keep going); fixing them needs a grammar change, a candidate after v2.0.0.
@@ -494,7 +495,7 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
         and `in_x: number;`). `@keyword` -> `@property`.
       - `set⏎in_x(v) {}` in a class: main a setter (a `method_definition`), now a field `set` then a method `in_x`; `tsc`
         keeps the setter (`set in_x(v) {}`), so this one moves away from `tsc`, as `static` and `get`: the known
-        difference above (owner decision 12), which main already has for `set⏎ordinary(v) {}`. Queries: `set` goes from
+        difference above, which main already has for `set⏎ordinary(v) {}`. Queries: `set` goes from
         `@keyword` to `@property` (bundled JavaScript queries), and `local.scope` and `definition.method` start at `in_x`
         instead of at `set`.
       N5 at `5226028` (before its reduction) already gave the head trees for these; this entry compares with `d4c5286`.
@@ -508,8 +509,8 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
   - Newly accepted inputs that `tsc` rejects (the grammar's identifier token takes any non-space character): after `a =
     b` and a line break, `in💩 = 1;`, `in\u0021 = 1;` and `in\u0073tanceof = 1;` (as written in the source, with the
     backslash) gave `ERROR` and now parse; `tsc` rejects all three. The same inputs with a word that does not start with
-    `in` (`ix💩`, `ix\u0021`, `i\u006estanceof`) already parsed, so this is a lookalike of existing over-acceptance
-    (owner rule 10).
+    `in` (`ix💩`, `ix\u0021`, `i\u006estanceof`) already parsed, so this is a lookalike of existing over-acceptance,
+    recorded as a known difference.
   - Known difference (pre-existing): U+0085 (NEL) is white space for `tsc` but not in the grammar's extras: the lexer
     reads it as an identifier character, and the scanner follows the lexer (it tests code points, not the C library). So
     `class C { x⏎in<U+0085>=1 }` is a field named `in<U+0085>` (`tsc`: a field `in`), and `a⏎in<U+0085> b;` gives
