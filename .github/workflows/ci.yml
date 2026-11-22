@@ -132,6 +132,10 @@ jobs:
           done
       - name: Run tests
         uses: tree-sitter/parser-test-action@v3
+        # Its Go step restores Go's build cache, which does not track the parser.c and scanner.c the bindings #include
+        # from outside their package: without -a, go test links the parser of the run that saved the cache.
+        env:
+          GOFLAGS: -a
         with:
           generate: false
           test-rust: true
