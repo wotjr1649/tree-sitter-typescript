@@ -11,6 +11,9 @@ limited_api = not get_config_var("Py_GIL_DISABLED")
 macros = [("PY_SSIZE_T_CLEAN", None), ("TREE_SITTER_HIDE_SYMBOLS", None)]
 if limited_api:
     macros.append(("Py_LIMITED_API", "0x030A0000"))
+elif system() == "Windows":
+    # Windows shares pyconfig.h between regular and free-threaded builds.
+    macros.append(("Py_GIL_DISABLED", "1"))
 
 
 class Build(build):
