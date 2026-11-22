@@ -1,0 +1,60 @@
+==========================================================
+Line terminators in await using declarations and expressions
+:language(typescript)
+:language(tsx)
+==========================================================
+
+export {};
+async function f() {
+  await
+using lf = null;
+  await
+using crlf = null;
+  awaitusing cr = null;
+  await using ls = null;
+  await using ps = null;
+  await/*
+*/using block = null;
+  await using();
+  await using
+x = null;
+}
+await
+using lf = null;
+await
+using crlf = null;
+awaitusing cr = null;
+await using ls = null;
+await using ps = null;
+await/*
+*/using block = null;
+await using();
+await using
+x = null;
+
+---
+
+(program
+  (export_statement (export_clause))
+  (function_declaration
+    (identifier)
+    (formal_parameters)
+    (statement_block
+      (using_declaration (variable_declarator (identifier) (null)))
+      (using_declaration (variable_declarator (identifier) (null)))
+      (using_declaration (variable_declarator (identifier) (null)))
+      (using_declaration (variable_declarator (identifier) (null)))
+      (using_declaration (variable_declarator (identifier) (null)))
+      (using_declaration (comment) (variable_declarator (identifier) (null)))
+      (expression_statement (await_expression (call_expression (identifier) (arguments))))
+      (expression_statement (await_expression (identifier)))
+      (expression_statement (assignment_expression (identifier) (null)))))
+  (using_declaration (variable_declarator (identifier) (null)))
+  (using_declaration (variable_declarator (identifier) (null)))
+  (using_declaration (variable_declarator (identifier) (null)))
+  (using_declaration (variable_declarator (identifier) (null)))
+  (using_declaration (variable_declarator (identifier) (null)))
+  (using_declaration (comment) (variable_declarator (identifier) (null)))
+  (expression_statement (await_expression (call_expression (identifier) (arguments))))
+  (expression_statement (await_expression (identifier)))
+  (expression_statement (assignment_expression (identifier) (null))))

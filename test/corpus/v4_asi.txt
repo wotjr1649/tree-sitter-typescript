@@ -1,0 +1,183 @@
+==============================================
+ASI after postfix updates and block arrows
+==============================================
+
+a++
+`one`;
+const f = x => {}
+`text`;
+
+---
+
+(program
+  (expression_statement
+    (update_expression
+      (identifier)))
+  (expression_statement
+    (template_string
+      (string_fragment)))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (identifier)
+        (statement_block))))
+  (expression_statement
+    (template_string
+      (string_fragment))))
+
+==============================================
+A top-level await followed by a using arrow
+==============================================
+
+await
+using => x;
+
+---
+
+(program
+  (expression_statement
+    (identifier))
+  (expression_statement
+    (arrow_function
+      (identifier)
+      (identifier))))
+
+==============================================
+Await in typed async and plain concise arrows
+==============================================
+
+const f = async <T,>(x: T): Promise<T> => await
+(x);
+const g = x => await
+using;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        (formal_parameters
+          (required_parameter
+            (identifier)
+            (type_annotation
+              (type_identifier))))
+        (type_annotation
+          (generic_type
+            (type_identifier)
+            (type_arguments
+              (type_identifier))))
+        (await_expression
+          (parenthesized_expression
+            (identifier))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (identifier)))
+
+==============================================
+Block arrow class field before computed method
+==============================================
+
+class C {
+  x: Fn = y => {}
+  [a](): void {}
+}
+
+---
+
+(program
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (public_field_definition
+        (property_identifier)
+        (type_annotation
+          (type_identifier))
+        (arrow_function
+          (identifier)
+          (statement_block)))
+      (method_definition
+        (computed_property_name
+          (identifier))
+        (formal_parameters)
+        (type_annotation
+          (predefined_type))
+        (statement_block)))))
+
+==============================================
+HTML-like open marker is a comparison with prefix operators
+:language(typescript)
+:language(tsx)
+==============================================
+
+a/*
+*/<!--x
++b
+
+---
+
+(program
+  (expression_statement
+    (binary_expression
+      (identifier)
+      (comment)
+      (binary_expression
+        (unary_expression (update_expression (identifier)))
+        (identifier)))))
+
+==============================================
+HTML-like close marker is invalid after a bare yield
+:language(typescript)
+:language(tsx)
+:error
+==============================================
+
+function*g(){yield//
+-->
+(x)}
+
+---
+
+(program)
+
+==============================================
+Await inside a TSX async concise arrow
+:language(tsx)
+==============================================
+
+const f = async <T,>(x: T) => <C>{await
+using}</C>;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        (formal_parameters
+          (required_parameter
+            (identifier)
+            (type_annotation
+              (type_identifier))))
+        (jsx_element
+          (jsx_opening_element
+            (identifier))
+          (jsx_expression
+            (await_expression
+              (identifier)))
+          (jsx_closing_element
+            (identifier)))))))

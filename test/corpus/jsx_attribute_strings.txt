@@ -1,0 +1,152 @@
+==========================================
+Annex B markers in quoted JSX attributes
+:language(tsx)
+==========================================
+
+<a b='<!--' c="<!--" d='-->' e="-->" />;
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)))
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)))
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)))
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment))))))
+
+=====================================================
+Quoted JSX attribute text around character references
+:language(tsx)
+=====================================================
+
+<a b='// &unfinished' c="  &amp;&#x26;" />;
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)))
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (html_character_reference)
+          (html_character_reference))))))
+
+=============================================================
+Consecutive ampersands before the JSX attribute closing quote
+:language(tsx)
+=============================================================
+
+<a b="&&"/>
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment))))))
+
+========================================================
+Bare ampersand before a complete JSX attribute reference
+:language(tsx)
+========================================================
+
+<a b='&&amp;'/>
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (html_character_reference))))))
+
+============================================================
+Overlong JSX attribute reference and trailing bare ampersand
+:language(tsx)
+============================================================
+
+<a b="&#123456;" c='x&'/>
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)))
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment))))))
+
+=================================
+EOF inside a quoted JSX attribute
+:language(tsx)
+=================================
+
+<a b="&
+
+---
+
+(program
+  (ERROR
+    (identifier)
+    (identifier)
+    (string_fragment)))
+
+=======================================================
+Error immediately after the JSX attribute closing quote
+:language(tsx)
+=======================================================
+
+<a b="&"@ c="ok"/>
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      name: (identifier)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)))
+      (ERROR)
+      attribute: (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment))))))

@@ -1034,8 +1034,13 @@ JSX attribute strings with an ampersand
       (jsx_attribute
         (property_identifier)
         (string
-          (string_fragment)
-          (string_fragment)
+          (string_fragment)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
           (string_fragment)))))
   (expression_statement
     (jsx_self_closing_element
@@ -1044,7 +1049,6 @@ JSX attribute strings with an ampersand
         (property_identifier)
         (string
           (string_fragment)
-          (string_fragment)
           (string_fragment)))))
   (expression_statement
     (jsx_self_closing_element
@@ -1052,15 +1056,6 @@ JSX attribute strings with an ampersand
       (jsx_attribute
         (property_identifier)
         (string
-          (string_fragment)
-          (string_fragment)))))
-  (expression_statement
-    (jsx_self_closing_element
-      (identifier)
-      (jsx_attribute
-        (property_identifier)
-        (string
-          (string_fragment)
           (string_fragment)))))
   (expression_statement
     (jsx_self_closing_element
@@ -1069,8 +1064,6 @@ JSX attribute strings with an ampersand
         (property_identifier)
         (string
           (html_character_reference)
-          (string_fragment)
-          (string_fragment)
           (string_fragment)))))
   (expression_statement
     (jsx_self_closing_element
@@ -1371,3 +1364,22 @@ function f() {
       (return_statement)
       (expression_statement
         (identifier)))))
+
+======================================================
+JS v4 typed tagged template accepts invalid escapes
+======================================================
+
+const x = tag<T>`\u`;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (call_expression
+        (identifier)
+        (type_arguments
+          (type_identifier))
+        (template_string
+          (escape_sequence))))))

@@ -1,0 +1,28 @@
+==============================================
+Type arguments on the comparison right operand
+:language(typescript)
+:language(tsx)
+==============================================
+
+let x = 1 < foo<string>();
+let y = (1 < foo)<string>();
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (binary_expression
+        (number)
+        (call_expression
+          (identifier)
+          (type_arguments (predefined_type))
+          (arguments)))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (call_expression
+        (parenthesized_expression (binary_expression (number) (identifier)))
+        (type_arguments (predefined_type))
+        (arguments)))))

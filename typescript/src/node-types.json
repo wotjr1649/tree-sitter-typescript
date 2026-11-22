@@ -56,6 +56,10 @@
         "named": true
       },
       {
+        "type": "using_declaration",
+        "named": true
+      },
+      {
         "type": "variable_declaration",
         "named": true
       }
@@ -882,6 +886,10 @@
             "named": true
           },
           {
+            "type": "call_expression",
+            "named": true
+          },
+          {
             "type": "identifier",
             "named": true
           },
@@ -957,6 +965,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "call_expression",
+            "named": true
+          },
           {
             "type": "identifier",
             "named": true
@@ -1066,7 +1078,31 @@
       "required": true,
       "types": [
         {
-          "type": "expression",
+          "type": "await_expression",
+          "named": true
+        },
+        {
+          "type": "instantiation_expression",
+          "named": true
+        },
+        {
+          "type": "new_expression",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
+          "named": true
+        },
+        {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        },
+        {
+          "type": "update_expression",
           "named": true
         }
       ]
@@ -2009,14 +2045,26 @@
         "required": false,
         "types": [
           {
+            "type": "class",
+            "named": true
+          },
+          {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "function_expression",
+            "named": true
+          },
+          {
+            "type": "generator_function",
             "named": true
           }
         ]
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
@@ -2029,6 +2077,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "import_attribute",
           "named": true
         },
         {
@@ -2153,15 +2205,23 @@
         ]
       },
       "kind": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
+          {
+            "type": "await",
+            "named": false
+          },
           {
             "type": "const",
             "named": false
           },
           {
             "type": "let",
+            "named": false
+          },
+          {
+            "type": "using",
             "named": false
           },
           {
@@ -2176,6 +2236,10 @@
         "types": [
           {
             "type": "array_pattern",
+            "named": true
+          },
+          {
+            "type": "call_expression",
             "named": true
           },
           {
@@ -2316,6 +2380,10 @@
           },
           {
             "type": "sequence_expression",
+            "named": true
+          },
+          {
+            "type": "using_declaration",
             "named": true
           },
           {
@@ -3085,7 +3153,11 @@
       "required": false,
       "types": [
         {
-          "type": "expression",
+          "type": "new_expression",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         }
       ]
@@ -3792,7 +3864,15 @@
       "required": true,
       "types": [
         {
-          "type": "expression",
+          "type": "new_expression",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
+          "named": true
+        },
+        {
+          "type": "update_expression",
           "named": true
         }
       ]
@@ -4158,19 +4238,7 @@
       "required": true,
       "types": [
         {
-          "type": "call_expression",
-          "named": true
-        },
-        {
           "type": "expression",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "member_expression",
           "named": true
         },
         {
@@ -5285,6 +5353,36 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "using_declaration",
+    "named": true,
+    "fields": {
+      "kind": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "await",
+            "named": false
+          },
+          {
+            "type": "using",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "variable_declarator",
+          "named": true
+        }
+      ]
     }
   },
   {

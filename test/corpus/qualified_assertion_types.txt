@@ -1,0 +1,66 @@
+==============================================
+Qualified types in assertion expressions
+:language(typescript)
+:language(tsx)
+==============================================
+
+export {};
+const a = await f() as A.B.C;
+const b = x satisfies A.B.C.D;
+const c = x as A.B.C<T>;
+const d = x as A.B.C[K];
+const e = (x as A.B.C).d;
+
+---
+
+(program
+  (export_statement (export_clause))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (await_expression (call_expression (identifier) (arguments)))
+        (nested_type_identifier
+          (nested_identifier (identifier) (property_identifier))
+          (type_identifier)))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (satisfies_expression
+        (identifier)
+        (nested_type_identifier
+          (nested_identifier
+            (member_expression (identifier) (property_identifier))
+            (property_identifier))
+          (type_identifier)))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (identifier)
+        (generic_type
+          (nested_type_identifier
+            (nested_identifier (identifier) (property_identifier))
+            (type_identifier))
+          (type_arguments (type_identifier))))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (as_expression
+        (identifier)
+        (lookup_type
+          (nested_type_identifier
+            (nested_identifier (identifier) (property_identifier))
+            (type_identifier))
+          (type_identifier)))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (member_expression
+        (parenthesized_expression
+          (as_expression
+            (identifier)
+            (nested_type_identifier
+              (nested_identifier (identifier) (property_identifier))
+              (type_identifier))))
+        (property_identifier)))))

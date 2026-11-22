@@ -1,0 +1,22 @@
+==============================================
+Default in named module specifiers is an identifier
+:language(typescript)
+:language(tsx)
+==============================================
+
+export { default };
+export { default as value } from 'm';
+export { value as default };
+import { default as imported } from 'm';
+
+---
+
+(program
+  (export_statement (export_clause (export_specifier (identifier))))
+  (export_statement
+    (export_clause (export_specifier (identifier) (identifier)))
+    (string (string_fragment)))
+  (export_statement (export_clause (export_specifier (identifier) (identifier))))
+  (import_statement
+    (import_clause (named_imports (import_specifier (identifier) (identifier))))
+    (string (string_fragment))))

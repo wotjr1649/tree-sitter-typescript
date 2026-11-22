@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "5c15467fbd81582f7a150ddae9c79b6abbba324e3e12a390350b1b057839b08a",
+  "cases_sha256": "b1c4e5aedc7f78c02fecd9d9acb1714d3fde0f6e06b09adcf78405fa2320499e",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -8980,6 +8980,86 @@
     1128
    ],
    "at": 11
+  },
+  {
+   "id": "c1/await-as.ts",
+   "sha256": "d30d83faff0315cfefcb038002ce1fd0317539c1b177c00a1bd199cb477ddbe7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/await-as.tsx",
+   "sha256": "d30d83faff0315cfefcb038002ce1fd0317539c1b177c00a1bd199cb477ddbe7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/satisfies.ts",
+   "sha256": "36d305b66cb8989e821b0bb3766853d7e9c523b480ead686c91481664103ffb2",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/satisfies.tsx",
+   "sha256": "36d305b66cb8989e821b0bb3766853d7e9c523b480ead686c91481664103ffb2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/generic.ts",
+   "sha256": "e7a288d884eccb98e569ce1f0ddcb3c415ec894726ca02d482e77a6aac096002",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/generic.tsx",
+   "sha256": "e7a288d884eccb98e569ce1f0ddcb3c415ec894726ca02d482e77a6aac096002",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/lookup.ts",
+   "sha256": "9d6c159f5fa43802a2e19120d1db6461c9b94263e39d6fd7b8298c4a217ac008",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/lookup.tsx",
+   "sha256": "9d6c159f5fa43802a2e19120d1db6461c9b94263e39d6fd7b8298c4a217ac008",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/member.ts",
+   "sha256": "3a685e2ab015acca6bfc7394d9e347aa0fb910b99ad2f48209ebc54dad2a4ec9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "c1/member.tsx",
+   "sha256": "3a685e2ab015acca6bfc7394d9e347aa0fb910b99ad2f48209ebc54dad2a4ec9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
   }
  ]
 }
