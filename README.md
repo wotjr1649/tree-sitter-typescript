@@ -25,6 +25,16 @@ References
 
 - [TypeScript Language Spec](https://github.com/microsoft/TypeScript/blob/main/doc/spec-ARCHIVED.md)
 
+## Go
+
+Install the Go bindings with:
+
+```sh
+go get github.com/wotjr1649/tree-sitter-typescript/v3/bindings/go@v3.0.0
+```
+
+If you are upgrading from v2, see the [v3 migration guide](docs/migrating-from-2.0.md).
+
 ## Known limitations
 
 After widening an included range or adding one, reparse from scratch with the updated ranges. In the C API,

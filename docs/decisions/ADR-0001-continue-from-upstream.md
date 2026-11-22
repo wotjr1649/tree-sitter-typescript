@@ -46,8 +46,8 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
 - The inherited publication workflow is gone; test, lint and fuzz CI stay. The test workflow uses CLI 0.27.2 and
   checks that the committed parsers match it.
 - Binding consumers need tree-sitter runtime 0.25 or later, and Python consumers Python 3.10 or later.
-- The Go module path is `github.com/wotjr1649/tree-sitter-typescript` (owner decision, 2026-11-18); from v2.0.0 it is
-  `github.com/wotjr1649/tree-sitter-typescript/v2` (amendment below, Decision 9).
+- The Go module path started as `github.com/wotjr1649/tree-sitter-typescript` (owner decision, 2026-11-18).
+  Releases v2.0.0 and v3.0.0 add the `/v2` and `/v3` suffixes, respectively (amendment below, Decision 9).
 - CI parses example repositories at pinned commits; the files the baseline grammar cannot parse are listed in
   `test/examples/known-failures.txt`, which may only shrink as the v1.1 grammar fixes land (owner decision,
   2026-11-18). CI fails a pull request that adds a path to it without changing the pins in `test/examples/repos.txt`.
@@ -91,16 +91,17 @@ fixes land") and refines Decision 4. Everything else in this record stands.
    the schema additions, and the recorded known differences from tsc. A MINOR or PATCH release needs none unless it finds
    something to record.
 7. **The JavaScript-grammar switch** (Decision 2) is versioned by comparing both grammars against the current release
-   with the tsc 7.0.2 oracle and the node-kind snapshots (`test/node-kinds`). The v4.4.0 port is MAJOR under the rules
+   with the tsc 7.0.2 oracle and the node-kind snapshots (`test/node-kinds`). The v4.4.0 port ships in v3.0.0 under the MAJOR rules
    in `AGENTS.md`. It changes previously error-free trees of valid input in both grammars. See the
    [migration guide](../migrating-from-2.0.md).
 8. **`test/examples/known-failures.txt`.** The grammar fixes that Decision 3 and the last Consequences bullet called
    "v1.1" landed as v2.0.0. The entries for constructs the release does not fix are marked `candidate:`; they may be
    fixed in a later MINOR (error to ok) or MAJOR release. The list still may only shrink, and a pull request that adds a
    path still needs a change to `test/examples/repos.txt`.
-9. **Go module path.** From v2.0.0 the module is `github.com/wotjr1649/tree-sitter-typescript/v2`, as Go requires for
-   a major version above 1; the bindings import as `github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go`. A later
-   MAJOR release moves the suffix (`/v3`, ...). CI checks that the manifests and the latest CHANGELOG version agree.
+9. **Go module path.** In v2.0.0 the module was `github.com/wotjr1649/tree-sitter-typescript/v2`, as Go requires for
+   a major version above 1. In v3.0.0 the module moves to `github.com/wotjr1649/tree-sitter-typescript/v3`, and the
+   bindings import as `github.com/wotjr1649/tree-sitter-typescript/v3/bindings/go`. Each later MAJOR release moves the
+   suffix again. CI checks that the manifests and the latest CHANGELOG version agree.
 10. **Oracle.** The oracle of Decision 7 is set up in `oracle/`: `typescript` 7.0.2 `tsc` with `--noEmit --noCheck`
     gives each case's verdict, and CI replays the committed cases against both grammars; the committed cases have no
     mismatch with tsc. Checker-only errors are out of scope.

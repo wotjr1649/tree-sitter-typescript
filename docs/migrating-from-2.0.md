@@ -1,9 +1,14 @@
-# Moving from 2.0.0 to the JavaScript v4.4.0 port
+# Moving from 2.0.0 to 3.0.0
 
 The TypeScript and TSX grammars now extend the vendored JavaScript grammar from
 `wotjr1649/tree-sitter-javascript` v4.4.0. This is a MAJOR change because some valid inputs that parsed without
 error in 2.0.0 have different trees. Queries and tree walkers that match those shapes need updating.
-[CHANGELOG](../CHANGELOG.md#unreleased)
+[CHANGELOG](../CHANGELOG.md#300---2026-11-22)
+
+## Go module path
+
+Update the binding import to `github.com/wotjr1649/tree-sitter-typescript/v3/bindings/go`. The functions
+`LanguageTypescript` and `LanguageTSX` keep their names.
 
 ## Full CST comparison against 2.0.0
 
