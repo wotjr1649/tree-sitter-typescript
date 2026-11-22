@@ -8,6 +8,7 @@ on:
       - tsx/src/scanner.c
       - common/scanner.h
       - "*/src/**"
+      - package.json
       - .github/workflows/fuzz.yml
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - tsx/src/scanner.c
       - common/scanner.h
       - "*/src/**"
+      - package.json
       - .github/workflows/fuzz.yml
   workflow_dispatch:
 
@@ -31,7 +33,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Read tree-sitter CLI pin
+        id: tree-sitter-pin
+        shell: bash
+        run: node -p '"ref=v" + require("./package.json").devDependencies["tree-sitter-cli"]' >> "$GITHUB_OUTPUT"
       - name: Fuzz ${{matrix.language}} parser
         uses: tree-sitter/fuzz-action@v4
         with:
           directory: ${{matrix.language}}
+          tree-sitter-version: ${{ steps.tree-sitter-pin.outputs.ref }}

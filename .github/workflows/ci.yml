@@ -20,12 +20,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      # The parsers are ABI 15; the CMake default must match so a CMake build never regenerates them with another ABI.
-      - name: Compare parser.c and CMake ABI
+      # ci/tree-sitter-abi.txt pins the ABI. Generation and the CMake default read it; the committed parsers and the npm
+      # build scripts repeat it, so a CMake build or npm run build never regenerates them with another ABI.
+      - name: Compare parser.c and npm build scripts with the ABI pin
+        shell: bash
         run: |-
-          grep -qx '#define LANGUAGE_VERSION 15' typescript/src/parser.c
-          grep -qx '#define LANGUAGE_VERSION 15' tsx/src/parser.c
-          grep -q 'set(TREE_SITTER_ABI_VERSION 15 CACHE' CMakeLists.txt
+          abi=$(cat ci/tree-sitter-abi.txt)
+          for grammar in typescript tsx; do
+            grep -qx "#define LANGUAGE_VERSION $abi" "$grammar/src/parser.c" ||
+              { echo "$grammar/src/parser.c is not ABI $abi"; exit 1; }
+            build=$(node -p "require('./$grammar/package.json').scripts.build")
+            test "$build" = "tree-sitter generate --abi $abi --js-runtime native" ||
+              { echo "$grammar/package.json build script differs from the CI recipe: $build"; exit 1; }
+          done
   versions:
     name: Version consistency
     runs-on: ubuntu-latest
@@ -72,18 +79,44 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Read tree-sitter CLI pin
+        id: tree-sitter-pin
+        shell: bash
+        run: node -p '"ref=v" + require("./package.json").devDependencies["tree-sitter-cli"]' >> "$GITHUB_OUTPUT"
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
         with:
-          tree-sitter-ref: v0.27.2
+          tree-sitter-ref: ${{ steps.tree-sitter-pin.outputs.ref }}
       # Generate only the two grammars; third_party/ holds an input, not a grammar to build.
       - name: Verify generated parsers
         shell: bash
         run: |-
+          abi=$(cat ci/tree-sitter-abi.txt)
           for grammar in typescript tsx; do
-            (cd "$grammar" && tree-sitter generate --abi 15 --js-runtime native)
+            (cd "$grammar" && tree-sitter generate --abi "$abi" --js-runtime native)
           done
+          awk '
+            FNR == 1 { in_main_lexer = 0 }
+            /^static bool ts_lex\(/ { in_main_lexer = 1 }
+            /^}/ { in_main_lexer = 0 }
+            in_main_lexer && /^[[:space:]]*case [0-9]+:/ { cases[FILENAME]++ }
+            /^[[:space:]]*#[[:space:]]*pragma[[:space:]]+(optimize[[:space:]]*\(|clang[[:space:]]+optimize[[:space:]]+off([[:space:]]|$)|GCC[[:space:]]+optimize([[:space:](]|$))/ {
+              print FILENAME ":" FNR ": forbidden optimization pragma: " $0
+              blocked = 1
+            }
+            END {
+              for (i = 1; i < ARGC; i++) {
+                n = cases[ARGV[i]] + 0
+                print ARGV[i] ": main lexer cases: " n
+                if (!n) blocked = 1
+              }
+              exit blocked
+            }
+          ' typescript/src/parser.c tsx/src/parser.c
           git diff --exit-code -- typescript/src tsx/src
+          # A file the generator adds is untracked, which git diff does not report.
+          extra=$(git status --porcelain --untracked-files=all -- typescript/src tsx/src)
+          test -z "$extra" || { echo "$extra"; exit 1; }
       # Example repositories at the commits pinned in test/examples/repos.txt.
       - name: Set up examples
         shell: bash

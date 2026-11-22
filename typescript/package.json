@@ -2,7 +2,7 @@
   "main": "../bindings/node/typescript",
   "private": true,
   "scripts": {
-    "build": "tree-sitter generate",
+    "build": "tree-sitter generate --abi 15 --js-runtime native",
     "prestart": "tree-sitter build --wasm",
     "start": "tree-sitter playground"
   }
