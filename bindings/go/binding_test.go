@@ -46,7 +46,7 @@ func TestLookaheadAfterSubtreeReuse(t *testing.T) {
 				{"bare declarator", "", "let x/*\n*/+y", " "},
 				{"typed bare declarator", "", "let x: T/*\n*/+y", " "},
 				{"bare yield ASI", "function* g(){return ", "yield yield\n(x);}", "/*review\n*/"},
-				{"bare yield Annex B", "function* g(){ f(", "yield<!--x\n); }", "/*review\n*/"},
+				{"comparison before prefix decrement", "a", "/*\n*/<!--x\n+b", " "},
 				{"initializer before prefix increment", "let", " a=b/**//*\u2028*/++c", " "},
 				{"initializer before prefix decrement", "let", " a=b//\u2029--c", " "},
 				{"declarator before line comment", "let a=b", "\nlet d=e//\nc;d;", " "},

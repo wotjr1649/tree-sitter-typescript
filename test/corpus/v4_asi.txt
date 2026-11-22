@@ -115,13 +115,14 @@ class C {
         (statement_block)))))
 
 ==============================================
-Annex B in a continued expression
+HTML-like open marker is a comparison with prefix operators
+:language(typescript)
+:language(tsx)
 ==============================================
 
 a/*
 */<!--x
-<!--y
-+b;
++b
 
 ---
 
@@ -130,9 +131,24 @@ a/*
     (binary_expression
       (identifier)
       (comment)
-      (html_comment)
-      (html_comment)
-      (identifier))))
+      (binary_expression
+        (unary_expression (update_expression (identifier)))
+        (identifier)))))
+
+==============================================
+HTML-like close marker is invalid after a bare yield
+:language(typescript)
+:language(tsx)
+:error
+==============================================
+
+function*g(){yield//
+-->
+(x)}
+
+---
+
+(program)
 
 ==============================================
 Await inside a TSX async concise arrow
