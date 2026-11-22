@@ -54,17 +54,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quoted JSX attribute fragments can split before the closing quote (A1) or merge around incomplete character
   references (A2). Trailing comments can move outside a bare declaration (A3), from an initializer's function body
   to its declaration (A4), or from a preceding statement or body to the enclosing block or program (B8).
-- `as` now wraps the `await_expression` in `await f() as T` (B2). Generic calls and their member accesses can move
-  inside `await` (N01, N02). Non-null assertions bind to their immediate operand (B6), and prefix operators can wrap
-  a generic call and its member access (B7).
+- `as` now wraps the `await_expression` in `await f() as T` (B2). A generic call is now under `await_expression` in
+  `await f<T>()` and in `function f(){ await g<T>(); }` (N01). In `await f<T>().x`, `await_expression` wraps the
+  member access (N02). Non-null assertions bind to their immediate operand (B6), and prefix operators can wrap a
+  generic call and its member access (B7).
 - The member object in `@(super.decorate)` is `super` (B9) and the member object in `<this.C/>` is `this` (B10).
   `using` and `await using` declarations now use `using_declaration` (B11). A `hash_bang_line` range ends before
   a terminating CR (H1).
 - In both `node-types.json` files, `await_expression`, `non_null_expression` and `instantiation_expression` list
   more specific child types in place of `expression`. `parenthesized_expression` lists those of its children
   covered by `expression` through that supertype, including calls, identifiers and member expressions.
-- The full CST comparison of `e0f14e6` against v2.0.0 found 962 changes among 21,747 input–grammar pairs with valid
-  input that previously parsed without error (896 TypeScript, 66 TSX). See the
+- The full CST comparison of `9ca6dae` against v2.0.0 covered 21,758 input–grammar pairs. It found 963 changes
+  to error-free trees of valid inputs (897 TypeScript, 66 TSX). See the
   [migration guide](docs/migrating-from-2.0.md) for the CST changes, schema details and query updates.
 
 ## [2.0.0] - 2026-11-20

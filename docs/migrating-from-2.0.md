@@ -8,13 +8,13 @@ error in 2.0.0 have different trees. Queries and tree walkers that match those s
 ## Full CST comparison against 2.0.0
 
 The comparison covers the corpus, the tsc 7.0.2 oracle, the pinned examples and JavaScript regression inputs at
-`e0f14e6`. It compares node kinds, fields, child order and source ranges, including `ERROR` and `MISSING` nodes.
+`9ca6dae`. It compares node kinds, fields, child order and source ranges, including `ERROR` and `MISSING` nodes.
 
 | Grammar | Input–grammar pairs | Identical | Valid, error-free trees changed | Error to ok | Error to error, changed | Rejected by tsc, ok to error | Rejected by tsc, ok to ok changed |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `typescript` | 18,937 | 16,957 | 896 | 180 | 88 | 815 | 1 |
-| `tsx` | 2,810 | 1,652 | 66 | 190 | 87 | 815 | 0 |
-| Total | 21,747 | 18,609 | 962 | 370 | 175 | 1,630 | 1 |
+| `typescript` | 18,942 | 16,961 | 897 | 181 | 87 | 815 | 1 |
+| `tsx` | 2,816 | 1,656 | 66 | 192 | 87 | 815 | 0 |
+| Total | 21,758 | 18,617 | 963 | 373 | 174 | 1,630 | 1 |
 
 The result columns are mutually exclusive. Three of the 17,665 example files now parse, leaving 11 known failures.
 
@@ -191,11 +191,11 @@ When replacing a whole hashbang line, handle the line terminator separately from
 | Input | 2.0.0 excerpt | Port excerpt |
 | --- | --- | --- |
 | `export{};await f<T>()` | `(call_expression function: (await_expression (identifier)) type_arguments: (type_arguments))` | `(await_expression (call_expression function: (identifier) type_arguments: (type_arguments)))` |
+| `function f(){ await g<T>(); }` | `(call_expression function: (await_expression (identifier)) type_arguments: (type_arguments))` | `(await_expression (call_expression function: (identifier) type_arguments: (type_arguments)))` |
 | `export{};await f<T>().x` | `(member_expression object: (call_expression function: (await_expression (identifier))) property: (property_identifier))` | `(await_expression (member_expression object: (call_expression function: (identifier)) property: (property_identifier)))` |
 
 Find awaited typed calls under `await_expression`. With a member access, follow its `object` field to the
-`call_expression`. The callee's `function` field contains the identifier in both new forms. The same shape applies to
-`await f<T>()` inside an ordinary function under the tsc syntax criterion. In that scope, `await(x)` is a call.
+`call_expression`. The call's `function` field contains the identifier. In an ordinary function, `await(x)` is a call.
 
 ## Other differences
 
