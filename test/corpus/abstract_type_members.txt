@@ -1,0 +1,86 @@
+==========================================================
+Abstract as an object type property name
+:language(typescript)
+:language(tsx)
+==========================================================
+
+type T = { abstract: Set<string>; concrete: Set<string> };
+
+---
+
+(program
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (property_signature
+        (property_identifier)
+        (type_annotation
+          (generic_type
+            (type_identifier)
+            (type_arguments
+              (predefined_type)))))
+      (property_signature
+        (property_identifier)
+        (type_annotation
+          (generic_type
+            (type_identifier)
+            (type_arguments
+              (predefined_type))))))))
+
+==========================================================
+Optional, method and readonly type members named abstract
+:language(typescript)
+:language(tsx)
+==========================================================
+
+interface I { abstract?: string }
+type T = { abstract(): string };
+type R = { readonly abstract: number };
+
+---
+
+(program
+  (interface_declaration
+    (type_identifier)
+    (interface_body
+      (property_signature
+        (property_identifier)
+        (type_annotation (predefined_type)))))
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (method_signature
+        (property_identifier)
+        (formal_parameters)
+        (type_annotation (predefined_type)))))
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (property_signature
+        (property_identifier)
+        (type_annotation (predefined_type))))))
+
+==========================================================
+Line breaks around a type property named abstract
+:language(typescript)
+:language(tsx)
+==========================================================
+
+interface I {
+  other: number
+  abstract
+  : string
+}
+
+---
+
+(program
+  (interface_declaration
+    (type_identifier)
+    (interface_body
+      (property_signature
+        (property_identifier)
+        (type_annotation (predefined_type)))
+      (property_signature
+        (property_identifier)
+        (type_annotation (predefined_type))))))

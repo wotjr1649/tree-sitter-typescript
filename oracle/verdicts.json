@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "4ce6f5a5920b3d2149cc49514be5177f38104fb1be8a020d1bba64159f29028b",
+  "cases_sha256": "848d9163fa9b1ea897392ace75dad14060795229c5a56a7d2f9cd4e3daed9053",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -9144,6 +9144,138 @@
     1110
    ],
    "at": 19
+  },
+  {
+   "id": "abstract-type-member/vscode.ts",
+   "sha256": "5284b9f523e696a2a62ece1a2071fb26d6b18a61a6544aef127f4e4f4a7551b8",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/vscode.tsx",
+   "sha256": "5284b9f523e696a2a62ece1a2071fb26d6b18a61a6544aef127f4e4f4a7551b8",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-optional.ts",
+   "sha256": "fd1a12d7920b3f7dd4c3ca207b00af3c3562cca3e234348e0a0a1e50afd04ffb",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-optional.tsx",
+   "sha256": "fd1a12d7920b3f7dd4c3ca207b00af3c3562cca3e234348e0a0a1e50afd04ffb",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-method.ts",
+   "sha256": "513d2d834d0e421dd373d81752e5b908e4fc6adbd920f1afb73c0e28081044ab",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-method.tsx",
+   "sha256": "513d2d834d0e421dd373d81752e5b908e4fc6adbd920f1afb73c0e28081044ab",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-after-break.ts",
+   "sha256": "d5de378033883bdf6f086586607551057fe92b4d409bf7c5f373b3abd9c44e9a",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-after-break.tsx",
+   "sha256": "d5de378033883bdf6f086586607551057fe92b4d409bf7c5f373b3abd9c44e9a",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-line-break.ts",
+   "sha256": "c60697994229a4e08732615aba8fbc226165153185015a0ab56a706b2388b689",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-line-break.tsx",
+   "sha256": "c60697994229a4e08732615aba8fbc226165153185015a0ab56a706b2388b689",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-object-construct.ts",
+   "sha256": "3b966d7f815fda13875751c22847bee1f649d0f68592b7da729dacd5e77cbeab",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-object-construct.tsx",
+   "sha256": "3b966d7f815fda13875751c22847bee1f649d0f68592b7da729dacd5e77cbeab",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-class.ts",
+   "sha256": "fcae422305fc09f420eb7bed86c1d44ffca4b39fe8ea5c89d69feeb25311a059",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/abstract-class.tsx",
+   "sha256": "fcae422305fc09f420eb7bed86c1d44ffca4b39fe8ea5c89d69feeb25311a059",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "abstract-type-member/incomplete-type.ts",
+   "sha256": "34ed76c66ad4a90d03df95e7f00da6c072fc4bb95529eed3f36167f5cb854273",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 21
+  },
+  {
+   "id": "abstract-type-member/incomplete-type.tsx",
+   "sha256": "34ed76c66ad4a90d03df95e7f00da6c072fc4bb95529eed3f36167f5cb854273",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 21
   }
  ]
 }
