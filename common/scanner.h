@@ -464,10 +464,10 @@ static bool semicolon_before_next_token(TSLexer *lexer, const bool *valid_symbol
             skip(lexer);
             return lexer->lookahead != '=';
 
-        // Don't insert a semicolon before `in` or `instanceof`, but do insert one
-        // before an identifier.
+        // A newline can end a member unless an operator, declaration, or modifier can continue.
         case 'i':
-            return !starts_in_operator(lexer, true);
+            return !starts_in_operator(lexer, true) ||
+                   (!expression && !valid_symbols[KEYWORD_CONTINUES] && !declaration_end);
 
         default:
             break;

@@ -224,7 +224,7 @@ the declaration, as tsc reads it; tsc then expects `,`. Type parameters named `o
 
 tsc accepts these and the grammar now gives `ERROR`, as a related form already did before (recorded, not fixed:
 no new kind of difference); the counts below say which of them parsed without error before.
-Fixing them needs a grammar change, a candidate after 2.0.0.
+This section records the 2.0.0 behavior. The Unreleased changelog lists later fixes.
 
 - **An index on the line after an `import(...)` type (N1, #13).** `const x = v as import('x').Y` + line
   break + `[a + b];` (also `satisfies`, `[f()]`, `[a?.b]`): a `subscript_expression` at 1.0.0, an `ERROR` now; tsc
@@ -288,10 +288,11 @@ for empty lists) are out of scope: `--noCheck` drops them.
 - **ASI after `static`, `get`, `set` (N5, #15).** tsc reads `static` + line break + `x = 1` as one static
   field and `get`/`set` + line break + `x() {}` as one accessor; the grammar reads two members, for every line-break
   form (1.0.0 already did for LF). A grammar change, not a scanner change, would be needed.
-- **A class or type member named `in`/`instanceof` after a line break, and the other shapes above (N5, #15).**
-  Only a member named `in` or `instanceof` itself; names that start with them parse
-  since N7. Rejected for every line-break form, LF included; see "Valid input that is an error
-  now". `for (var x⏎in y)` keeps its `in`.
+- **A member named `in` or `instanceof` after a line break (N5, #15).**
+  The Unreleased fix allows these names after a class field without an initializer, a class member signature
+  (an abstract method signature or an index signature), or a type member. A class field initializer can continue
+  with either binary operator. `tsc` accepts `class C { a = () => {}⏎in = 1; }`, but the grammar still tries to read
+  `in` as a binary operator. Put a semicolon after `() => {}` to parse two fields. `for (var x⏎in y)` keeps its `in`.
 - **Words starting with `in` after a line break (N7).** Accepted although tsc rejects them: after `a = b` and a line
   break, `in💩 = 1;`, `in\u0021 = 1;`, `in\u0073tanceof = 1;` (the grammar's identifier token takes any non-space
   character; the same words not starting with `in` were accepted at 1.0.0). `set⏎in_x(v) {}` reads as two members, as

@@ -39,7 +39,8 @@ owner approval. go-treesitter regenerates `src/parser.c` with its own pinned CLI
   request that adds a path to the list fails CI unless it also changes `repos.txt`
   (`test/examples/check-known-failures-shrink.sh`). Entries marked
   `candidate:` are grammar gaps not fixed yet and possible later changes: a call signature
-  starting with `<` on a new line. Entries marked
+  starting with `<` on a new line. The migration notes track the remaining case of a class field initialized with
+  a block-bodied arrow function before a member named `in` on a new line. Entries marked
   `not complete TypeScript` are fixture inputs. Moving a pin updates the list in the same change.
 - Releases are `vMAJOR.MINOR.PATCH` tags with a GitHub Release; the latest is
   `gh release view -R wotjr1649/tree-sitter-typescript`. Record every release in `CHANGELOG.md` (Keep a Changelog).
