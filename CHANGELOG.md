@@ -58,14 +58,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `await f<T>()` and in `function f(){ await g<T>(); }` (N01). In `await f<T>().x`, `await_expression` wraps the
   member access (N02). Non-null assertions bind to their immediate operand (B6), and prefix operators can wrap a
   generic call and its member access (B7).
+- `as` and `satisfies` keep the full qualified type in expressions such as `await f() as A.B.C`, including qualified
+  generic and indexed access types. The final `C` is the `name` of the `nested_type_identifier` (C1).
 - The member object in `@(super.decorate)` is `super` (B9) and the member object in `<this.C/>` is `this` (B10).
   `using` and `await using` declarations now use `using_declaration` (B11). A `hash_bang_line` range ends before
   a terminating CR (H1).
 - In both `node-types.json` files, `await_expression`, `non_null_expression` and `instantiation_expression` list
   more specific child types in place of `expression`. `parenthesized_expression` lists those of its children
   covered by `expression` through that supertype, including calls, identifiers and member expressions.
-- The full CST comparison of `9ca6dae` against v2.0.0 covered 21,758 input–grammar pairs. It found 963 changes
-  to error-free trees of valid inputs (897 TypeScript, 66 TSX). See the
+- The full CST comparison against v2.0.0 covered 21,770 input–grammar pairs. It found 984 changes
+  to error-free trees of valid inputs (914 TypeScript, 70 TSX). See the
   [migration guide](docs/migrating-from-2.0.md) for the CST changes, schema details and query updates.
 
 ## [2.0.0] - 2026-11-20

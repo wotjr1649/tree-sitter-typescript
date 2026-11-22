@@ -742,6 +742,9 @@ module.exports = function defineGrammar(dialect) {
         $._semicolon,
       ),
 
+      // Score each prefix segment so `as` and `satisfies` consume the full qualified type before reducing.
+      nested_identifier: ($, previous) => prec.dynamic(1, previous),
+
       nested_type_identifier: $ => prec('member', seq(
         field('module', choice($.identifier, $.nested_identifier)),
         '.',

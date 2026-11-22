@@ -7,14 +7,15 @@ error in 2.0.0 have different trees. Queries and tree walkers that match those s
 
 ## Full CST comparison against 2.0.0
 
-The comparison covers the corpus, the tsc 7.0.2 oracle, the pinned examples and JavaScript regression inputs at
-`9ca6dae`. It compares node kinds, fields, child order and source ranges, including `ERROR` and `MISSING` nodes.
+The comparison covers the corpus, the tsc 7.0.2 oracle, the pinned examples and JavaScript regression inputs,
+including the C1 cases. It compares node kinds, fields, child order and source ranges, including `ERROR` and
+`MISSING` nodes.
 
 | Grammar | Input–grammar pairs | Identical | Valid, error-free trees changed | Error to ok | Error to error, changed | Rejected by tsc, ok to error | Rejected by tsc, ok to ok changed |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `typescript` | 18,942 | 16,961 | 897 | 181 | 87 | 815 | 1 |
-| `tsx` | 2,816 | 1,656 | 66 | 192 | 87 | 815 | 0 |
-| Total | 21,758 | 18,617 | 963 | 373 | 174 | 1,630 | 1 |
+| `typescript` | 18,948 | 16,950 | 914 | 181 | 87 | 815 | 1 |
+| `tsx` | 2,822 | 1,658 | 70 | 192 | 87 | 815 | 0 |
+| Total | 21,770 | 18,608 | 984 | 373 | 174 | 1,630 | 1 |
 
 The result columns are mutually exclusive. Three of the 17,665 example files now parse, leaving 11 known failures.
 
@@ -92,13 +93,14 @@ Find the `comment` as a direct child of `lexical_declaration`, beside the `varia
 
 Match the cast first and then its awaited expression.
 
-The same change affects `export{};let x=await f()as A.B.C` (C1). The `.C` is a value member in both trees.
-tsc reads it as part of the qualified type.
+### Qualified types after `as` and `satisfies` (C1)
 
-- 2.0.0 gives `(await_expression (member_expression object: (as_expression (call_expression) (nested_type_identifier))))`.
-- The port gives `(member_expression object: (as_expression (await_expression (call_expression)) (nested_type_identifier)))`.
+In `export{};let x=await f()as A.B.C`, 2.0.0 puts `.C` in a value `member_expression` under `await_expression`.
+The port reads `(as_expression (await_expression (call_expression)) (nested_type_identifier module: (nested_identifier) name: (type_identifier)))`.
+The type's `module` spans `A.B` and its `name` spans `C`.
 
-Follow the member's `object` to the cast and its `await_expression`.
+Read the qualified name from the type child of `as_expression` or `satisfies_expression`. `(x as A.B.C).d`
+still uses `member_expression` for `.d`, with the parenthesized assertion as its `object`.
 
 ### Postfix non-null assertions in larger expressions (B6)
 

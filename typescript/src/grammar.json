@@ -4113,42 +4113,17 @@
       ]
     },
     "nested_identifier": {
-      "type": "PREC",
-      "value": "member",
+      "type": "PREC_DYNAMIC",
+      "value": 1,
       "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "FIELD",
-            "name": "object",
-            "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "identifier"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "nested_identifier"
-                  },
-                  "named": true,
-                  "value": "member_expression"
-                }
-              ]
-            }
-          },
-          {
-            "type": "STRING",
-            "value": "."
-          },
-          {
-            "type": "FIELD",
-            "name": "property",
-            "content": {
-              "type": "ALIAS",
+        "type": "PREC",
+        "value": "member",
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "object",
               "content": {
                 "type": "CHOICE",
                 "members": [
@@ -4157,16 +4132,45 @@
                     "name": "identifier"
                   },
                   {
-                    "type": "SYMBOL",
-                    "name": "_keyword_identifier"
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "nested_identifier"
+                    },
+                    "named": true,
+                    "value": "member_expression"
                   }
                 ]
-              },
-              "named": true,
-              "value": "property_identifier"
+              }
+            },
+            {
+              "type": "STRING",
+              "value": "."
+            },
+            {
+              "type": "FIELD",
+              "name": "property",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "identifier"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "_keyword_identifier"
+                    }
+                  ]
+                },
+                "named": true,
+                "value": "property_identifier"
+              }
             }
-          }
-        ]
+          ]
+        }
       }
     },
     "_jsx_keyword_member_expression": {

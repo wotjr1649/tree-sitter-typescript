@@ -1087,3 +1087,13 @@
 {"id":"n7/letobj-semi-block.tsx","sha256":"b6c2a87711eb15d7f4f864865dc541153fef036de8e0ca11c0f8b1890860d1d8","source":"let;\n{ x }","grammar":"tsx","expect":["0-4:expression_statement","5-10:statement_block"]}
 {"id":"n7/letobj-block-stmt.ts","sha256":"ec1fb49c81fbed1cb5f35161eddec19657759e4e043b05101a624d9a5dd43b6f","source":"let\n{ x = 1; }","grammar":"typescript","errorAt":11}
 {"id":"n7/letobj-block-stmt.tsx","sha256":"ec1fb49c81fbed1cb5f35161eddec19657759e4e043b05101a624d9a5dd43b6f","source":"let\n{ x = 1; }","grammar":"tsx","errorAt":11}
+{"id":"c1/await-as.ts","sha256":"d30d83faff0315cfefcb038002ce1fd0317539c1b177c00a1bd199cb477ddbe7","source":"export{};let x=await f()as A.B.C","grammar":"typescript","expect":["27-32:nested_type_identifier"]}
+{"id":"c1/await-as.tsx","sha256":"d30d83faff0315cfefcb038002ce1fd0317539c1b177c00a1bd199cb477ddbe7","source":"export{};let x=await f()as A.B.C","grammar":"tsx","expect":["27-32:nested_type_identifier"]}
+{"id":"c1/satisfies.ts","sha256":"36d305b66cb8989e821b0bb3766853d7e9c523b480ead686c91481664103ffb2","source":"x satisfies A.B.C.D;","grammar":"typescript","expect":["12-19:nested_type_identifier"]}
+{"id":"c1/satisfies.tsx","sha256":"36d305b66cb8989e821b0bb3766853d7e9c523b480ead686c91481664103ffb2","source":"x satisfies A.B.C.D;","grammar":"tsx","expect":["12-19:nested_type_identifier"]}
+{"id":"c1/generic.ts","sha256":"e7a288d884eccb98e569ce1f0ddcb3c415ec894726ca02d482e77a6aac096002","source":"x as A.B.C<T>;","grammar":"typescript","expect":["5-13:generic_type"]}
+{"id":"c1/generic.tsx","sha256":"e7a288d884eccb98e569ce1f0ddcb3c415ec894726ca02d482e77a6aac096002","source":"x as A.B.C<T>;","grammar":"tsx","expect":["5-13:generic_type"]}
+{"id":"c1/lookup.ts","sha256":"9d6c159f5fa43802a2e19120d1db6461c9b94263e39d6fd7b8298c4a217ac008","source":"x as A.B.C[K];","grammar":"typescript","expect":["5-13:lookup_type"]}
+{"id":"c1/lookup.tsx","sha256":"9d6c159f5fa43802a2e19120d1db6461c9b94263e39d6fd7b8298c4a217ac008","source":"x as A.B.C[K];","grammar":"tsx","expect":["5-13:lookup_type"]}
+{"id":"c1/member.ts","sha256":"3a685e2ab015acca6bfc7394d9e347aa0fb910b99ad2f48209ebc54dad2a4ec9","source":"(x as A.B.C).d;","grammar":"typescript","expect":["0-14:member_expression"]}
+{"id":"c1/member.tsx","sha256":"3a685e2ab015acca6bfc7394d9e347aa0fb910b99ad2f48209ebc54dad2a4ec9","source":"(x as A.B.C).d;","grammar":"tsx","expect":["0-14:member_expression"]}
