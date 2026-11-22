@@ -93,6 +93,8 @@ jobs:
         run: |-
           abi=$(cat ci/tree-sitter-abi.txt)
           for grammar in typescript tsx; do
+            # Remove the generated files first, so one the generator no longer writes shows up as deleted.
+            rm -rf "$grammar/src/parser.c" "$grammar/src/grammar.json" "$grammar/src/node-types.json" "$grammar/src/tree_sitter"
             (cd "$grammar" && tree-sitter generate --abi "$abi" --js-runtime native)
           done
           awk '
