@@ -11994,6 +11994,15 @@
                 "name": "identifier"
               },
               {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": "symbol"
+                },
+                "named": true,
+                "value": "identifier"
+              },
+              {
                 "type": "SYMBOL",
                 "name": "rest_pattern"
               }
@@ -12017,8 +12026,22 @@
           "type": "FIELD",
           "name": "name",
           "content": {
-            "type": "SYMBOL",
-            "name": "identifier"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "identifier"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": "symbol"
+                },
+                "named": true,
+                "value": "identifier"
+              }
+            ]
           }
         },
         {
@@ -14502,6 +14525,10 @@
     [
       "optional_tuple_parameter",
       "primary_type"
+    ],
+    [
+      "optional_tuple_parameter",
+      "predefined_type"
     ],
     [
       "rest_pattern",

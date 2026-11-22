@@ -124,6 +124,8 @@ module.exports = function defineGrammar(dialect) {
       [$.pattern, $.primary_type],
 
       [$.optional_tuple_parameter, $.primary_type],
+      // `symbol?` can be an optional type or the start of an optional tuple label.
+      [$.optional_tuple_parameter, $.predefined_type],
       [$.rest_pattern, $.primary_type, $.primary_expression],
 
       [$.object, $.object_type],
@@ -907,12 +909,12 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       tuple_parameter: $ => seq(
-        field('name', choice($.identifier, $.rest_pattern)),
+        field('name', choice($.identifier, alias('symbol', $.identifier), $.rest_pattern)),
         field('type', $.type_annotation),
       ),
 
       optional_tuple_parameter: $ => seq(
-        field('name', $.identifier),
+        field('name', choice($.identifier, alias('symbol', $.identifier))),
         '?',
         field('type', $.type_annotation),
       ),
