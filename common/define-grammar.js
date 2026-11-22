@@ -83,25 +83,19 @@ module.exports = function defineGrammar(dialect) {
       [$.construct_signature, $._property_name],
     ]),
 
-    conflicts: ($, previous) => previous.concat([
-      [$.expression, $._typed_template_call],
+    conflicts: ($, previous) => previous.filter((rules) =>
+      rules.map((rule) => rule.name).join(' ') !== 'primary_expression method_definition',
+    ).concat([
       // `f<typeof import('m')>()`: with the call_expression ordered above it in `precedences`, the type query lost
       // to the call and the type arguments were read as a binary `<` and `>`.
       [$.call_expression, $._type_query_call_expression],
       [$.primary_expression, $._type_query_import_arguments],
-      [$.call_expression, $.instantiation_expression, $.binary_expression],
-      [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
-      [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
-      [$.call_expression, $.instantiation_expression, $.binary_expression, $.await_expression],
-      [$.await_expression, $._property_name],
       [$.primary_expression, $._ts_nonordinary_method_head],
       [$.primary_expression, $._ts_method_signature],
       [$._ordinary_method_name, $.public_field_definition],
       [$._ordinary_method_name, $.property_signature],
       // Keep both the type arguments and the relational operator interpretations of '<'.
-      [$.expression, $.call_expression, $.instantiation_expression],
       [$.expression, $.call_expression, $._typed_template_call, $.instantiation_expression],
-      [$.expression, $.call_expression, $.await_expression, $.instantiation_expression],
       [$.expression, $.call_expression, $.await_expression, $._typed_template_call, $.instantiation_expression],
 
       // This appears to be necessary to parse a parenthesized class expression
@@ -147,6 +141,9 @@ module.exports = function defineGrammar(dialect) {
       dialect === 'typescript' ? [
         [$.primary_type, $.type_parameter],
       ] : [
+        [$.await_expression, $._property_name],
+        [$.expression, $.call_expression, $.instantiation_expression],
+        [$.expression, $.call_expression, $.await_expression, $.instantiation_expression],
         [$.jsx_opening_element, $._arrow_type_parameter],
         [$.jsx_opening_element, $.type_parameter, $._arrow_type_parameter],
         [$.type_parameter, $._arrow_type_parameter],
@@ -155,7 +152,6 @@ module.exports = function defineGrammar(dialect) {
         [$.primary_expression, $.index_signature],
         [$.primary_expression, $._ts_method_signature, $.property_signature, $.index_signature],
         [$.primary_expression, $._ts_method_signature, $.property_signature],
-        [$.jsx_expression, $.object_type],
         [$.jsx_namespace_name, $.literal_type],
         [$.jsx_namespace_name, $.predefined_type],
         [$.jsx_namespace_name, $.type_query],

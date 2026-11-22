@@ -14335,10 +14335,6 @@
     ],
     [
       "primary_expression",
-      "method_definition"
-    ],
-    [
-      "primary_expression",
       "_ordinary_method_name"
     ],
     [
@@ -14386,43 +14382,12 @@
       "_property_name"
     ],
     [
-      "expression",
-      "_typed_template_call"
-    ],
-    [
       "call_expression",
       "_type_query_call_expression"
     ],
     [
       "primary_expression",
       "_type_query_import_arguments"
-    ],
-    [
-      "call_expression",
-      "instantiation_expression",
-      "binary_expression"
-    ],
-    [
-      "call_expression",
-      "instantiation_expression",
-      "binary_expression",
-      "unary_expression"
-    ],
-    [
-      "call_expression",
-      "instantiation_expression",
-      "binary_expression",
-      "update_expression"
-    ],
-    [
-      "call_expression",
-      "instantiation_expression",
-      "binary_expression",
-      "await_expression"
-    ],
-    [
-      "await_expression",
-      "_property_name"
     ],
     [
       "primary_expression",
@@ -14443,18 +14408,7 @@
     [
       "expression",
       "call_expression",
-      "instantiation_expression"
-    ],
-    [
-      "expression",
-      "call_expression",
       "_typed_template_call",
-      "instantiation_expression"
-    ],
-    [
-      "expression",
-      "call_expression",
-      "await_expression",
       "instantiation_expression"
     ],
     [
