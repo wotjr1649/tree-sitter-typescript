@@ -25,7 +25,7 @@ import (
 	"unicode/utf8"
 
 	tree_sitter "github.com/tree-sitter/go-tree-sitter"
-	tree_sitter_typescript "github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go"
+	tree_sitter_typescript "github.com/wotjr1649/tree-sitter-typescript/v3/bindings/go"
 )
 
 // The oracle the replay accepts, written down here and not read back from the files under test: run.mjs pins the same

@@ -6,7 +6,7 @@ import (
 	"unsafe"
 
 	tree_sitter "github.com/tree-sitter/go-tree-sitter"
-	tree_sitter_typescript "github.com/wotjr1649/tree-sitter-typescript/v2/bindings/go"
+	tree_sitter_typescript "github.com/wotjr1649/tree-sitter-typescript/v3/bindings/go"
 )
 
 func parse(t *testing.T, lang unsafe.Pointer, src string) {

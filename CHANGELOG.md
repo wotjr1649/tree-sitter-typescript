@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [3.0.0] - 2026-11-22
 
 ### Changed
 
@@ -66,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In both `node-types.json` files, `await_expression`, `non_null_expression` and `instantiation_expression` list
   more specific child types in place of `expression`. `parenthesized_expression` lists those of its children
   covered by `expression` through that supertype, including calls, identifiers and member expressions.
+- The Go module path is `github.com/wotjr1649/tree-sitter-typescript/v3`.
 - The full CST comparison against v2.0.0 covered 21,770 input–grammar pairs. It found 984 changes
   to error-free trees of valid inputs (914 TypeScript, 70 TSX). See the
   [migration guide](docs/migrating-from-2.0.md) for the CST changes, schema details and query updates.
@@ -582,3 +583,5 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
     `ERROR` (`tsc` accepts it), as before. (The C library differs too: on the review host `iswspace(0x85)` returned 8 in
     `ucrtbase.dll` and 0 in `msvcrt.dll`.)
   - `test/examples/known-failures.txt`: no entry cleared.
+
+[3.0.0]: https://github.com/wotjr1649/tree-sitter-typescript/compare/v2.0.0...v3.0.0
