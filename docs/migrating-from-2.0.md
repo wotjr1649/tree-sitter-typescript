@@ -200,5 +200,5 @@ Find awaited typed calls under `await_expression`. With a member access, follow 
 
 - TypeScript and TSX leave Annex B HTML-like comment markers to the normal grammar. Code such as `a/*\n*/<!--x\n+b`
   parses using `<`, `!` and `--`. Some multiline forms also change the association of successive `<` operators.
-- The generated `parser.c` is 11,821,348 bytes for TypeScript and 12,502,888 bytes for TSX, up 25.7% and 32.6%
+- The generated `parser.c` is 11,821,267 bytes for TypeScript and 12,502,807 bytes for TSX, up 25.7% and 32.6%
   from 2.0.0. LR state counts are 10,482 and 10,996, up from 6,719 and 6,851 respectively.

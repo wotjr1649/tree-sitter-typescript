@@ -522,6 +522,15 @@ module.exports = function defineGrammar(dialect) {
         ),
       ),
 
+      decorator_member_expression: $ => prec('member', seq(
+        field('object', choice(
+          $.identifier,
+          alias($.decorator_member_expression, $.member_expression),
+        )),
+        '.',
+        field('property', reserved('properties', alias($.identifier, $.property_identifier))),
+      )),
+
       decorator_call_expression: $ => prec('call', seq(
         field('function', choice(
           $.identifier,

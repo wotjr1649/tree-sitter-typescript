@@ -1,0 +1,33 @@
+==========================================================
+Reserved names in decorator members
+:language(typescript)
+:language(tsx)
+==========================================================
+
+@d.default class A {}
+@d.default<T>() class B {}
+@d.class<T>() class C {}
+
+---
+
+(program
+  (class_declaration
+    (decorator (member_expression (identifier) (property_identifier)))
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (decorator
+      (call_expression
+        (member_expression (identifier) (property_identifier))
+        (type_arguments (type_identifier))
+        (arguments)))
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (decorator
+      (call_expression
+        (member_expression (identifier) (property_identifier))
+        (type_arguments (type_identifier))
+        (arguments)))
+    (type_identifier)
+    (class_body)))
