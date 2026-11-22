@@ -1,9 +1,19 @@
 from os.path import isdir, join
 from platform import system
+from sysconfig import get_config_var
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build import build
 from wheel.bdist_wheel import bdist_wheel
+
+
+limited_api = not get_config_var("Py_GIL_DISABLED")
+macros = [("PY_SSIZE_T_CLEAN", None), ("TREE_SITTER_HIDE_SYMBOLS", None)]
+if limited_api:
+    macros.append(("Py_LIMITED_API", "0x030A0000"))
+elif system() == "Windows":
+    # Windows shares pyconfig.h between regular and free-threaded builds.
+    macros.append(("Py_GIL_DISABLED", "1"))
 
 
 class Build(build):
@@ -17,7 +27,7 @@ class Build(build):
 class BdistWheel(bdist_wheel):
     def get_tag(self):
         python, abi, platform = super().get_tag()
-        if python.startswith("cp"):
+        if limited_api and python.startswith("cp"):
             python, abi = "cp310", "abi3"
         return python, abi, platform
 
@@ -47,13 +57,9 @@ setup(
                 "/std:c11",
                 "/utf-8",
             ],
-            define_macros=[
-                ("Py_LIMITED_API", "0x030A0000"),
-                ("PY_SSIZE_T_CLEAN", None),
-                ("TREE_SITTER_HIDE_SYMBOLS", None),
-            ],
+            define_macros=macros,
             include_dirs=["typescript/src"],
-            py_limited_api=True,
+            py_limited_api=limited_api,
         )
     ],
     cmdclass={

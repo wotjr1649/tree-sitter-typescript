@@ -30,5 +30,12 @@ static struct PyModuleDef module = {
 };
 
 PyMODINIT_FUNC PyInit__binding(void) {
-    return PyModule_Create(&module);
+    PyObject *binding = PyModule_Create(&module);
+#ifdef Py_GIL_DISABLED
+    if (binding != NULL && PyUnstable_Module_SetGIL(binding, Py_MOD_GIL_NOT_USED) < 0) {
+        Py_DECREF(binding);
+        return NULL;
+    }
+#endif
+    return binding;
 }

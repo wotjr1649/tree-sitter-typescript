@@ -1,0 +1,4 @@
+include common/scanner.h
+include typescript/src/tree_sitter/*.h
+include tsx/src/tree_sitter/*.h
+include queries/*.scm
