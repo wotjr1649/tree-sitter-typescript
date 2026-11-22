@@ -1981,10 +1981,6 @@
         "required": false,
         "types": [
           {
-            "type": "default",
-            "named": false
-          },
-          {
             "type": "identifier",
             "named": true
           },
@@ -1998,10 +1994,6 @@
         "multiple": false,
         "required": true,
         "types": [
-          {
-            "type": "default",
-            "named": false
-          },
           {
             "type": "identifier",
             "named": true
@@ -2967,10 +2959,6 @@
         "multiple": false,
         "required": true,
         "types": [
-          {
-            "type": "default",
-            "named": false
-          },
           {
             "type": "identifier",
             "named": true

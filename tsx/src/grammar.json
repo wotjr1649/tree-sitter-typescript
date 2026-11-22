@@ -489,8 +489,13 @@
             "name": "string"
           },
           {
-            "type": "STRING",
-            "value": "default"
+            "type": "ALIAS",
+            "content": {
+              "type": "STRING",
+              "value": "default"
+            },
+            "named": true,
+            "value": "identifier"
           }
         ]
       },

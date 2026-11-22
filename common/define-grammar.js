@@ -361,6 +361,12 @@ module.exports = function defineGrammar(dialect) {
         '/>',
       )),
 
+      _module_export_name: $ => reserved('properties', choice(
+        $.identifier,
+        $.string,
+        alias('default', $.identifier),
+      )),
+
       export_specifier: (_, previous) => seq(
         optional(choice('type', 'typeof')),
         previous,
