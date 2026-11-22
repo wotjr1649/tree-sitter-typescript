@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Parse `symbol` as a tuple element label, including `symbol?: T`, in TypeScript and TSX.
+- Parse typed and optional properties and method signatures named `abstract` in object types and interfaces.
 
 ## [3.0.0] - 2026-11-22
 

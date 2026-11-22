@@ -1172,6 +1172,7 @@ module.exports = function defineGrammar(dialect) {
               $.construct_signature,
               $.index_signature,
               $.method_signature,
+              alias($._abstract_named_method_signature, $.method_signature),
             ),
           ),
           optional(choice(',', $._semicolon)),
@@ -1181,14 +1182,31 @@ module.exports = function defineGrammar(dialect) {
 
       call_signature: $ => $._call_signature,
 
-      property_signature: $ => seq(
-        optional($.accessibility_modifier),
-        optional('static'),
-        optional($.override_modifier),
-        optional('readonly'),
-        field('name', $._property_name),
+      property_signature: $ => choice(
+        seq(
+          optional($.accessibility_modifier),
+          optional('static'),
+          optional($.override_modifier),
+          optional('readonly'),
+          field('name', $._property_name),
+          optional('?'),
+          field('type', optional($.type_annotation)),
+        ),
+        // An explicit suffix keeps ASI out of the construct signature's path.
+        seq(
+          field('name', alias('abstract', $.property_identifier)),
+          choice(
+            field('type', $.type_annotation),
+            seq('?', field('type', optional($.type_annotation))),
+          ),
+        ),
+      ),
+
+      _abstract_named_method_signature: $ => seq(
+        field('name', alias('abstract', $.property_identifier)),
         optional('?'),
-        field('type', optional($.type_annotation)),
+        $._ordinary_method_call_signature,
+        $._leave_signature,
       ),
 
       _call_signature: $ => callSignature($, $.formal_parameters),
