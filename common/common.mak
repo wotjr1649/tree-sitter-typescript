@@ -56,16 +56,18 @@ ifneq ($(STRIP),)
 	$(STRIP) $@
 endif
 
-$(LANGUAGE_NAME).pc: ../bindings/c/$(LANGUAGE_NAME).pc.in
-	sed -e 's|@CMAKE_PROJECT_VERSION@|$(VERSION)|' \
-		-e 's|@CMAKE_INSTALL_LIBDIR@|$(LIBDIR:$(PREFIX)/%=%)|' \
-		-e 's|@CMAKE_INSTALL_INCLUDEDIR@|$(INCLUDEDIR:$(PREFIX)/%=%)|' \
-		-e 's|@PROJECT_DESCRIPTION@|$(DESCRIPTION)|' \
-		-e 's|@CMAKE_PROJECT_HOMEPAGE_URL@|$(HOMEPAGE_URL)|' \
-		-e 's|@CMAKE_INSTALL_PREFIX@|$(PREFIX)|' $< > $@
+sed_replacement = $(subst |,\|,$(subst &,\&,$(subst \,\\,$(1))))
 
-$(PARSER): $(SRC_DIR)/grammar.json
-	$(TS) generate $^
+$(LANGUAGE_NAME).pc: ../bindings/c/$(LANGUAGE_NAME).pc.in
+	sed -e 's|@CMAKE_PROJECT_VERSION@|$(call sed_replacement,$(VERSION))|' \
+		-e 's|@PC_LIBDIR@|$(call sed_replacement,$(LIBDIR:$(PREFIX)/%=$${prefix}/%))|' \
+		-e 's|@PC_INCLUDEDIR@|$(call sed_replacement,$(INCLUDEDIR:$(PREFIX)/%=$${prefix}/%))|' \
+		-e 's|@PROJECT_DESCRIPTION@|$(call sed_replacement,$(DESCRIPTION))|' \
+		-e 's|@CMAKE_PROJECT_HOMEPAGE_URL@|$(call sed_replacement,$(HOMEPAGE_URL))|' \
+		-e 's|@CMAKE_INSTALL_PREFIX@|$(call sed_replacement,$(PREFIX))|' $< > $@
+
+generate:
+	$(TS) generate --abi "$$(cat ../ci/tree-sitter-abi.txt)" --js-runtime native
 
 install: all
 	install -d '$(DESTDIR)$(INCLUDEDIR)'/tree_sitter '$(DESTDIR)$(PCLIBDIR)' '$(DESTDIR)$(LIBDIR)'
@@ -87,4 +89,4 @@ uninstall:
 clean:
 	$(RM) $(OBJS) $(LANGUAGE_NAME).pc lib$(LANGUAGE_NAME).a lib$(LANGUAGE_NAME).$(SOEXT)
 
-.PHONY: all install uninstall clean
+.PHONY: all install uninstall clean generate $(LANGUAGE_NAME).pc

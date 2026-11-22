@@ -23,15 +23,17 @@ find_program(TREE_SITTER_CLI tree-sitter DOC "Tree-sitter CLI")
 include(GNUInstallDirs)
 
 macro(add_parser name)
-    add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c"
-                       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/grammar.json"
-                       COMMAND "${TREE_SITTER_CLI}" generate src/grammar.json
-                                --abi=${TREE_SITTER_ABI_VERSION}
-                       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-                       COMMENT "Generating parser.c")
+    # Use the ABI of the parser being compiled. TREE_SITTER_ABI_VERSION controls ts-generate.
+    set(parser "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${parser}")
+    file(STRINGS "${parser}" parser_abi_define LIMIT_COUNT 1 REGEX "^#define LANGUAGE_VERSION [0-9]+$")
+    if(NOT parser_abi_define MATCHES "^#define LANGUAGE_VERSION ([0-9]+)$")
+        message(FATAL_ERROR "Cannot read LANGUAGE_VERSION from ${parser}")
+    endif()
+    set(parser_abi "${CMAKE_MATCH_1}")
 
     add_library(tree-sitter-${name}
-                "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c"
+                "${parser}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/src/scanner.c")
     target_include_directories(tree-sitter-${name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -43,7 +45,7 @@ macro(add_parser name)
                           PROPERTIES
                           C_STANDARD 11
                           POSITION_INDEPENDENT_CODE ON
-                          SOVERSION "${TREE_SITTER_ABI_VERSION}.${PROJECT_VERSION_MAJOR}"
+                          SOVERSION "${parser_abi}.${PROJECT_VERSION_MAJOR}"
                           DEFINE_SYMBOL "")
 
     configure_file("${CMAKE_SOURCE_DIR}/bindings/c/tree-sitter-${name}.pc.in"
@@ -57,10 +59,26 @@ macro(add_parser name)
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endmacro()
 
+foreach(dir IN ITEMS LIBDIR INCLUDEDIR)
+    if(IS_ABSOLUTE "${CMAKE_INSTALL_${dir}}")
+        set(PC_${dir} "${CMAKE_INSTALL_${dir}}")
+    else()
+        set(PC_${dir} "\${prefix}/${CMAKE_INSTALL_${dir}}")
+    endif()
+endforeach()
+
 add_subdirectory(typescript tree-sitter-typescript)
 
 add_subdirectory(tsx tree-sitter-tsx)
 
-add_custom_target(ts-test "${TREE_SITTER_CLI}" test
-                  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-                  COMMENT "tree-sitter test")
+if(TREE_SITTER_CLI)
+    add_custom_target(ts-generate
+                      COMMAND "${CMAKE_COMMAND}" -E chdir "${CMAKE_CURRENT_SOURCE_DIR}/typescript"
+                              "${TREE_SITTER_CLI}" generate --abi "${TREE_SITTER_ABI_VERSION}" --js-runtime native
+                      COMMAND "${CMAKE_COMMAND}" -E chdir "${CMAKE_CURRENT_SOURCE_DIR}/tsx"
+                              "${TREE_SITTER_CLI}" generate --abi "${TREE_SITTER_ABI_VERSION}" --js-runtime native
+                      VERBATIM)
+    add_custom_target(ts-test "${TREE_SITTER_CLI}" test
+                      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                      VERBATIM)
+endif()
