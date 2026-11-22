@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "b1c4e5aedc7f78c02fecd9d9acb1714d3fde0f6e06b09adcf78405fa2320499e",
+  "cases_sha256": "4ce6f5a5920b3d2149cc49514be5177f38104fb1be8a020d1bba64159f29028b",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -9060,6 +9060,90 @@
    "verdict": "accept",
    "codes": [],
    "at": null
+  },
+  {
+   "id": "symbol-tuple-label/vscode.ts",
+   "sha256": "bc5e3988a150f336096c4fea2a3da7d79d8e31e0f7dba9d63fa9f7ef3ee1d073",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/vscode.tsx",
+   "sha256": "bc5e3988a150f336096c4fea2a3da7d79d8e31e0f7dba9d63fa9f7ef3ee1d073",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/symbol-optional.ts",
+   "sha256": "2b9891e22f263c48b8ad7db0e6e22b2aa23f3d82dc5c15034ca502f98a902d75",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/symbol-optional.tsx",
+   "sha256": "2b9891e22f263c48b8ad7db0e6e22b2aa23f3d82dc5c15034ca502f98a902d75",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/symbol-line-break.ts",
+   "sha256": "5e8a7e570f4cde5ad491b79eabfc405767c92709a698e3a7b56bee44c4fc20d7",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/symbol-line-break.tsx",
+   "sha256": "5e8a7e570f4cde5ad491b79eabfc405767c92709a698e3a7b56bee44c4fc20d7",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/symbol-types.ts",
+   "sha256": "78344a75faa342e33f314f518a282aecc3427d23526961a4d1bce04fc010be6d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/symbol-types.tsx",
+   "sha256": "78344a75faa342e33f314f518a282aecc3427d23526961a4d1bce04fc010be6d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "symbol-tuple-label/incomplete-optional.ts",
+   "sha256": "6155c903200b79b76eb11ec36dfa9c2702d367bdb926efc25d1b6c5bb7138061",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 19
+  },
+  {
+   "id": "symbol-tuple-label/incomplete-optional.tsx",
+   "sha256": "6155c903200b79b76eb11ec36dfa9c2702d367bdb926efc25d1b6c5bb7138061",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1110
+   ],
+   "at": 19
   }
  ]
 }

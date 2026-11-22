@@ -11,4 +11,3 @@ examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/
 examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/fixtures/context/p14/source/f2.ts	not complete TypeScript: test fixture fragment (members outside a class/interface, placeholder or line-number text, incomplete code)
 examples/vscode/extensions/copilot/src/extension/typescriptContext/serverPlugin/src/common/typescripts.ts	candidate: property named abstract in an object type, e.g. { abstract: Set<string> }
 examples/vscode/extensions/vscode-colorize-perf-tests/test/colorize-fixtures/test-checker.ts	not complete TypeScript: test fixture truncated in the middle of an expression
-examples/vscode/src/vs/workbench/contrib/terminalContrib/voice/browser/terminalVoice.ts	candidate: symbol as a labeled tuple element name, e.g. [spoken: string, symbol: string]
