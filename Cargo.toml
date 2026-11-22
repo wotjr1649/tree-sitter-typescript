@@ -23,7 +23,9 @@ include = [
   "tsx/grammar.js",
   "tsx/src",
   "queries/*",
-  "./tree-sitter.json",
+  "tree-sitter.json",
+  "/LICENSE",
+  "/NOTICE",
 ]
 
 [lib]
