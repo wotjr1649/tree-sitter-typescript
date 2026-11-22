@@ -831,7 +831,7 @@ module.exports = function defineGrammar(dialect) {
         '.',
         field('property', choice(
           $.private_property_identifier,
-          reserved('properties', alias(choice($.identifier, $._keyword_identifier), $.property_identifier)),
+          reserved('properties', alias($.identifier, $.property_identifier)),
         )),
       ),
       // A dot chain that starts at `import(...)`, with no call in between and no bare `import`: the only
@@ -1013,7 +1013,7 @@ module.exports = function defineGrammar(dialect) {
         choice('.', '?.'),
         field('property', choice(
           $.private_property_identifier,
-          reserved('properties', alias(choice($.identifier, $._keyword_identifier), $.property_identifier)),
+          reserved('properties', alias($.identifier, $.property_identifier)),
         )),
       ),
       _type_query_subscript_expression: $ => seq(

@@ -11704,17 +11704,8 @@
                 "content": {
                   "type": "ALIAS",
                   "content": {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "identifier"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "_keyword_identifier"
-                      }
-                    ]
+                    "type": "SYMBOL",
+                    "name": "identifier"
                   },
                   "named": true,
                   "value": "property_identifier"
@@ -12593,17 +12584,8 @@
                 "content": {
                   "type": "ALIAS",
                   "content": {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "identifier"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "_keyword_identifier"
-                      }
-                    ]
+                    "type": "SYMBOL",
+                    "name": "identifier"
                   },
                   "named": true,
                   "value": "property_identifier"
