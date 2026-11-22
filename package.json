@@ -15,6 +15,7 @@
     "tsx"
   ],
   "files": [
+    "NOTICE",
     "binding.gyp",
     "prebuilds/**",
     "bindings/node/*",
@@ -26,6 +27,7 @@
     "tsx/package.json",
     "typescript/src/**",
     "tsx/src/**",
+    "!*/src/*.o",
     "common/**",
     "third_party/**",
     "*.wasm"
