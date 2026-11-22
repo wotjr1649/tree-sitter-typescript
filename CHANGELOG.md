@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Share parser states for class field initializers, type query subscript indexes and semicolons.
+  LR states fall from 11,215 to 9,695 for TypeScript and from
+  11,767 to 10,247 for TSX. Large states fall from 1,527 to 1,384
+  and 1,545 to 1,402, respectively. Generated parser source shrinks from
+  12,899,199 to 11,919,023 bytes and from 13,630,855 to 12,647,534 bytes.
+  On Windows with GCC 16.2.0, parser DLLs shrink from 2,254,618 to 2,075,930 bytes
+  and from 2,400,020 to 2,215,700 bytes.
+
 ### Fixed
 
 - Parse `symbol` as a tuple element label, including `symbol?: T`, in TypeScript and TSX.
