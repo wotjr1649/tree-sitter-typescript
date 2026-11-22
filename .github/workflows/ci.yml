@@ -195,7 +195,9 @@ jobs:
       - name: Replay verdicts against both grammars
         working-directory: oracle/replay
         run: go run . -oracle ..
-      # Node kinds (named and anonymous) and field names are a public contract; a change shows up as a diff here.
+      - name: Self-test the node-types gate
+        run: node --test test/node-kinds/generate.test.mjs
+      # Keep reviewable snapshots of the complete node-types contract.
       - name: Check the node-kind snapshot
         shell: bash
         run: |-
@@ -203,3 +205,15 @@ jobs:
           node test/node-kinds/generate.mjs
           git diff --exit-code -- test/node-kinds
           test -z "$(git status --porcelain --untracked-files=all -- test/node-kinds)"
+      # Keep the release pin independent of candidate snapshots. Review contract changes before advancing it.
+      - name: Check node-types compatibility with v3.0.0
+        shell: bash
+        run: |-
+          baseline_commit=cc6fae74302ff5b272bd0cc0b7b28907594b6039
+          git fetch --no-tags --depth=1 origin refs/tags/v3.0.0
+          test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$baseline_commit"
+          baseline_dir=$(mktemp -d "$RUNNER_TEMP/node-kinds.XXXXXX")
+          for grammar in typescript tsx; do
+            git show "$baseline_commit:$grammar/src/node-types.json" > "$baseline_dir/$grammar.json"
+          done
+          node test/node-kinds/generate.mjs --compare-baseline "$baseline_dir"
