@@ -205,8 +205,10 @@ module.exports = function defineGrammar(dialect) {
         field('name', $._property_name),
         optional(choice('?', '!')),
         field('type', optional($.type_annotation)),
-        optional(choice($._field_initializer, $._binding_end)),
+        optional($._public_field_end),
       ),
+
+      _public_field_end: $ => choice($._field_initializer, $._binding_end),
 
       // override original catch_clause, add optional type annotation
       catch_clause: $ => seq(

@@ -9895,22 +9895,26 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "_field_initializer"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "_binding_end"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "_public_field_end"
             },
             {
               "type": "BLANK"
             }
           ]
+        }
+      ]
+    },
+    "_public_field_end": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_field_initializer"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_binding_end"
         }
       ]
     },
