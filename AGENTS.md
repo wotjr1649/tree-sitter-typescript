@@ -17,15 +17,15 @@ owner approval. go-treesitter regenerates `src/parser.c` with its own pinned CLI
   (`tree-sitter generate --abi <ABI> --js-runtime native` in `typescript/` and `tsx/`) and commit the generated files
   with the source change. Never edit generated files by hand or by post-processing. A generated `parser.c` must not
   contain the generator's optimize-off pragmas.
-- The CLI pin is `devDependencies.tree-sitter-cli` in `package.json`. Until CI reads it, `.github/workflows/ci.yml`
-  (`tree-sitter-ref`) repeats it: change both in the same PR; `fuzz.yml` uses the fuzz action's default CLI. It
+- The CLI pin is `devDependencies.tree-sitter-cli` in `package.json`; `ci.yml` and `fuzz.yml` read it. It
   tracks the latest stable tree-sitter release (`gh release view -R tree-sitter/tree-sitter`). Move it in its own PR:
   regenerate, compare full CSTs on the fixed inputs and record generated-code differences. Identical trees are a patch
   release; otherwise follow the SemVer rules below.
-- The ABI is the generate command's `--abi` value in `ci.yml`; `CMakeLists.txt` and the CI `abi` job repeat it:
-  change all together. Binding runtime lower bounds are in the binding manifests; py-tree-sitter's Python floor sets
-  `requires-python`, the `cp` abi3 wheel tag and `Py_LIMITED_API` (`setup.py`) together. Changing the ABI or a
-  runtime lower bound needs the owner's approval and a major release.
+- The ABI pin is `ci/tree-sitter-abi.txt`; the CI generate command and the CMake default read it. The `build` scripts in
+  `typescript/package.json` and `tsx/package.json` repeat the CI generate command with it, and the CI `abi` job checks
+  them and both `parser.c`: change them together. Binding runtime lower bounds are in the binding manifests;
+  py-tree-sitter's Python floor sets `requires-python`, the `cp` abi3 wheel tag and `Py_LIMITED_API` (`setup.py`)
+  together. Changing the ABI or a runtime lower bound needs the owner's approval and a major release.
 - `third_party/tree-sitter-javascript/` (`grammar.js`, the generation input, and `queries/`) is copied unchanged from a
   release tag of `wotjr1649/tree-sitter-javascript` (latest: `gh release view -R wotjr1649/tree-sitter-javascript`),
   within go-treesitter ADR-0024 7.7. Never edit it; replacing it changes its

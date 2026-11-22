@@ -9,8 +9,11 @@ project(tree-sitter-typescript
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(TREE_SITTER_REUSE_ALLOCATOR "Reuse the library allocator" OFF)
 
-set(TREE_SITTER_ABI_VERSION 15 CACHE STRING "Tree-sitter ABI version")
-if(NOT ${TREE_SITTER_ABI_VERSION} MATCHES "^[0-9]+$")
+if(NOT DEFINED TREE_SITTER_ABI_VERSION)
+    file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/ci/tree-sitter-abi.txt" TREE_SITTER_DEFAULT_ABI_VERSION)
+endif()
+set(TREE_SITTER_ABI_VERSION "${TREE_SITTER_DEFAULT_ABI_VERSION}" CACHE STRING "Tree-sitter ABI version")
+if(NOT "${TREE_SITTER_ABI_VERSION}" MATCHES "^[0-9]+$")
     unset(TREE_SITTER_ABI_VERSION CACHE)
     message(FATAL_ERROR "TREE_SITTER_ABI_VERSION must be an integer")
 endif()
