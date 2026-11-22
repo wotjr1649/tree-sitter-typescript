@@ -31,7 +31,8 @@ owner approval. go-treesitter regenerates `src/parser.c` with its own pinned CLI
   within go-treesitter ADR-0024 7.7. Never edit it; replacing it changes its
   source and SHA-256s in `NOTICE` and the CI check together, and the tsx main lexer must stay below the
   optimize-off pragma threshold.
-- `tree-sitter test` runs `test/corpus` with the `typescript` grammar only; `tsx` has no corpus of its own.
+- `tree-sitter test` runs `test/corpus`; `tsx` has no corpus directory of its own. A case runs with the `typescript`
+  grammar unless its `:language(...)` attributes name grammars; a case that names `typescript` and `tsx` runs with both.
 - CI parses every `.ts`/`.tsx` file of the example repositories pinned in `test/examples/repos.txt`
   (`test/examples/parse-examples.mjs`). `test/examples/known-failures.txt` lists the files that fail and why; it may
   only shrink. A new failure fails CI; a listed file that starts parsing is removed in the same change; a pull
