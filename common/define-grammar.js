@@ -18,6 +18,7 @@ module.exports = function defineGrammar(dialect) {
       $._comparison_gt,
       $._leave_signature,
       $._lexical_declaration_binding,
+      $._type_member_break,
     ]),
 
     supertypes: ($, previous) => previous.concat([
@@ -61,6 +62,8 @@ module.exports = function defineGrammar(dialect) {
       [$.readonly_type, $.primary_expression],
       [$.type_query, $.subscript_expression, $.expression],
       [$.type_query, $._type_query_subscript_expression],
+      // Keep ordinary typeof continuations ahead of the reduction, but allow both parses at a member break.
+      ['type_query_continuation', $.type_query],
       [$.nested_type_identifier, $.generic_type, $.primary_type, $.lookup_type, $.index_type_query, $.type],
       [$.as_expression, $.satisfies_expression, $.primary_type],
       [$._type_query_member_expression, $.member_expression],
@@ -103,6 +106,10 @@ module.exports = function defineGrammar(dialect) {
 
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
+      // A line break before '<' can end a member or continue its generic type.
+      [$.primary_type, $._continued_generic_type],
+      [$.type_query, $._type_query_instantiation_expression],
+      [$.primary_type, $._type_query_instantiated_member_expression_in_type_annotation],
 
       // The arrow function's own signature (see arrow_function) takes over these conflicts from _call_signature.
       [$._arrow_call_signature, $.function_type],
@@ -594,7 +601,7 @@ module.exports = function defineGrammar(dialect) {
         optional($.override_modifier),
         optional('readonly'),
         choice(
-          seq($._ordinary_method_name, optional('?'), $._ordinary_method_call_signature),
+          seq($._ordinary_method_name, optional('?'), optional($._type_member_break), $._ordinary_method_call_signature),
           seq($._ts_nonordinary_method_head, $._call_signature),
         ),
       ),
@@ -873,9 +880,9 @@ module.exports = function defineGrammar(dialect) {
         )),
       ),
       // Type arguments only on the outermost member, not on an object or callee (ours, on top of upstream #365).
-      _type_query_instantiated_member_expression_in_type_annotation: $ => seq(
-        $._type_query_import_member_expression_in_type_annotation,
-        $.type_arguments,
+      _type_query_instantiated_member_expression_in_type_annotation: $ => choice(
+        seq($._type_query_import_member_expression_in_type_annotation, $.type_arguments),
+        prec(-1, seq($._type_query_import_member_expression_in_type_annotation, $._type_member_break, $.type_arguments)),
       ),
       _type_query_import_call_expression_in_type_annotation: $ => seq(
         field('function', $.import),
@@ -945,6 +952,7 @@ module.exports = function defineGrammar(dialect) {
         $._type_identifier,
         $.nested_type_identifier,
         $.generic_type,
+        alias($._continued_generic_type, $.generic_type),
         $.object_type,
         $.array_type,
         $.tuple_type,
@@ -1007,6 +1015,12 @@ module.exports = function defineGrammar(dialect) {
         field('type_arguments', $.type_arguments),
       )),
 
+      _continued_generic_type: $ => prec('call', seq(
+        field('name', choice($._type_identifier, $.nested_type_identifier)),
+        $._type_member_break,
+        field('type_arguments', $.type_arguments),
+      )),
+
       type_predicate: $ => seq(
         field('name', choice(
           $.identifier,
@@ -1027,7 +1041,7 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       // Type query expressions are more restrictive than regular expressions
-      _type_query_member_expression: $ => seq(
+      _type_query_member_expression: $ => prec('type_query_continuation', seq(
         field('object', choice(
           $.identifier,
           $.this,
@@ -1040,19 +1054,23 @@ module.exports = function defineGrammar(dialect) {
           $.private_property_identifier,
           reserved('properties', alias($.identifier, $.property_identifier)),
         )),
-      ),
-      _type_query_subscript_expression: $ => seq(
-        field('object', choice(
+      )),
+      _type_query_subscript_expression: $ => {
+        const object = field('object', choice(
           $.identifier,
           $.this,
           alias($._type_query_subscript_expression, $.subscript_expression),
           alias($._type_query_member_expression, $.member_expression),
           alias($._type_query_call_expression, $.call_expression),
-        )),
-        optional('?.'),
-        '[', field('index', choice($.predefined_type, $.string, $.number)), ']',
-      ),
-      _type_query_call_expression: $ => choice(
+        ));
+        const subscript = seq('[', field('index', choice($.predefined_type, $.string, $.number)), ']');
+        return choice(
+          seq(object, subscript),
+          // Keep the optional access shift ahead of the type query reduction.
+          prec(1, seq(object, '?.', prec(0, subscript))),
+        );
+      },
+      _type_query_call_expression: $ => prec('type_query_continuation', choice(
         // `import('m')` or `import('m', { with: ... })`: the only calls tsc reads as a type (an import type takes a string
         // literal and an optional attributes object, see `_type_query_import_arguments`). Dynamic precedence 1:
         // in `f<typeof import('m')>(1, 2)` the comparison reading also holds a call_expression (`import('m')`,
@@ -1072,21 +1090,25 @@ module.exports = function defineGrammar(dialect) {
           )),
           field('arguments', $.arguments),
         ),
-      ),
+      )),
       // A string literal and an optional object (the import attributes), no trailing comma: tsc rejects `import('m',)` (TS1005)
       // and reads `import('m', { with: {} },)` as a comparison. Any other argument is not an import type for us either.
       // `arguments` lists `string` and `object` among its children because of this rule (a schema addition).
       _type_query_import_arguments: $ => seq('(', $.string, optional(seq(',', $.object)), ')'),
-      _type_query_instantiation_expression: $ => seq(
-        field('function', choice(
+      _type_query_instantiation_expression: $ => {
+        const target = field('function', choice(
           $.import,
           $.identifier,
           alias($._type_query_member_expression, $.member_expression),
           alias($._type_query_subscript_expression, $.subscript_expression),
-        )),
-        field('type_arguments', $.type_arguments),
-      ),
-      type_query: $ => prec.right(seq(
+        ));
+        const args = field('type_arguments', $.type_arguments);
+        return choice(
+          prec('type_query_continuation', seq(target, args)),
+          seq(target, $._type_member_break, args),
+        );
+      },
+      type_query: $ => seq(
         'typeof',
         choice(
           alias($._type_query_subscript_expression, $.subscript_expression),
@@ -1096,7 +1118,7 @@ module.exports = function defineGrammar(dialect) {
           $.identifier,
           $.this,
         ),
-      )),
+      ),
 
       index_type_query: $ => seq(
         'keyof',
@@ -1163,22 +1185,44 @@ module.exports = function defineGrammar(dialect) {
         choice('{', '{|'),
         optional(seq(
           optional(choice(',', ';')),
-          sepBy1(
-            choice(',', $._semicolon),
-            choice(
-              $.export_statement,
-              $.property_signature,
-              $.call_signature,
-              $.construct_signature,
-              $.index_signature,
-              $.method_signature,
-              alias($._abstract_named_method_signature, $.method_signature),
-            ),
-          ),
+          $._object_type_member,
+          repeat(choice(
+            seq(choice(',', $._semicolon), $._object_type_member),
+            seq($._type_member_break, alias($._unseparated_generic_call_signature, $.call_signature)),
+          )),
           optional(choice(',', $._semicolon)),
         )),
         choice('}', '|}'),
       ),
+
+      _object_type_member: $ => choice(
+        $.export_statement,
+        $.property_signature,
+        $.call_signature,
+        $.construct_signature,
+        $.index_signature,
+        $.method_signature,
+        alias($._abstract_named_method_signature, $.method_signature),
+        seq(
+          alias($._method_signature_before_generic_call, $.method_signature),
+          alias($._unseparated_generic_call_signature, $.call_signature),
+        ),
+      ),
+
+      _method_signature_before_generic_call: $ => seq(
+        $._ts_method_signature,
+        $._type_member_break,
+        $._leave_context,
+      ),
+
+      // Prefer the existing member sequence whenever it parses without errors.
+      _unseparated_generic_call_signature: $ => prec.dynamic(-1, seq(
+        field('type_parameters', $.type_parameters),
+        field('parameters', $.formal_parameters),
+        field('return_type', optional(
+          choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+        )),
+      )),
 
       call_signature: $ => $._call_signature,
 
@@ -1287,6 +1331,7 @@ module.exports = function defineGrammar(dialect) {
       construct_signature: $ => seq(
         optional('abstract'),
         'new',
+        optional($._type_member_break),
         field('type_parameters', optional($.type_parameters)),
         field('parameters', $.formal_parameters),
         field('type', optional($.type_annotation)),

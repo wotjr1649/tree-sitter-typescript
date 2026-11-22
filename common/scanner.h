@@ -45,6 +45,7 @@ enum TokenType {
     COMPARISON_GT,
     LEAVE_SIGNATURE,
     LEXICAL_DECLARATION_BINDING, // Never emitted. Valid after let or const.
+    TYPE_MEMBER_BREAK,
 };
 
 enum Context {
@@ -594,6 +595,13 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     *at_comparison_gt = !trivia.comment && next == ASI_NEXT_TOKEN && lexer->lookahead == '>';
     if (!trivia.newline) return false;
 
+    // Preserve ASI at a typed declaration before considering a member break.
+    if (valid_symbols[TYPE_MEMBER_BREAK] && !valid_symbols[DECLARATION_END] &&
+        scanner->pending_token != DECLARATION_PENDING && next == ASI_NEXT_TOKEN && lexer->lookahead == '<') {
+        lexer->result_symbol = TYPE_MEMBER_BREAK;
+        return true;
+    }
+
     // After return, break and continue, a line terminator ends the statement unless a ';' follows.
     if (restricted) {
         return next != ASI_NEXT_TOKEN || lexer->lookahead != ';';
@@ -884,10 +892,17 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
         return true;
     }
 
-    if (valid_symbols[LEAVE_SIGNATURE]) {
+    bool asi = valid_symbols[AUTOMATIC_SEMICOLON] || valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON];
+    if (valid_symbols[LEAVE_SIGNATURE] || (valid_symbols[TYPE_MEMBER_BREAK] && !asi &&
+        !valid_symbols[LEAVE_CONCISE_BODY])) {
         lexer->mark_end(lexer);
         ASITrivia trivia = {0};
         if (scan_asi_trivia(lexer, &trivia, false, RANGE_IGNORE) == ASI_SLASH) return false;
+        if (valid_symbols[TYPE_MEMBER_BREAK] && trivia.newline && lexer->lookahead == '<') {
+            lexer->result_symbol = TYPE_MEMBER_BREAK;
+            return true;
+        }
+        if (!valid_symbols[LEAVE_SIGNATURE]) return false;
         switch (lexer->lookahead) {
             case '[':
                 if (trivia.newline) return leave_context(scanner, lexer, LEAVE_SIGNATURE);
@@ -931,7 +946,7 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
         if (lexer->lookahead == '?' && valid_symbols[TERNARY_QMARK]) return scan_ternary_qmark(lexer);
         if (lexer->lookahead == '>' && valid_symbols[COMPARISON_GT]) return scan_comparison_gt(lexer);
         if (trivia.newline) return false;
-    } else if (valid_symbols[AUTOMATIC_SEMICOLON] || valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON]) {
+    } else if (asi) {
         bool try_ternary = false, at_comparison_gt = false, at_next_token = false;
         if (scan_automatic_semicolon(scanner, lexer, valid_symbols, &try_ternary, &at_comparison_gt, &at_next_token)) {
             if (scanner->pending_token == DECLARATION_PENDING && lexer->result_symbol != DECLARATION_END) {

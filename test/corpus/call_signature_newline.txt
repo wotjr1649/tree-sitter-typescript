@@ -1,0 +1,225 @@
+========================================
+Generic call signatures after line breaks
+:language(typescript)
+:language(tsx)
+========================================
+
+interface S {
+  a: number
+  <T>(x: T): T
+}
+
+type S = {
+  f(): B
+  <T>(x: T): T
+};
+
+---
+
+(program
+  (interface_declaration
+    (type_identifier)
+    (interface_body
+      (property_signature
+        (property_identifier)
+        (type_annotation (predefined_type)))
+      (call_signature
+        (type_parameters (type_parameter (type_identifier)))
+        (formal_parameters
+          (required_parameter
+            (identifier)
+            (type_annotation (type_identifier))))
+        (type_annotation (type_identifier)))))
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (method_signature
+        (property_identifier)
+        (formal_parameters)
+        (type_annotation (type_identifier)))
+      (call_signature
+        (type_parameters (type_parameter (type_identifier)))
+        (formal_parameters
+          (required_parameter
+            (identifier)
+            (type_annotation (type_identifier))))
+        (type_annotation (type_identifier))))))
+
+================================================
+Line-broken type query arguments stay on the property type
+:language(typescript)
+:language(tsx)
+================================================
+
+interface A {
+  p: typeof x
+  <T>
+  ()
+}
+type B = {
+  p: import("pkg").X
+  <T>
+  ()
+}
+
+---
+
+(program
+  (interface_declaration
+    (type_identifier)
+    (interface_body
+      (property_signature
+        (property_identifier)
+        (type_annotation
+          (type_query
+            (instantiation_expression
+              (identifier)
+              (type_arguments (type_identifier))))))
+      (call_signature (formal_parameters))))
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (property_signature
+        (property_identifier)
+        (type_annotation
+          (member_expression
+            (call_expression (import) (arguments (string (string_fragment))))
+            (property_identifier)
+            (type_arguments (type_identifier)))))
+      (call_signature (formal_parameters)))))
+
+================================================
+Type assertions after typed declarations
+:language(typescript)
+================================================
+
+let a: X
+<T>[0]
+var b: X
+<T>[0]
+export let c: X
+<T>[0]
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator (identifier) (type_annotation (type_identifier))))
+  (expression_statement
+    (type_assertion (type_arguments (type_identifier)) (array (number))))
+  (variable_declaration
+    (variable_declarator (identifier) (type_annotation (type_identifier))))
+  (expression_statement
+    (type_assertion (type_arguments (type_identifier)) (array (number))))
+  (export_statement
+    (lexical_declaration
+      (variable_declarator (identifier) (type_annotation (type_identifier)))))
+  (expression_statement
+    (type_assertion (type_arguments (type_identifier)) (array (number)))))
+
+================================================
+Generic arrows after typed declarations
+:language(typescript)
+:language(tsx)
+================================================
+
+let a: X
+<T,>() => 0
+var b: X
+<T,>() => 0
+export let c: X
+<T,>() => 0
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator (identifier) (type_annotation (type_identifier))))
+  (expression_statement
+    (arrow_function
+      (type_parameters (type_parameter (type_identifier)))
+      (formal_parameters)
+      (number)))
+  (variable_declaration
+    (variable_declarator (identifier) (type_annotation (type_identifier))))
+  (expression_statement
+    (arrow_function
+      (type_parameters (type_parameter (type_identifier)))
+      (formal_parameters)
+      (number)))
+  (export_statement
+    (lexical_declaration
+      (variable_declarator (identifier) (type_annotation (type_identifier)))))
+  (expression_statement
+    (arrow_function
+      (type_parameters (type_parameter (type_identifier)))
+      (formal_parameters)
+      (number))))
+
+================================================
+JSX elements after typed declarations
+:language(tsx)
+================================================
+
+let a: X
+<a/>
+var b: X
+<b/>
+export let c: X
+<c/>
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator (identifier) (type_annotation (type_identifier))))
+  (expression_statement (jsx_self_closing_element (identifier)))
+  (variable_declaration
+    (variable_declarator (identifier) (type_annotation (type_identifier))))
+  (expression_statement (jsx_self_closing_element (identifier)))
+  (export_statement
+    (lexical_declaration
+      (variable_declarator (identifier) (type_annotation (type_identifier)))))
+  (expression_statement (jsx_self_closing_element (identifier))))
+
+================================================
+Generic call signatures after type queries
+:language(typescript)
+:language(tsx)
+================================================
+
+interface A {
+  p: typeof x
+  <T>()
+}
+type B = {
+  p: import("pkg").X
+  <T>()
+}
+
+---
+
+(program
+  (interface_declaration
+    (type_identifier)
+    (interface_body
+      (property_signature
+        (property_identifier)
+        (type_annotation (type_query (identifier))))
+      (call_signature
+        (type_parameters (type_parameter (type_identifier)))
+        (formal_parameters))))
+  (type_alias_declaration
+    (type_identifier)
+    (object_type
+      (property_signature
+        (property_identifier)
+        (type_annotation
+          (member_expression
+            (call_expression
+              (import)
+              (arguments (string (string_fragment))))
+            (property_identifier))))
+      (call_signature
+        (type_parameters (type_parameter (type_identifier)))
+        (formal_parameters)))))
