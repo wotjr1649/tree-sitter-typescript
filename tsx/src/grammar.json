@@ -9984,8 +9984,13 @@
                         "type": "CHOICE",
                         "members": [
                           {
-                            "type": "SYMBOL",
-                            "name": "_jsx_identifier"
+                            "type": "ALIAS",
+                            "content": {
+                              "type": "SYMBOL",
+                              "name": "jsx_identifier"
+                            },
+                            "named": true,
+                            "value": "identifier"
                           },
                           {
                             "type": "SYMBOL",
@@ -10006,6 +10011,24 @@
                               {
                                 "type": "SYMBOL",
                                 "name": "identifier"
+                              },
+                              {
+                                "type": "ALIAS",
+                                "content": {
+                                  "type": "CHOICE",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "_jsx_keyword_identifier"
+                                    },
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "this"
+                                    }
+                                  ]
+                                },
+                                "named": true,
+                                "value": "identifier"
                               },
                               {
                                 "type": "ALIAS",

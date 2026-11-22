@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - v4.3.0 carries pending ASI and declaration lookahead across incremental reuse of bare declarators and `yield`.
   - v4.4.0 preserves trailing comments after a reused initializer or declarator at EOF and across line breaks.
 - Generated `parser.c` sizes against v2.0.0 are 9,403,434 to 11,821,267 bytes for TypeScript (+25.7%) and
-  9,432,380 to 12,502,807 bytes for TSX (+32.6%). LR states grow from 6,719 to 10,482 and from 6,851 to 10,996,
+  9,432,380 to 12,552,303 bytes for TSX (+33.1%). LR states grow from 6,719 to 10,482 and from 6,851 to 11,034,
   respectively.
 
 ### Added
@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse an `await using` declaration across a line break between the keywords when its binding starts on the same
   line as `using`. A call such as `await using()` still parses as an expression.
 - Accept reserved member names such as `default` and `class` in decorators, including calls with type arguments.
+- Parse type arguments on bare JSX keyword names, such as `<this<T> />` and `<default<T>>x</default>`.
 - Prefer `await_expression` over an ambiguous call in modules and async functions, including `await(this)`.
 - Bind type arguments to postfix expressions before comparisons. `1 < foo<string>()` is a comparison whose right
   operand is the generic call. Two pinned VS Code files with `unique` after `<` now parse.

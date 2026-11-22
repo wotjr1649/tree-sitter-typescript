@@ -331,12 +331,13 @@ module.exports = function defineGrammar(dialect) {
           seq(
             choice(
               field('name', choice(
-                $._jsx_identifier,
+                alias($.jsx_identifier, $.identifier),
                 $.jsx_namespace_name,
               )),
               seq(
                 field('name', choice(
                   $.identifier,
+                  alias(choice($._jsx_keyword_identifier, $.this), $.identifier),
                   // Keep ordinary members separate from JSX-only keyword, this and hyphenated heads.
                   alias($.nested_identifier, $.member_expression),
                   alias($._jsx_keyword_member_expression, $.member_expression),

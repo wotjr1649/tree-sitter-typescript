@@ -1,0 +1,63 @@
+==========================================================
+Type arguments on bare JSX keyword names
+:language(tsx)
+==========================================================
+
+<this<T> />;
+<default<T> />;
+<this<T>>x</this>;
+<default<T>>x</default>;
+<A<T> />;
+const f = <T,>(x: T) => x;
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element (identifier) (type_arguments (type_identifier))))
+  (expression_statement
+    (jsx_self_closing_element (identifier) (type_arguments (type_identifier))))
+  (expression_statement
+    (jsx_element
+      (jsx_opening_element (identifier) (type_arguments (type_identifier)))
+      (jsx_text)
+      (jsx_closing_element (identifier))))
+  (expression_statement
+    (jsx_element
+      (jsx_opening_element (identifier) (type_arguments (type_identifier)))
+      (jsx_text)
+      (jsx_closing_element (identifier))))
+  (expression_statement
+    (jsx_self_closing_element (identifier) (type_arguments (type_identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (arrow_function
+        (type_parameters (type_parameter (type_identifier)))
+        (formal_parameters
+          (required_parameter (identifier) (type_annotation (type_identifier))))
+        (identifier)))))
+
+==========================================================
+A hyphen after a JSX member dot remains invalid
+:language(tsx)
+:error
+==========================================================
+
+<a.b-c<T> />;
+
+---
+
+(program)
+
+==========================================================
+TypeScript rejects bare JSX tags with type arguments
+:language(typescript)
+:error
+==========================================================
+
+<this<T> />;
+
+---
+
+(program)
