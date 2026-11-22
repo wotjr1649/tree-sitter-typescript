@@ -173,7 +173,9 @@ Allow `(this)` in the member's `object` field when matching JSX tag names.
 
 In `await using as=f()`, the old statement wrapped the assignment in `await_expression`. The port puts `await`
 and `using` in the declaration's `kind` field. Match `using_declaration` and read the `name` and `value` fields
-of each `variable_declarator`. Iterate `kind` tokens to detect the async form.
+of each `variable_declarator`. Iterate `kind` tokens to detect the async form. A line break between `await` and
+`using` in an async function or module also gives one `using_declaration` when the binding starts on the same
+line as `using`.
 
 ### CR-terminated hashbangs (H1)
 

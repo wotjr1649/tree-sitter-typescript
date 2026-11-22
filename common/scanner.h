@@ -515,16 +515,18 @@ static bool scan_await_using(const Scanner *scanner, TSLexer *lexer, const bool 
                              bool newline, bool asi_for_identifier) {
     if (!consume_word(lexer, "using", false)) return asi_for_identifier;
     if (is_identifier_part(lexer->lookahead)) return asi_for_identifier;
-    if (newline && (scanner->depth || !valid_symbols[AUTOMATIC_SEMICOLON])) {
-        lexer->result_symbol = AWAIT_OPERAND_CONTINUES;
-        return valid_symbols[AWAIT_OPERAND_CONTINUES];
-    }
-
     ASITrivia after_using = {0};
     ASILookahead next = scan_asi_trivia(lexer, &after_using, false, RANGE_STOP);
     bool binding = next == ASI_NEXT_TOKEN && !after_using.newline && starts_using_binding(lexer);
+    if (binding && (!newline || (context_flags(scanner) & AWAIT_CONTEXT))) {
+        lexer->result_symbol = AWAIT_USING;
+        return true;
+    }
     if (newline) {
-        if (binding) return true;
+        if (scanner->depth || !valid_symbols[AUTOMATIC_SEMICOLON]) {
+            lexer->result_symbol = AWAIT_OPERAND_CONTINUES;
+            return valid_symbols[AWAIT_OPERAND_CONTINUES];
+        }
         if (next == ASI_NEXT_TOKEN && !after_using.newline && lexer->lookahead == '=') {
             advance(lexer);
             // A bare arrow is not a unary operand of await.
@@ -534,7 +536,7 @@ static bool scan_await_using(const Scanner *scanner, TSLexer *lexer, const bool 
         return valid_symbols[AWAIT_USING_ASI];
     }
     lexer->result_symbol = AWAIT_USING;
-    return binding || (next == ASI_END && !lexer->eof(lexer));
+    return next == ASI_END && !lexer->eof(lexer);
 }
 
 static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols, bool *try_ternary,

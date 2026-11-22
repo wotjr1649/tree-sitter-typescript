@@ -51,6 +51,7 @@ func TestLookaheadAfterSubtreeReuse(t *testing.T) {
 				{"initializer before prefix decrement", "let", " a=b//\u2029--c", " "},
 				{"declarator before line comment", "let a=b", "\nlet d=e//\nc;d;", " "},
 				{"initializer before comment at EOF", "let", " a=b//", " "},
+				{"await using across a line break", "async function f(){await", " using x = null;}", "\r\n"},
 			} {
 				t.Run(c.name, func(t *testing.T) {
 					parser := tree_sitter.NewParser()

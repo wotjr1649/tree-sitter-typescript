@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A line break before `[` ends a function or method return type, including a break inside a block comment.
   A same-line `T[K]` or `T[]` remains part of the return type.
+- Parse an `await using` declaration across a line break between the keywords when its binding starts on the same
+  line as `using`. A call such as `await using()` still parses as an expression.
 - Prefer `await_expression` over an ambiguous call in modules and async functions, including `await(this)`.
 - Bind type arguments to postfix expressions before comparisons. `1 < foo<string>()` is a comparison whose right
   operand is the generic call. Two pinned VS Code files with `unique` after `<` now parse.

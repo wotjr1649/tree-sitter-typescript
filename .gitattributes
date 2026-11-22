@@ -39,3 +39,6 @@ go.sum linguist-generated
 bindings/swift/** linguist-generated
 Package.swift linguist-generated
 Package.resolved linguist-generated
+
+# The corpus input distinguishes LF, CRLF and CR.
+test/corpus/await_using_line_breaks.txt -text whitespace=cr-at-eol
