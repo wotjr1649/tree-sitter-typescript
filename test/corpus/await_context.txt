@@ -99,3 +99,43 @@ let y = a ?? b!.c;
                     (arguments (string)))
                   (property_identifier))))))
         (object)))))
+
+==========================================================
+Unambiguous await operands in ordinary functions
+:language(typescript)
+:language(tsx)
+==========================================================
+
+function f() {
+  await g<T>();
+  await /* same line */ g();
+  await 42;
+  await .5;
+  await "x";
+  await(this);
+  await<T>(x);
+  await + x;
+  await
+  g();
+}
+
+---
+
+(program
+  (function_declaration
+    (identifier)
+    (formal_parameters)
+    (statement_block
+      (expression_statement
+        (await_expression
+          (call_expression (identifier) (type_arguments (type_identifier)) (arguments))))
+      (expression_statement
+        (await_expression (comment) (call_expression (identifier) (arguments))))
+      (expression_statement (await_expression (number)))
+      (expression_statement (await_expression (number)))
+      (expression_statement (await_expression (string (string_fragment))))
+      (expression_statement (call_expression (identifier) (arguments (this))))
+      (expression_statement (call_expression (identifier) (type_arguments (type_identifier)) (arguments (identifier))))
+      (expression_statement (binary_expression (identifier) (identifier)))
+      (expression_statement (identifier))
+      (expression_statement (call_expression (identifier) (arguments))))))

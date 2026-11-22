@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accept reserved member names such as `default` and `class` in decorators, including calls with type arguments.
 - Parse type arguments on bare JSX keyword names, such as `<this<T> />` and `<default<T>>x</default>`.
 - Prefer `await_expression` over an ambiguous call in modules and async functions, including `await(this)`.
+  Ordinary functions also parse forms such as `await g<T>()` as an await expression and retain `await(x)` as a call.
 - Bind type arguments to postfix expressions before comparisons. `1 < foo<string>()` is a comparison whose right
   operand is the generic call. Two pinned VS Code files with `unique` after `<` now parse.
 - Keep `default` an `identifier` in named import and export specifiers, including names on either side of `as`.

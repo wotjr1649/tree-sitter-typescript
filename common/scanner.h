@@ -786,10 +786,11 @@ static bool scan_identifier_word(TSLexer *lexer, const char *keyword) {
     return consume_word(lexer, keyword, false) && !is_identifier_part(lexer->lookahead);
 }
 
-static bool scan_context_word(const Scanner *scanner, TSLexer *lexer, bool keyword) {
+static bool scan_context_word(const Scanner *scanner, TSLexer *lexer, bool keyword, bool allow_await_operand) {
     unsigned flags = context_flags(scanner);
     const char *word = NULL;
-    if (lexer->lookahead == 'a' && (keyword || !(flags & AWAIT_CONTEXT))) {
+    bool await = lexer->lookahead == 'a';
+    if (await && (keyword || !(flags & AWAIT_CONTEXT))) {
         word = "await";
     } else if (lexer->lookahead == 'y' && !(flags & YIELD_CONTEXT)) {
         word = "yield";
@@ -797,6 +798,20 @@ static bool scan_context_word(const Scanner *scanner, TSLexer *lexer, bool keywo
     if (!word || !consume_word(lexer, word, false)) return false;
     if (is_identifier_part(lexer->lookahead)) return false;
     lexer->mark_end(lexer);
+    if (await && allow_await_operand) {
+        // Outside async scopes, tsc recognizes same-line word and literal operands such as `g()` and `42`.
+        ASITrivia trivia = {0};
+        ASILookahead next = scan_asi_trivia(lexer, &trivia, true, RANGE_STOP);
+        if (next == ASI_NEXT_TOKEN && !trivia.newline) {
+            int32_t c = lexer->lookahead;
+            if (c == '.') {
+                advance(lexer);
+                keyword = is_digit(lexer->lookahead);
+            } else {
+                keyword = (is_identifier_part(c) && !starts_in_operator(lexer, false)) || c == '"' || c == '\'';
+            }
+        }
+    }
     lexer->result_symbol = keyword ? CONTEXT_AWAIT : CONTEXT_IDENTIFIER;
     return true;
 }
@@ -968,10 +983,10 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
     }
 
     if (lexer->lookahead == 'a' && valid_symbols[CONTEXT_AWAIT] && (context_flags(scanner) & ASYNC_ARROW_CONTEXT)) {
-        return scan_context_word(scanner, lexer, true);
+        return scan_context_word(scanner, lexer, true, false);
     }
     if (valid_symbols[CONTEXT_IDENTIFIER] && (lexer->lookahead == 'a' || lexer->lookahead == 'y')) {
-        return scan_context_word(scanner, lexer, false);
+        return scan_context_word(scanner, lexer, false, valid_symbols[CONTEXT_AWAIT]);
     }
 
     if (valid_symbols[TERNARY_QMARK] && lexer->lookahead == '?') {

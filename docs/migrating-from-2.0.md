@@ -194,7 +194,8 @@ When replacing a whole hashbang line, handle the line terminator separately from
 | `export{};await f<T>().x` | `(member_expression object: (call_expression function: (await_expression (identifier))) property: (property_identifier))` | `(await_expression (member_expression object: (call_expression function: (identifier)) property: (property_identifier)))` |
 
 Find awaited typed calls under `await_expression`. With a member access, follow its `object` field to the
-`call_expression`. The callee's `function` field contains the identifier in both new forms.
+`call_expression`. The callee's `function` field contains the identifier in both new forms. The same shape applies to
+`await f<T>()` inside an ordinary function under the tsc syntax criterion. In that scope, `await(x)` is a call.
 
 ## Other differences
 
