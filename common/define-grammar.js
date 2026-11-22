@@ -83,9 +83,10 @@ module.exports = function defineGrammar(dialect) {
       [$.construct_signature, $._property_name],
     ]),
 
-    conflicts: ($, previous) => previous.filter((rules) =>
-      rules.map((rule) => rule.name).join(' ') !== 'primary_expression method_definition',
-    ).concat([
+    conflicts: ($, previous) => previous.filter((rules) => ![
+      'primary_expression method_definition',
+      'primary_expression _nonordinary_method_head',
+    ].includes(rules.map((rule) => rule.name).join(' '))).concat([
       // `f<typeof import('m')>()`: with the call_expression ordered above it in `precedences`, the type query lost
       // to the call and the type arguments were read as a binary `<` and `>`.
       [$.call_expression, $._type_query_call_expression],
@@ -131,7 +132,6 @@ module.exports = function defineGrammar(dialect) {
       [$.object, $.object_type],
       [$.object, $.object_pattern, $.object_type],
       [$.object, $.object_pattern, $._property_name],
-      [$.object_pattern, $.object_type],
       [$.object_pattern, $.object_type],
 
       [$.array, $.tuple_type],

@@ -14466,10 +14466,6 @@
   "conflicts": [
     [
       "primary_expression",
-      "_nonordinary_method_head"
-    ],
-    [
-      "primary_expression",
       "_property_name"
     ],
     [
@@ -14673,10 +14669,6 @@
       "object",
       "object_pattern",
       "_property_name"
-    ],
-    [
-      "object_pattern",
-      "object_type"
     ],
     [
       "object_pattern",
