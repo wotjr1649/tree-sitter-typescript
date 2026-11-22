@@ -15536,7 +15536,6 @@
   ],
   "inline": [
     "_expressions",
-    "_semicolon",
     "_identifier",
     "_reserved_identifier",
     "_jsx_attribute",

@@ -169,6 +169,7 @@ module.exports = function defineGrammar(dialect) {
       .filter((rule) => ![
         '_formal_parameter',
         '_call_signature',
+        '_semicolon',
       ].includes(rule.name))
       .concat([
         $._type_identifier,
