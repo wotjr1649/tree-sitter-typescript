@@ -872,11 +872,13 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
         ASITrivia trivia = {0};
         if (scan_asi_trivia(lexer, &trivia, false, RANGE_IGNORE) == ASI_SLASH) return false;
         switch (lexer->lookahead) {
+            case '[':
+                if (trivia.newline) return leave_context(scanner, lexer, LEAVE_SIGNATURE);
+                break;
             case '{':
             case ':':
             case '<':
             case '>':
-            case '[':
             case '.':
             case '?':
             case '|':
