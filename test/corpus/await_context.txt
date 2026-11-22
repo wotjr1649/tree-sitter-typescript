@@ -1,0 +1,101 @@
+==============================================
+Await in modules and async functions
+:language(typescript)
+:language(tsx)
+==============================================
+
+export {};
+await(this);
+let x = await(a).b;
+let y = await (x as T).m;
+let z = await({}) as {};
+async function f() { await(this); }
+
+---
+
+(program
+  (export_statement (export_clause))
+  (expression_statement (await_expression (parenthesized_expression (this))))
+  (lexical_declaration
+    (variable_declarator (identifier)
+      (await_expression
+        (member_expression (parenthesized_expression (identifier)) (property_identifier)))))
+  (lexical_declaration
+    (variable_declarator (identifier)
+      (await_expression
+        (member_expression
+          (parenthesized_expression (as_expression (identifier) (type_identifier)))
+          (property_identifier)))))
+  (lexical_declaration
+    (variable_declarator (identifier)
+      (as_expression (await_expression (parenthesized_expression (object))) (object_type))))
+  (function_declaration
+    (identifier) (formal_parameters)
+    (statement_block
+      (expression_statement (await_expression (parenthesized_expression (this)))))))
+
+==============================================
+Generic async arrow with an awaited member call
+:language(typescript)
+:language(tsx)
+==============================================
+
+executeCommand=async<R>()=>{await(unknown as{}).authenticate(()=>({}));{}};
+
+---
+
+(program
+  (expression_statement
+    (assignment_expression
+      (identifier)
+      (arrow_function
+        (type_parameters (type_parameter (type_identifier)))
+        (formal_parameters)
+        (statement_block
+          (expression_statement
+            (await_expression
+              (call_expression
+                (member_expression
+                  (parenthesized_expression (as_expression (identifier) (object_type)))
+                  (property_identifier))
+                (arguments
+                  (arrow_function (formal_parameters) (parenthesized_expression (object)))))))
+          (statement_block))))))
+
+==============================================
+Await, non-null and typed call binding
+:language(typescript)
+:language(tsx)
+==============================================
+
+export {};
+let x = await f() as {};
+let y = a ?? b!.c;
+({sheetLoaded:!!second<HTMLImageElement>('').complete},{});
+
+---
+
+(program
+  (export_statement (export_clause))
+  (lexical_declaration
+    (variable_declarator (identifier)
+      (as_expression (await_expression (call_expression (identifier) (arguments))) (object_type))))
+  (lexical_declaration
+    (variable_declarator (identifier)
+      (binary_expression
+        (identifier)
+        (member_expression (non_null_expression (identifier)) (property_identifier)))))
+  (expression_statement
+    (parenthesized_expression
+      (sequence_expression
+        (object
+          (pair (property_identifier)
+            (unary_expression
+              (unary_expression
+                (member_expression
+                  (call_expression
+                    (identifier)
+                    (type_arguments (type_identifier))
+                    (arguments (string)))
+                  (property_identifier))))))
+        (object)))))

@@ -287,6 +287,9 @@ module.exports = function defineGrammar(dialect) {
         $.non_null_expression,
       ),
 
+      // Prefer await in an active context even when an ordinary call carries dynamic precedence.
+      await_expression: (_, previous) => prec.dynamic(3, previous),
+
       _await_operand: ($, previous) => choice(
         ...previous.members.filter((member) => dialect === 'tsx' || member.name !== '_jsx_element'),
         ...(dialect === 'typescript' ? [$.type_assertion] : []),
