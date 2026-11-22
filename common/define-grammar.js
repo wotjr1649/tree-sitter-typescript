@@ -1052,8 +1052,11 @@ module.exports = function defineGrammar(dialect) {
           alias($._type_query_call_expression, $.call_expression),
         )),
         optional('?.'),
-        '[', field('index', choice($.predefined_type, $.string, $.number)), ']',
+        '[', field('index', $._type_query_subscript_index), ']',
       ),
+
+      _type_query_subscript_index: $ => choice($.predefined_type, $.string, $.number),
+
       _type_query_call_expression: $ => choice(
         // `import('m')` or `import('m', { with: ... })`: the only calls tsc reads as a type (an import type takes a string
         // literal and an optional attributes object, see `_type_query_import_arguments`). Dynamic precedence 1:
