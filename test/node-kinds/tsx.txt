@@ -328,6 +328,7 @@ unary_expression{argument,operator}
 undefined
 union_type
 update_expression{argument,operator}
+using_declaration{kind}
 variable_declaration
 variable_declarator{name,type,value}
 while_statement{body,condition}

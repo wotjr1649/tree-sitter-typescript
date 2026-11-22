@@ -1,5 +1,13 @@
 const JavaScript = require('../third_party/tree-sitter-javascript/grammar');
 
+const callSignature = ($, parameters) => seq(
+  field('type_parameters', optional($.type_parameters)),
+  field('parameters', parameters),
+  field('return_type', optional(
+    choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
+  )),
+);
+
 module.exports = function defineGrammar(dialect) {
   return grammar(JavaScript, {
     name: dialect,
@@ -7,6 +15,8 @@ module.exports = function defineGrammar(dialect) {
     externals: ($, previous) => previous.concat([
       $._function_signature_automatic_semicolon,
       $.__error_recovery,
+      $._comparison_gt,
+      $._leave_signature,
       $._lexical_declaration_binding,
     ]),
 
@@ -17,11 +27,12 @@ module.exports = function defineGrammar(dialect) {
 
     precedences: ($, previous) => previous.concat([
       [
+        'new',
         'call',
+        'typed_call',
         'instantiation',
         'unary',
         'binary',
-        $.await_expression,
         $.arrow_function,
       ],
       [
@@ -39,7 +50,7 @@ module.exports = function defineGrammar(dialect) {
       ],
       [$.mapped_type_clause, $.primary_expression],
       [$.accessibility_modifier, $.primary_expression],
-      ['unary_void', $.expression],
+      ['unary', 'unary_void', $.expression],
       [$.extends_clause, $.primary_expression],
       ['unary', 'assign'],
       ['declaration', $.expression],
@@ -82,6 +93,16 @@ module.exports = function defineGrammar(dialect) {
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
       [$.call_expression, $.instantiation_expression, $.binary_expression, $.await_expression],
+      [$.await_expression, $._property_name],
+      [$.primary_expression, $._ts_nonordinary_method_head],
+      [$.primary_expression, $._ts_method_signature],
+      [$._ordinary_method_name, $.public_field_definition],
+      [$._ordinary_method_name, $.property_signature],
+      // Keep both the type arguments and the relational operator interpretations of '<'.
+      [$.expression, $.call_expression, $.instantiation_expression],
+      [$.expression, $.call_expression, $._typed_template_call, $.instantiation_expression],
+      [$.expression, $.call_expression, $.await_expression, $.instantiation_expression],
+      [$.expression, $.call_expression, $.await_expression, $._typed_template_call, $.instantiation_expression],
 
       // This appears to be necessary to parse a parenthesized class expression
       [$.class],
@@ -129,6 +150,19 @@ module.exports = function defineGrammar(dialect) {
         [$.jsx_opening_element, $._arrow_type_parameter],
         [$.jsx_opening_element, $.type_parameter, $._arrow_type_parameter],
         [$.type_parameter, $._arrow_type_parameter],
+        // Keep JSX and type parameter branches until the tag or arrow resolves the ambiguity.
+        [$.jsx_opening_element, $.type_parameter],
+        [$.primary_expression, $.index_signature],
+        [$.primary_expression, $._ts_method_signature, $.property_signature, $.index_signature],
+        [$.primary_expression, $._ts_method_signature, $.property_signature],
+        [$.jsx_expression, $.object_type],
+        [$.jsx_namespace_name, $.literal_type],
+        [$.jsx_namespace_name, $.predefined_type],
+        [$.jsx_namespace_name, $.type_query],
+        [$.jsx_attribute, $.constraint],
+        [$.jsx_attribute, $.type_parameter],
+        [$.jsx_attribute, $._arrow_type_parameter],
+        [$.jsx_attribute, $.type_parameter, $._arrow_type_parameter],
         [$.jsx_namespace_name, $.primary_type],
       ],
     ),
@@ -151,7 +185,11 @@ module.exports = function defineGrammar(dialect) {
           seq($.accessibility_modifier, optional('declare')),
         )),
         choice(
-          seq(optional('static'), optional($.override_modifier), optional('readonly')),
+          seq(
+            optional(choice('static', alias($._static_before_get_field, 'static'))),
+            optional($.override_modifier),
+            optional('readonly'),
+          ),
           seq(optional('abstract'), optional('readonly')),
           seq(optional('readonly'), optional('abstract')),
         ),
@@ -169,7 +207,7 @@ module.exports = function defineGrammar(dialect) {
         field('name', $._property_name),
         optional(choice('?', '!')),
         field('type', optional($.type_annotation)),
-        optional($._initializer),
+        optional(choice($._field_initializer, $._binding_end)),
       ),
 
       // override original catch_clause, add optional type annotation
@@ -195,13 +233,18 @@ module.exports = function defineGrammar(dialect) {
 
       call_expression: $ => choice(
         prec.dynamic(2, prec('call', seq(
-          field('function', choice($.expression, $.import)),
-          field('type_arguments', optional($.type_arguments)),
+          field('function', choice($.expression, $._postfix_expression, $.import)),
+          field('arguments', $.arguments),
+        ))),
+        // Prefer attaching type arguments to an await operand when both parses succeed.
+        prec.dynamic(2, prec('typed_call', seq(
+          field('function', choice($.expression, prec.dynamic(1, $._postfix_expression), $.import)),
+          field('type_arguments', $.type_arguments),
           field('arguments', $.arguments),
         ))),
         prec('template_call', seq(
           field('function', choice($.primary_expression, $.new_expression)),
-          field('arguments', $.template_string),
+          field('arguments', alias($._tagged_template_string, $.template_string)),
         )),
         $._typed_template_call,
         prec('member', seq(
@@ -223,7 +266,7 @@ module.exports = function defineGrammar(dialect) {
       _typed_template_call: $ => prec.dynamic(1, seq(
         field('function', choice($.primary_expression, $.new_expression)),
         field('type_arguments', $.type_arguments),
-        field('arguments', $.template_string),
+        field('arguments', alias($._tagged_template_string, $.template_string)),
       )),
 
       new_expression: $ => prec.right('new', seq(
@@ -234,8 +277,7 @@ module.exports = function defineGrammar(dialect) {
       )),
 
       assignment_expression: $ => prec.right('assign', seq(
-        optional('using'),
-        field('left', choice($.parenthesized_expression, $._lhs_expression)),
+        field('left', choice($.parenthesized_expression, $._lhs_expression, $.call_expression)),
         '=',
         field('right', $.expression),
       )),
@@ -248,6 +290,17 @@ module.exports = function defineGrammar(dialect) {
         previous,
         $.non_null_expression,
       ),
+
+      _await_operand: ($, previous) => choice(
+        ...previous.members.filter((member) => dialect === 'tsx' || member.name !== '_jsx_element'),
+        ...(dialect === 'typescript' ? [$.type_assertion] : []),
+        // Outrank the inherited await priority when both instantiation parses succeed.
+        prec.dynamic(2, $.instantiation_expression),
+      ),
+
+      _postfix_expression: ($, previous) => dialect === 'typescript'
+        ? choice($.primary_expression, $.new_expression)
+        : previous,
 
       // If the dialect is regular typescript, we exclude JSX expressions and
       // include type assertions. If the dialect is TSX, we do the opposite.
@@ -285,7 +338,9 @@ module.exports = function defineGrammar(dialect) {
               seq(
                 field('name', choice(
                   $.identifier,
+                  // Keep ordinary members separate from JSX-only keyword, this and hyphenated heads.
                   alias($.nested_identifier, $.member_expression),
+                  alias($._jsx_keyword_member_expression, $.member_expression),
                 )),
                 field('type_arguments', optional($.type_arguments)),
               ),
@@ -306,35 +361,6 @@ module.exports = function defineGrammar(dialect) {
         $._jsx_start_opening_element,
         '/>',
       )),
-
-      // A `&` that starts no complete html_character_reference is text, as tsc reads it (`"E&xit"`, `"a&"`).
-      _jsx_string: $ => choice(
-        seq(
-          '"',
-          repeat(choice(
-            alias($.unescaped_double_jsx_string_fragment, $.string_fragment),
-            $.html_character_reference,
-            alias($._jsx_string_ampersand, $.string_fragment),
-          )),
-          '"',
-        ),
-        seq(
-          '\'',
-          repeat(choice(
-            alias($.unescaped_single_jsx_string_fragment, $.string_fragment),
-            $.html_character_reference,
-            alias($._jsx_string_ampersand, $.string_fragment),
-          )),
-          '\'',
-        ),
-      ),
-
-      // No precedence: a complete html_character_reference is longer and wins. A regex, not '&', keeps it a leaf.
-      _jsx_string_ampersand: _ => token.immediate(/&/),
-
-      // As in tree-sitter-javascript, but `&` no longer takes the closing quote with it.
-      unescaped_double_jsx_string_fragment: _ => token.immediate(prec(1, /([^"&]|&[^"#A-Za-z])+/)),
-      unescaped_single_jsx_string_fragment: _ => token.immediate(prec(1, /([^'&]|&[^'#A-Za-z])+/)),
 
       export_specifier: (_, previous) => seq(
         optional(choice('type', 'typeof')),
@@ -400,8 +426,12 @@ module.exports = function defineGrammar(dialect) {
         seq('export', 'as', 'namespace', $.identifier, $._semicolon),
       ),
 
+      namespace_export: $ => seq(
+        '*', 'as', reserved('properties', choice($.identifier, $.string, alias('default', $.identifier))),
+      ),
+
       non_null_expression: $ => prec.left('unary', seq(
-        $.expression, '!',
+        choice($._postfix_expression, $.update_expression), '!',
       )),
 
       // The scanner never produces `_lexical_declaration_binding`; its validity tells it that `let` may go on
@@ -413,11 +443,23 @@ module.exports = function defineGrammar(dialect) {
         $._semicolon,
       ),
 
+      _using_declarator: $ => $.variable_declarator,
+
+      // TS allows a type annotation after the keyword-named declarator: `using as: D = f();`.
+      _using_keyword_declarator: $ => seq(
+        field('name', alias(choice('as', 'satisfies'), $.identifier)),
+        optional(choice(
+          $._initializer,
+          $._declaration_end,
+          seq(field('type', $.type_annotation), optional($._initializer)),
+        )),
+      ),
+
       variable_declarator: $ => choice(
         seq(
           field('name', choice($.identifier, $._destructuring_pattern)),
           field('type', optional($.type_annotation)),
-          optional($._initializer),
+          optional(choice($._initializer, $._declaration_end)),
         ),
         prec('declaration', seq(
           field('name', $.identifier),
@@ -427,22 +469,15 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       method_signature: $ => seq(
-        optional($.accessibility_modifier),
-        optional('static'),
-        optional($.override_modifier),
-        optional('readonly'),
-        optional('async'),
-        optional(choice('get', 'set', '*')),
-        field('name', $._property_name),
-        optional('?'),
-        $._call_signature,
+        $._ts_method_signature,
+        $._leave_signature,
       ),
 
       abstract_method_signature: $ => seq(
         optional($.accessibility_modifier),
         'abstract',
         optional($.override_modifier),
-        optional(choice('get', 'set', '*')),
+        optional(choice('get', 'set', seq(optional($._generator_method_continues), '*'))),
         field('name', $._property_name),
         optional('?'),
         $._call_signature,
@@ -463,10 +498,12 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       function_signature: $ => seq(
-        optional('async'),
-        'function',
-        field('name', $.identifier),
+        choice(
+          seq('function', field('name', $.identifier), $._enter_plain),
+          seq('async', 'function', field('name', $.identifier), $._enter_await),
+        ),
         $._call_signature,
+        $._leave_signature,
         choice($._semicolon, $._function_signature_automatic_semicolon),
       ),
 
@@ -489,13 +526,10 @@ module.exports = function defineGrammar(dialect) {
         field('arguments', $.arguments),
       )),
 
+      // Keep the parenthesized_expression node without the ordinary rule's type annotation.
       decorator_parenthesized_expression: $ => seq(
         '(',
-        choice(
-          $.identifier,
-          alias($.decorator_member_expression, $.member_expression),
-          alias($.decorator_call_expression, $.call_expression),
-        ),
+        $.expression,
         ')',
       ),
 
@@ -532,17 +566,27 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       method_definition: $ => prec.left(seq(
+        $._ts_method_signature,
+        field('body', $.statement_block),
+        $._leave_context,
+      )),
+
+      _ts_method_signature: $ => seq(
         optional($.accessibility_modifier),
-        optional('static'),
+        optional(choice('static', alias($._static_before_get_field, 'static'))),
         optional($.override_modifier),
         optional('readonly'),
-        optional('async'),
-        optional(choice('get', 'set', '*')),
-        field('name', $._property_name),
-        optional('?'),
-        $._call_signature,
-        field('body', $.statement_block),
-      )),
+        choice(
+          seq($._ordinary_method_name, optional('?'), $._ordinary_method_call_signature),
+          seq($._ts_nonordinary_method_head, $._call_signature),
+        ),
+      ),
+
+      _ts_nonordinary_method_head: $ => choice(
+        seq('async', optional($._restricted_keyword), optional(choice('get', 'set')), field('name', $._property_name), optional('?'), $._enter_await),
+        seq(optional($._generator_method_continues), '*', field('name', $._property_name), optional('?'), $._enter_yield),
+        seq('async', optional($._restricted_keyword), optional($._generator_method_continues), '*', field('name', $._property_name), optional('?'), $._enter_both),
+      ),
 
       declaration: ($, previous) => choice(
         previous,
@@ -574,8 +618,18 @@ module.exports = function defineGrammar(dialect) {
         $.type,
       )),
 
+      binary_expression: ($, previous) => choice(
+        previous,
+        // Prefer the comparison if > can introduce a signed operand on the same line.
+        prec.dynamic(4, prec.left('binary_relation', seq(
+          field('left', $.expression),
+          field('operator', alias($._comparison_gt, '>')),
+          field('right', $.expression),
+        ))),
+      ),
+
       instantiation_expression: $ => prec('instantiation', seq(
-        $.expression,
+        choice($.expression, $._postfix_expression),
         field('type_arguments', $.type_arguments),
       )),
 
@@ -600,7 +654,8 @@ module.exports = function defineGrammar(dialect) {
 
       _extends_clause_single: $ => prec('extends', seq(
         field('value', $.expression),
-        field('type_arguments', optional($.type_arguments)),
+        // Keep trailing type arguments on the extends clause when both parses succeed.
+        field('type_arguments', optional(prec.dynamic(1, $.type_arguments))),
       )),
 
       implements_clause: $ => seq(
@@ -780,7 +835,7 @@ module.exports = function defineGrammar(dialect) {
         '.',
         field('property', choice(
           $.private_property_identifier,
-          alias($.identifier, $.property_identifier),
+          reserved('properties', alias(choice($.identifier, $._keyword_identifier), $.property_identifier)),
         )),
       ),
       // A dot chain that starts at `import(...)`, with no call in between and no bare `import`: the only
@@ -793,7 +848,7 @@ module.exports = function defineGrammar(dialect) {
         '.',
         field('property', choice(
           $.private_property_identifier,
-          alias($.identifier, $.property_identifier),
+          reserved('properties', alias(choice($.identifier, $._keyword_identifier), $.property_identifier)),
         )),
       ),
       // Type arguments only on the outermost member, not on an object or callee (ours, on top of upstream #365).
@@ -962,7 +1017,7 @@ module.exports = function defineGrammar(dialect) {
         choice('.', '?.'),
         field('property', choice(
           $.private_property_identifier,
-          alias($.identifier, $.property_identifier),
+          reserved('properties', alias(choice($.identifier, $._keyword_identifier), $.property_identifier)),
         )),
       ),
       _type_query_subscript_expression: $ => seq(
@@ -1115,34 +1170,19 @@ module.exports = function defineGrammar(dialect) {
         field('type', optional($.type_annotation)),
       ),
 
-      _call_signature: $ => seq(
-        field('type_parameters', optional($.type_parameters)),
-        field('parameters', $.formal_parameters),
-        field('return_type', optional(
-          choice($.type_annotation, $.asserts_annotation, $.type_predicate_annotation),
-        )),
-      ),
+      _call_signature: $ => callSignature($, $.formal_parameters),
+
+      _ordinary_method_call_signature: $ => callSignature($, alias($._ordinary_method_parameters, $.formal_parameters)),
 
       // tsc's parser accepts an empty list (`type A<> = number;`); TS1098 is a checker error.
       type_parameters: $ => seq(
         '<', optional(seq(commaSep1($.type_parameter), optional(','))), '>',
       ),
 
-      // tsc reads `<>(x) => x` as a type assertion with no type (TS1110), so an arrow function needs a non-empty list.
-      arrow_function: $ => seq(
-        optional('async'),
-        choice(
-          field('parameter', choice(
-            alias($._reserved_identifier, $.identifier),
-            $.identifier,
-          )),
-          $._arrow_call_signature,
-        ),
-        '=>',
-        field('body', choice(
-          $.expression,
-          $.statement_block,
-        )),
+      // A declaration can take empty type parameters, while an arrow needs at least one.
+      _arrow_parameters: $ => choice(
+        field('parameter', choice(alias($._reserved_identifier, $.identifier), $.identifier)),
+        $._arrow_call_signature,
       ),
 
       _arrow_call_signature: $ => seq(
@@ -1171,22 +1211,6 @@ module.exports = function defineGrammar(dialect) {
       // stay plain names and tags, as before variance annotations existed. Later parameters (`<T, in U>`) are
       // unambiguous and keep them.
       ...(dialect === 'tsx' ? {
-        arrow_function: $ => seq(
-          optional('async'),
-          choice(
-            field('parameter', choice(
-              alias($._reserved_identifier, $.identifier),
-              $.identifier,
-            )),
-            $._arrow_call_signature,
-          ),
-          '=>',
-          field('body', choice(
-            $.expression,
-            $.statement_block,
-          )),
-        ),
-
         _arrow_call_signature: $ => seq(
           field('type_parameters', optional(alias($._arrow_type_parameters, $.type_parameters))),
           field('parameters', $.formal_parameters),
@@ -1275,6 +1299,10 @@ module.exports = function defineGrammar(dialect) {
 
       _type_identifier: $ => alias($.identifier, $.type_identifier),
 
+      // `export` is no longer a `_reserved_identifier` (JS v3b), and `export` starts an `export_statement` member of an
+      // object type: it needs to stay a property name there (`{ export: number }`).
+      _property_name: ($, previous) => choice(previous, alias('export', $.property_identifier)),
+
       _reserved_identifier: (_, previous) => choice(
         'declare',
         'namespace',
@@ -1297,7 +1325,6 @@ module.exports = function defineGrammar(dialect) {
         'boolean',
         'string',
         'symbol',
-        'export',
         'object',
         'new',
         'readonly',

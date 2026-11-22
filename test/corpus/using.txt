@@ -1,0 +1,431 @@
+==========================================================
+Using declaration with a keyword name and a type annotation
+==========================================================
+
+using as: D = f();
+using satisfies: E = g();
+
+---
+
+(program
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))))
+
+==========================================================
+Using declaration with a keyword name and a type annotation (tsx)
+:language(tsx)
+==========================================================
+
+using as: D = f();
+using satisfies: E = g();
+
+---
+
+(program
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))))
+
+==========================================================
+Using declaration with a keyword name: several declarators
+==========================================================
+
+using as: D = f(), b: E = g();
+using a = f(), satisfies: D = g();
+using as: D = f(), satisfies: E = g();
+
+---
+
+(program
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))))
+
+==========================================================
+Using declaration with a keyword name: await using and for heads
+==========================================================
+
+async function f() {
+  await using as: D = f();
+  for (using satisfies: D = f(); ; ) ;
+  for (await using as of x) ;
+  for (using satisfies of x) ;
+}
+
+---
+
+(program
+  (function_declaration
+    name: (identifier)
+    parameters: (formal_parameters)
+    body: (statement_block
+      (using_declaration
+        (variable_declarator
+          name: (identifier)
+          type: (type_annotation
+            (type_identifier))
+          value: (call_expression
+            function: (identifier)
+            arguments: (arguments))))
+      (for_statement
+        initializer: (using_declaration
+          (variable_declarator
+            name: (identifier)
+            type: (type_annotation
+              (type_identifier))
+            value: (call_expression
+              function: (identifier)
+              arguments: (arguments))))
+        condition: (empty_statement)
+        body: (empty_statement))
+      (for_in_statement
+        left: (identifier)
+        right: (identifier)
+        body: (empty_statement))
+      (for_in_statement
+        left: (identifier)
+        right: (identifier)
+        body: (empty_statement)))))
+
+==========================================================
+Using declaration with a keyword name: await using and for heads (tsx)
+:language(tsx)
+==========================================================
+
+async function f() {
+  await using as: D = f();
+  for (using satisfies: D = f(); ; ) ;
+  for (await using as of x) ;
+  for (using satisfies of x) ;
+}
+
+---
+
+(program
+  (function_declaration
+    name: (identifier)
+    parameters: (formal_parameters)
+    body: (statement_block
+      (using_declaration
+        (variable_declarator
+          name: (identifier)
+          type: (type_annotation
+            (type_identifier))
+          value: (call_expression
+            function: (identifier)
+            arguments: (arguments))))
+      (for_statement
+        initializer: (using_declaration
+          (variable_declarator
+            name: (identifier)
+            type: (type_annotation
+              (type_identifier))
+            value: (call_expression
+              function: (identifier)
+              arguments: (arguments))))
+        condition: (empty_statement)
+        body: (empty_statement))
+      (for_in_statement
+        left: (identifier)
+        right: (identifier)
+        body: (empty_statement))
+      (for_in_statement
+        left: (identifier)
+        right: (identifier)
+        body: (empty_statement)))))
+
+==========================================================
+Using declaration with a keyword name: blocks
+==========================================================
+
+{
+  using as: D = f();
+}
+if (x) {
+  using satisfies: D = f();
+}
+class C {
+  static {
+    using as: D = f();
+  }
+}
+const g = () => {
+  using satisfies = f();
+};
+
+---
+
+(program
+  (statement_block
+    (using_declaration
+      (variable_declarator
+        name: (identifier)
+        type: (type_annotation
+          (type_identifier))
+        value: (call_expression
+          function: (identifier)
+          arguments: (arguments)))))
+  (if_statement
+    condition: (parenthesized_expression
+      (identifier))
+    consequence: (statement_block
+      (using_declaration
+        (variable_declarator
+          name: (identifier)
+          type: (type_annotation
+            (type_identifier))
+          value: (call_expression
+            function: (identifier)
+            arguments: (arguments))))))
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (class_static_block
+        body: (statement_block
+          (using_declaration
+            (variable_declarator
+              name: (identifier)
+              type: (type_annotation
+                (type_identifier))
+              value: (call_expression
+                function: (identifier)
+                arguments: (arguments))))))))
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (arrow_function
+        parameters: (formal_parameters)
+        body: (statement_block
+          (using_declaration
+            (variable_declarator
+              name: (identifier)
+              value: (call_expression
+                function: (identifier)
+                arguments: (arguments)))))))))
+
+==========================================================
+Using declaration with a keyword name: line break after using
+==========================================================
+
+using
+as: D = f();
+using
+satisfies: D = f();
+
+---
+
+(program
+  (expression_statement
+    (identifier))
+  (labeled_statement
+    label: (statement_identifier)
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (call_expression
+          function: (identifier)
+          arguments: (arguments)))))
+  (expression_statement
+    (identifier))
+  (labeled_statement
+    label: (statement_identifier)
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (call_expression
+          function: (identifier)
+          arguments: (arguments))))))
+
+==========================================================
+Using declaration with a keyword name: no type annotation
+==========================================================
+
+using as = f();
+using satisfies = g();
+async function f() {
+  await using as = f();
+}
+
+---
+
+(program
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (function_declaration
+    name: (identifier)
+    parameters: (formal_parameters)
+    body: (statement_block
+      (using_declaration
+        (variable_declarator
+          name: (identifier)
+          value: (call_expression
+            function: (identifier)
+            arguments: (arguments)))))))
+
+==========================================================
+Using declaration with other contextual keyword names
+==========================================================
+
+using type: D = f();
+using type = f();
+using async = f();
+using from: D = f();
+using declare = f();
+using readonly: D = f();
+
+---
+
+(program
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments))))
+  (using_declaration
+    (variable_declarator
+      name: (identifier)
+      type: (type_annotation
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments)))))
+
+==========================================================
+Using as an identifier is not a declaration
+==========================================================
+
+using(x);
+using = 1;
+using.x;
+as: D = f();
+
+---
+
+(program
+  (expression_statement
+    (call_expression
+      function: (identifier)
+      arguments: (arguments
+        (identifier))))
+  (expression_statement
+    (assignment_expression
+      left: (identifier)
+      right: (number)))
+  (expression_statement
+    (member_expression
+      object: (identifier)
+      property: (property_identifier)))
+  (labeled_statement
+    label: (statement_identifier)
+    body: (expression_statement
+      (assignment_expression
+        left: (identifier)
+        right: (call_expression
+          function: (identifier)
+          arguments: (arguments))))))

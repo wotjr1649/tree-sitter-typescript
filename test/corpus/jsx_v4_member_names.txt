@@ -1,0 +1,95 @@
+=================================================
+JS v4 typed JSX member names
+:language(tsx)
+=================================================
+
+<a-b.C<T> />;
+<this-foo.a.b<X>>ok</this-foo.a.b>;
+<this.C<T> />;
+<export.C<T> />;
+<a.b<C> />;
+
+---
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      (member_expression
+        (identifier)
+        (property_identifier))
+      (type_arguments
+        (type_identifier))))
+  (expression_statement
+    (jsx_element
+      (jsx_opening_element
+        (member_expression
+          (member_expression
+            (identifier)
+            (property_identifier))
+          (property_identifier))
+        (type_arguments
+          (type_identifier)))
+      (jsx_text)
+      (jsx_closing_element
+        (member_expression
+          (member_expression
+            (identifier)
+            (property_identifier))
+          (property_identifier)))))
+  (expression_statement
+    (jsx_self_closing_element
+      (member_expression
+        (this)
+        (property_identifier))
+      (type_arguments
+        (type_identifier))))
+  (expression_statement
+    (jsx_self_closing_element
+      (member_expression
+        (identifier)
+        (property_identifier))
+      (type_arguments
+        (type_identifier))))
+  (expression_statement
+    (jsx_self_closing_element
+      (member_expression
+        (identifier)
+        (property_identifier))
+      (type_arguments
+        (type_identifier)))))
+
+=================================================
+JS v4 rejects a hyphen after a JSX member dot
+:language(tsx)
+:error
+=================================================
+
+<A.b-c<T> />;
+
+---
+
+(program)
+
+=================================================
+JS v4 incomplete JSX member type arguments
+:language(tsx)
+:error
+=================================================
+
+const x = <a.b<C<
+
+---
+
+(program)
+
+=================================================
+JS v4 incomplete JSX member before export
+:language(tsx)
+:error
+=================================================
+
+const x = <a.b export
+
+---
+
+(program)
