@@ -5389,10 +5389,6 @@
                     "type": "CHOICE",
                     "members": [
                       {
-                        "type": "SYMBOL",
-                        "name": "expression"
-                      },
-                      {
                         "type": "PREC_DYNAMIC",
                         "value": 1,
                         "content": {
@@ -10671,17 +10667,8 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_postfix_expression"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_postfix_expression"
           },
           {
             "type": "FIELD",

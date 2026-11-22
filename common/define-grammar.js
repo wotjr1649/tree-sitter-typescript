@@ -234,7 +234,7 @@ module.exports = function defineGrammar(dialect) {
         ))),
         // Prefer attaching type arguments to an await operand when both parses succeed.
         prec.dynamic(2, prec('typed_call', seq(
-          field('function', choice($.expression, prec.dynamic(1, $._postfix_expression), $.import)),
+          field('function', choice(prec.dynamic(1, $._postfix_expression), $.import)),
           field('type_arguments', $.type_arguments),
           field('arguments', $.arguments),
         ))),
@@ -627,8 +627,9 @@ module.exports = function defineGrammar(dialect) {
         ))),
       ),
 
+      // A comparison before type arguments stays outside the postfix expression.
       instantiation_expression: $ => prec('instantiation', seq(
-        choice($.expression, $._postfix_expression),
+        $._postfix_expression,
         field('type_arguments', $.type_arguments),
       )),
 

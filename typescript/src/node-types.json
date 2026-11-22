@@ -3165,7 +3165,11 @@
       "required": false,
       "types": [
         {
-          "type": "expression",
+          "type": "new_expression",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         }
       ]
