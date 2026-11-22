@@ -9,7 +9,7 @@
 | `run.mjs` | The verdict runner (Node, ESM) and its self-test |
 | `verdicts.json` | The committed verdicts, produced by `run.mjs` |
 | `replay/` | The Go replay (nested module `replay/go.mod`: `github.com/tree-sitter/go-tree-sitter` v0.25.0 through cgo, the repository's `bindings/go` for both grammars through a `replace`; the root `go.mod` is untouched); `judge_test.go` is its self-test |
-| `../test/node-kinds/` | Node-kind and field snapshot of each grammar and the script that writes it (below) |
+| `../test/node-kinds/` | Node types snapshots, generator, and compatibility tests for both grammars |
 
 ## The oracle
 
@@ -88,7 +88,7 @@ Exit codes of the replay:
 - **1**: a result differs; the differences are listed. Registering such a case is not an option (rule: no mismatch in the committed set).
 - **2**: the inputs are inconsistent: a `sha256` that does not match its source, verdicts made from other cases (`cases_sha256`), another runner (`runner_sha256`) or another `package-lock.json`, a tool version, an npm integrity or a `tsc` argument list (`meta.arguments`) that differs from the values written into the replay (7.0.2, `sha512-8FYau96o…`, `--noEmit --noCheck --pretty false --target esnext --jsx preserve`) in the verdicts or the lock, a `package.json` whose pin is not exactly 7.0.2, any `@typescript/typescript-*` package of the lock at another version, no cases, a case that does not fit its verdict, or a grammar that cannot be loaded. Nothing is judged.
 
-CI (`oracle` job of `.github/workflows/ci.yml`, `ubuntu-24.04`): `npm ci --ignore-scripts`, the runner self-test, regenerate `verdicts.json` and fail on any difference from the committed file (the file must be tracked: `git ls-files --error-unmatch` runs first, because `git diff` passes for an untracked file), the replay self-test, the replay, and the node-kind snapshot check.
+CI (`oracle` job of `.github/workflows/ci.yml`, `ubuntu-24.04`) runs `npm ci --ignore-scripts`, the runner self-test, the verdict regeneration check, the replay self-test, the replay, and the node types checks below. The verdict regeneration check first verifies that `verdicts.json` is tracked, then fails on any diff.
 
 ## Adding cases in a fix pull request (rule (b))
 
@@ -99,13 +99,15 @@ CI (`oracle` job of `.github/workflows/ci.yml`, `ubuntu-24.04`): `npm ci --ignor
 
 Changing the `typescript` version means changing `package.json`, `package-lock.json`, the pin and integrity in `run.mjs` and the version, integrity and arguments written into `replay/main.go`, and regenerating `verdicts.json` in the same pull request; review every verdict that moves.
 
-## Node-kind snapshot
+## Node types snapshots and compatibility
 
-`node test/node-kinds/generate.mjs` writes `test/node-kinds/typescript.txt` and `test/node-kinds/tsx.txt` from `typescript/src/node-types.json` and `tsx/src/node-types.json`: one sorted line per kind; a named kind is bare or with its field names (`call_expression{arguments,function,type_arguments}`), an anonymous kind (keyword or punctuation token) is a JSON string (`"out"`). Node kinds and field names are a public contract (`AGENTS.md`): CI regenerates the files and fails on `git diff --exit-code -- test/node-kinds`, so a removal or rename shows up as a deleted line, an addition as an added line, and a grammar change that forgets to refresh the snapshot fails. A fix pull request that adds a kind runs the script and commits the result.
+`node test/node-kinds/generate.mjs` writes `typescript.txt` and `tsx.txt` in `test/node-kinds/` from each grammar's `src/node-types.json`. Sorted, tab-separated rows record named and anonymous kinds, field and child types, supertype subtypes, and true `multiple` and `required` flags. Regenerate and commit the snapshots when the grammar's node types change. CI checks both files against regeneration.
+
+CI also runs `node test/node-kinds/generate.mjs --compare-baseline DIR`, where `DIR` contains the two `node-types.json` files from the pinned v3.0.0 release, saved as `typescript.json` and `tsx.json`. The gate reports additions and fails on removals, loss of `multiple`, or an existing optional entry becoming required. This comparison reads the current and release JSON directly, so it also checks pull requests that refresh the snapshots.
 
 ## Known limits
 
 - The Go bindings `#include` `typescript/src/parser.c` and `tsx/src/parser.c` from outside their package, so Go's build cache does not see a regenerated parser at the same path: CI runs the replay without a restored cache, and a local run after `tree-sitter generate` needs `go clean -cache` or its own `GOCACHE`.
-- The node-kind snapshot follows `node-types.json`. The TypeScript runtime also exposes `jsx_text` as a visible named kind (id 163) that is absent from `typescript/src/node-types.json` and so from `typescript.txt` (the TSX snapshot has it); losing that symbol would not show up as a snapshot difference.
+- The checks cover `node-types.json`. The TypeScript runtime exposes `jsx_text` as a visible named kind outside that schema. The TSX schema and snapshot include it.
 - The `checkout@v4`, `setup-node@v4` and `setup-go@v5` actions of the `oracle` job declare Node 20 and run on Node 24 with a runner warning, like the existing jobs (same generation); moving all of them is a separate change.
 - The platform binary packages (`@typescript/typescript-*`) are pinned by version only: the runner and the replay check that the installed one and every one in the lock are 7.0.2, but their integrity is not compared with a value of its own; `npm ci` verifies it against the lockfile in CI. Whether the native file on disk is the one npm unpacked is not checked.

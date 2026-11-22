@@ -1,326 +1,1261 @@
-"!"
-"!="
-"!=="
-"${"
-"%"
-"%="
-"&"
-"&&"
-"&&="
-"&="
-"'"
-"("
-")"
-"*"
-"**"
-"**="
-"*="
-"+"
-"++"
-"+="
-"+?:"
-","
-"-"
-"--"
-"-="
-"-?:"
-"."
-"..."
-"/"
-"/="
-":"
-";"
-"<"
-"<<"
-"<<="
-"<="
-"="
-"=="
-"==="
-"=>"
-">"
-">="
-">>"
-">>="
-">>>"
-">>>="
-"?"
-"?."
-"?:"
-"??"
-"??="
-"@"
-"["
-"\""
-"]"
-"^"
-"^="
-"`"
-"abstract"
-"accessor"
-"any"
-"as"
-"assert"
-"asserts"
-"async"
-"await"
-"boolean"
-"break"
-"case"
-"catch"
-"class"
-"const"
-"continue"
-"debugger"
-"declare"
-"default"
-"delete"
-"do"
-"else"
-"enum"
-"export"
-"extends"
-"finally"
-"for"
-"from"
-"function"
-"get"
-"global"
-"if"
-"implements"
-"import"
-"in"
-"infer"
-"instanceof"
-"interface"
-"is"
-"keyof"
-"let"
-"meta"
-"module"
-"namespace"
-"never"
-"new"
-"number"
-"object"
-"of"
-"out"
-"override"
-"private"
-"protected"
-"public"
-"readonly"
-"require"
-"return"
-"satisfies"
-"set"
-"static"
-"string"
-"switch"
-"symbol"
-"target"
-"throw"
-"try"
-"type"
-"typeof"
-"unique symbol"
-"unknown"
-"using"
-"var"
-"void"
-"while"
-"with"
-"yield"
-"{"
-"{|"
-"|"
-"|="
-"||"
-"||="
-"|}"
-"}"
-"~"
-abstract_class_declaration{body,decorator,name,type_parameters}
-abstract_method_signature{name,parameters,return_type,type_parameters}
-accessibility_modifier
-adding_type_annotation
-ambient_declaration
-arguments
-array
-array_pattern
-array_type
-arrow_function{body,parameter,parameters,return_type,type_parameters}
-as_expression
-asserts
-asserts_annotation
-assignment_expression{left,right}
-assignment_pattern{left,right}
-augmented_assignment_expression{left,operator,right}
-await_expression
-binary_expression{left,operator,right}
-break_statement{label}
-call_expression{arguments,function,type_arguments}
-call_signature{parameters,return_type,type_parameters}
-catch_clause{body,parameter,type}
-class_body{decorator}
-class_declaration{body,decorator,name,type_parameters}
-class_heritage
-class_static_block{body}
-class{body,decorator,name,type_parameters}
-comment
-computed_property_name
-conditional_type{alternative,consequence,left,right}
-constraint
-construct_signature{parameters,type,type_parameters}
-constructor_type{parameters,type,type_parameters}
-continue_statement{label}
-debugger_statement
-declaration
-decorator
-default_type
-do_statement{body,condition}
-else_clause
-empty_statement
-enum_assignment{name,value}
-enum_body{name}
-enum_declaration{body,name}
-escape_sequence
-existential_type
-export_clause
-export_specifier{alias,name}
-export_statement{declaration,decorator,source,value}
-expression
-expression_statement
-extends_clause{type_arguments,value}
-extends_type_clause{type}
-false
-finally_clause{body}
-flow_maybe_type
-for_in_statement{body,kind,left,operator,right,value}
-for_statement{body,condition,increment,initializer}
-formal_parameters
-function_declaration{body,name,parameters,return_type,type_parameters}
-function_expression{body,name,parameters,return_type,type_parameters}
-function_signature{name,parameters,return_type,type_parameters}
-function_type{parameters,return_type,type_parameters}
-generator_function_declaration{body,name,parameters,return_type,type_parameters}
-generator_function{body,name,parameters,return_type,type_parameters}
-generic_type{name,type_arguments}
-hash_bang_line
-html_comment
-identifier
-if_statement{alternative,condition,consequence}
-implements_clause
-import
-import_alias
-import_attribute
-import_clause
-import_require_clause{source}
-import_specifier{alias,name}
-import_statement{source}
-index_signature{index_type,name,sign,type}
-index_type_query
-infer_type
-instantiation_expression{function,type_arguments}
-interface_body
-interface_declaration{body,name,type_parameters}
-internal_module{body,name}
-intersection_type
-labeled_statement{body,label}
-lexical_declaration{kind}
-literal_type
-lookup_type
-mapped_type_clause{alias,name,type}
-member_expression{object,optional_chain,property}
-meta_property
-method_definition{body,name,parameters,return_type,type_parameters}
-method_signature{name,parameters,return_type,type_parameters}
-module{body,name}
-named_imports
-namespace_export
-namespace_import
-nested_identifier{object,property}
-nested_type_identifier{module,name}
-new_expression{arguments,constructor,type_arguments}
-non_null_expression
-null
-number
-object
-object_assignment_pattern{left,right}
-object_pattern
-object_type
-omitting_type_annotation
-opting_type_annotation
-optional_chain
-optional_parameter{decorator,name,pattern,type,value}
-optional_type
-override_modifier
-pair_pattern{key,value}
-pair{key,value}
-parenthesized_expression{type}
-parenthesized_type
-pattern
-predefined_type
-primary_expression
-primary_type
-private_property_identifier
-program
-property_identifier
-property_signature{name,type}
-public_field_definition{decorator,name,type,value}
-readonly_type
-regex_flags
-regex_pattern
-regex{flags,pattern}
-required_parameter{decorator,name,pattern,type,value}
-rest_pattern
-rest_type
-return_statement
-satisfies_expression
-sequence_expression
-shorthand_property_identifier
-shorthand_property_identifier_pattern
-spread_element
-statement
-statement_block
-statement_identifier
-string
-string_fragment
-subscript_expression{index,object,optional_chain}
-super
-switch_body
-switch_case{body,value}
-switch_default{body}
-switch_statement{body,value}
-template_literal_type
-template_string
-template_substitution
-template_type
-ternary_expression{alternative,condition,consequence}
-this
-this_type
-throw_statement
-true
-try_statement{body,finalizer,handler}
-tuple_type
-type
-type_alias_declaration{name,type_parameters,value}
-type_annotation
-type_arguments
-type_assertion
-type_identifier
-type_parameters
-type_parameter{constraint,name,value}
-type_predicate_annotation
-type_predicate{name,type}
-type_query
-unary_expression{argument,operator}
-undefined
-union_type
-update_expression{argument,operator}
-using_declaration{kind}
-variable_declaration
-variable_declarator{name,type,value}
-while_statement{body,condition}
-with_statement{body,object}
-yield_expression
+child	abstract_class_declaration	class_heritage
+child	abstract_method_signature	accessibility_modifier
+child	abstract_method_signature	override_modifier
+child	adding_type_annotation	type
+child	ambient_declaration	declaration
+child	ambient_declaration	property_identifier
+child	ambient_declaration	statement_block
+child	ambient_declaration	type
+child	arguments	expression
+child	arguments	object
+child	arguments	spread_element
+child	arguments	string
+child	array	expression
+child	array	spread_element
+child	array_pattern	assignment_pattern
+child	array_pattern	pattern
+child	array_type	primary_type
+child	as_expression	expression
+child	as_expression	type
+child	asserts	identifier
+child	asserts	this
+child	asserts	type_predicate
+child	asserts_annotation	asserts
+child	await_expression	await_expression
+child	await_expression	instantiation_expression
+child	await_expression	new_expression
+child	await_expression	primary_expression
+child	await_expression	type_assertion
+child	await_expression	unary_expression
+child	await_expression	update_expression
+child	class	class_heritage
+child	class_body	abstract_method_signature
+child	class_body	class_static_block
+child	class_body	index_signature
+child	class_body	method_definition
+child	class_body	method_signature
+child	class_body	public_field_definition
+child	class_declaration	class_heritage
+child	class_heritage	extends_clause
+child	class_heritage	implements_clause
+child	computed_property_name	expression
+child	constraint	type
+child	decorator	call_expression
+child	decorator	identifier
+child	decorator	member_expression
+child	decorator	parenthesized_expression
+child	default_type	type
+child	else_clause	statement
+child	enum_body	enum_assignment
+child	export_clause	export_specifier
+child	export_statement	export_clause
+child	export_statement	expression
+child	export_statement	identifier
+child	export_statement	import_attribute
+child	export_statement	namespace_export
+child	expression_statement	expression
+child	expression_statement	sequence_expression
+child	flow_maybe_type	primary_type
+child	formal_parameters	optional_parameter
+child	formal_parameters	required_parameter
+child	implements_clause	type
+child	import_alias	identifier
+child	import_alias	nested_identifier
+child	import_attribute	object
+child	import_clause	identifier
+child	import_clause	named_imports
+child	import_clause	namespace_import
+child	import_require_clause	identifier
+child	import_statement	import_attribute
+child	import_statement	import_clause
+child	import_statement	import_require_clause
+child	index_signature	mapped_type_clause
+child	index_type_query	primary_type
+child	infer_type	type
+child	infer_type	type_identifier
+child	instantiation_expression	new_expression
+child	instantiation_expression	primary_expression
+child	interface_body	call_signature
+child	interface_body	construct_signature
+child	interface_body	export_statement
+child	interface_body	index_signature
+child	interface_body	method_signature
+child	interface_body	property_signature
+child	interface_declaration	extends_type_clause
+child	intersection_type	type
+child	lexical_declaration	variable_declarator
+child	literal_type	false
+child	literal_type	null
+child	literal_type	number
+child	literal_type	string
+child	literal_type	true
+child	literal_type	unary_expression
+child	literal_type	undefined
+child	lookup_type	type
+child	member_expression	type_arguments
+child	method_definition	accessibility_modifier
+child	method_definition	override_modifier
+child	method_signature	accessibility_modifier
+child	method_signature	override_modifier
+child	named_imports	import_specifier
+child	namespace_export	identifier
+child	namespace_export	string
+child	namespace_import	identifier
+child	non_null_expression	new_expression
+child	non_null_expression	primary_expression
+child	non_null_expression	update_expression
+child	object	method_definition
+child	object	pair
+child	object	shorthand_property_identifier
+child	object	spread_element
+child	object_pattern	object_assignment_pattern
+child	object_pattern	pair_pattern
+child	object_pattern	rest_pattern
+child	object_pattern	shorthand_property_identifier_pattern
+child	object_type	call_signature
+child	object_type	construct_signature
+child	object_type	export_statement
+child	object_type	index_signature
+child	object_type	method_signature
+child	object_type	property_signature
+child	omitting_type_annotation	type
+child	opting_type_annotation	type
+child	optional_parameter	accessibility_modifier
+child	optional_parameter	override_modifier
+child	optional_type	type
+child	parenthesized_expression	expression
+child	parenthesized_expression	sequence_expression
+child	parenthesized_type	type
+child	program	hash_bang_line
+child	program	statement
+child	property_signature	accessibility_modifier
+child	property_signature	override_modifier
+child	public_field_definition	accessibility_modifier
+child	public_field_definition	override_modifier
+child	readonly_type	type
+child	required_parameter	accessibility_modifier
+child	required_parameter	override_modifier
+child	rest_pattern	array_pattern
+child	rest_pattern	identifier
+child	rest_pattern	member_expression
+child	rest_pattern	non_null_expression
+child	rest_pattern	object_pattern
+child	rest_pattern	subscript_expression
+child	rest_pattern	undefined
+child	rest_type	type
+child	return_statement	expression
+child	return_statement	sequence_expression
+child	satisfies_expression	expression
+child	satisfies_expression	type
+child	sequence_expression	expression
+child	spread_element	expression
+child	statement_block	statement
+child	string	escape_sequence
+child	string	string_fragment
+child	switch_body	switch_case
+child	switch_body	switch_default
+child	template_literal_type	string_fragment
+child	template_literal_type	template_type
+child	template_string	escape_sequence
+child	template_string	string_fragment
+child	template_string	template_substitution
+child	template_substitution	expression
+child	template_substitution	sequence_expression
+child	template_type	infer_type
+child	template_type	primary_type
+child	throw_statement	expression
+child	throw_statement	sequence_expression
+child	tuple_type	optional_parameter
+child	tuple_type	optional_type
+child	tuple_type	required_parameter
+child	tuple_type	rest_type
+child	tuple_type	type
+child	type_annotation	type
+child	type_arguments	type
+child	type_assertion	expression
+child	type_assertion	type_arguments
+child	type_parameters	type_parameter
+child	type_predicate_annotation	type_predicate
+child	type_query	call_expression
+child	type_query	identifier
+child	type_query	instantiation_expression
+child	type_query	member_expression
+child	type_query	subscript_expression
+child	type_query	this
+child	union_type	type
+child	using_declaration	variable_declarator
+child	variable_declaration	variable_declarator
+child	yield_expression	expression
+field	abstract_class_declaration	body	class_body
+field	abstract_class_declaration	decorator	decorator
+field	abstract_class_declaration	name	type_identifier
+field	abstract_class_declaration	type_parameters	type_parameters
+field	abstract_method_signature	name	computed_property_name
+field	abstract_method_signature	name	number
+field	abstract_method_signature	name	private_property_identifier
+field	abstract_method_signature	name	property_identifier
+field	abstract_method_signature	name	string
+field	abstract_method_signature	parameters	formal_parameters
+field	abstract_method_signature	return_type	asserts_annotation
+field	abstract_method_signature	return_type	type_annotation
+field	abstract_method_signature	return_type	type_predicate_annotation
+field	abstract_method_signature	type_parameters	type_parameters
+field	arrow_function	body	expression
+field	arrow_function	body	statement_block
+field	arrow_function	parameter	identifier
+field	arrow_function	parameters	formal_parameters
+field	arrow_function	return_type	asserts_annotation
+field	arrow_function	return_type	type_annotation
+field	arrow_function	return_type	type_predicate_annotation
+field	arrow_function	type_parameters	type_parameters
+field	assignment_expression	left	array_pattern
+field	assignment_expression	left	call_expression
+field	assignment_expression	left	identifier
+field	assignment_expression	left	member_expression
+field	assignment_expression	left	non_null_expression
+field	assignment_expression	left	object_pattern
+field	assignment_expression	left	parenthesized_expression
+field	assignment_expression	left	subscript_expression
+field	assignment_expression	left	undefined
+field	assignment_expression	right	expression
+field	assignment_pattern	left	pattern
+field	assignment_pattern	right	expression
+field	augmented_assignment_expression	left	call_expression
+field	augmented_assignment_expression	left	identifier
+field	augmented_assignment_expression	left	member_expression
+field	augmented_assignment_expression	left	non_null_expression
+field	augmented_assignment_expression	left	parenthesized_expression
+field	augmented_assignment_expression	left	subscript_expression
+field	augmented_assignment_expression	operator	"%="
+field	augmented_assignment_expression	operator	"&&="
+field	augmented_assignment_expression	operator	"&="
+field	augmented_assignment_expression	operator	"**="
+field	augmented_assignment_expression	operator	"*="
+field	augmented_assignment_expression	operator	"+="
+field	augmented_assignment_expression	operator	"-="
+field	augmented_assignment_expression	operator	"/="
+field	augmented_assignment_expression	operator	"<<="
+field	augmented_assignment_expression	operator	">>="
+field	augmented_assignment_expression	operator	">>>="
+field	augmented_assignment_expression	operator	"??="
+field	augmented_assignment_expression	operator	"^="
+field	augmented_assignment_expression	operator	"|="
+field	augmented_assignment_expression	operator	"||="
+field	augmented_assignment_expression	right	expression
+field	binary_expression	left	expression
+field	binary_expression	left	private_property_identifier
+field	binary_expression	operator	"!="
+field	binary_expression	operator	"!=="
+field	binary_expression	operator	"%"
+field	binary_expression	operator	"&"
+field	binary_expression	operator	"&&"
+field	binary_expression	operator	"*"
+field	binary_expression	operator	"**"
+field	binary_expression	operator	"+"
+field	binary_expression	operator	"-"
+field	binary_expression	operator	"/"
+field	binary_expression	operator	"<"
+field	binary_expression	operator	"<<"
+field	binary_expression	operator	"<="
+field	binary_expression	operator	"=="
+field	binary_expression	operator	"==="
+field	binary_expression	operator	">"
+field	binary_expression	operator	">="
+field	binary_expression	operator	">>"
+field	binary_expression	operator	">>>"
+field	binary_expression	operator	"??"
+field	binary_expression	operator	"^"
+field	binary_expression	operator	"in"
+field	binary_expression	operator	"instanceof"
+field	binary_expression	operator	"|"
+field	binary_expression	operator	"||"
+field	binary_expression	right	expression
+field	break_statement	label	statement_identifier
+field	call_expression	arguments	arguments
+field	call_expression	arguments	template_string
+field	call_expression	function	expression
+field	call_expression	function	import
+field	call_expression	type_arguments	type_arguments
+field	call_signature	parameters	formal_parameters
+field	call_signature	return_type	asserts_annotation
+field	call_signature	return_type	type_annotation
+field	call_signature	return_type	type_predicate_annotation
+field	call_signature	type_parameters	type_parameters
+field	catch_clause	body	statement_block
+field	catch_clause	parameter	array_pattern
+field	catch_clause	parameter	identifier
+field	catch_clause	parameter	object_pattern
+field	catch_clause	type	type_annotation
+field	class	body	class_body
+field	class	decorator	decorator
+field	class	name	type_identifier
+field	class	type_parameters	type_parameters
+field	class_body	decorator	decorator
+field	class_declaration	body	class_body
+field	class_declaration	decorator	decorator
+field	class_declaration	name	type_identifier
+field	class_declaration	type_parameters	type_parameters
+field	class_static_block	body	statement_block
+field	conditional_type	alternative	type
+field	conditional_type	consequence	type
+field	conditional_type	left	type
+field	conditional_type	right	type
+field	construct_signature	parameters	formal_parameters
+field	construct_signature	type	type_annotation
+field	construct_signature	type_parameters	type_parameters
+field	constructor_type	parameters	formal_parameters
+field	constructor_type	type	type
+field	constructor_type	type_parameters	type_parameters
+field	continue_statement	label	statement_identifier
+field	do_statement	body	statement
+field	do_statement	condition	parenthesized_expression
+field	enum_assignment	name	computed_property_name
+field	enum_assignment	name	number
+field	enum_assignment	name	private_property_identifier
+field	enum_assignment	name	property_identifier
+field	enum_assignment	name	string
+field	enum_assignment	value	expression
+field	enum_body	name	computed_property_name
+field	enum_body	name	number
+field	enum_body	name	private_property_identifier
+field	enum_body	name	property_identifier
+field	enum_body	name	string
+field	enum_declaration	body	enum_body
+field	enum_declaration	name	identifier
+field	export_specifier	alias	identifier
+field	export_specifier	alias	string
+field	export_specifier	name	identifier
+field	export_specifier	name	string
+field	export_statement	declaration	declaration
+field	export_statement	decorator	decorator
+field	export_statement	source	string
+field	export_statement	value	class
+field	export_statement	value	expression
+field	export_statement	value	function_expression
+field	export_statement	value	generator_function
+field	extends_clause	type_arguments	type_arguments
+field	extends_clause	value	expression
+field	extends_type_clause	type	generic_type
+field	extends_type_clause	type	nested_type_identifier
+field	extends_type_clause	type	type_identifier
+field	finally_clause	body	statement_block
+field	for_in_statement	body	statement
+field	for_in_statement	kind	"await"
+field	for_in_statement	kind	"const"
+field	for_in_statement	kind	"let"
+field	for_in_statement	kind	"using"
+field	for_in_statement	kind	"var"
+field	for_in_statement	left	array_pattern
+field	for_in_statement	left	call_expression
+field	for_in_statement	left	identifier
+field	for_in_statement	left	member_expression
+field	for_in_statement	left	non_null_expression
+field	for_in_statement	left	object_pattern
+field	for_in_statement	left	parenthesized_expression
+field	for_in_statement	left	subscript_expression
+field	for_in_statement	left	undefined
+field	for_in_statement	operator	"in"
+field	for_in_statement	operator	"of"
+field	for_in_statement	right	expression
+field	for_in_statement	right	sequence_expression
+field	for_in_statement	value	expression
+field	for_statement	body	statement
+field	for_statement	condition	";"
+field	for_statement	condition	empty_statement
+field	for_statement	condition	expression
+field	for_statement	condition	sequence_expression
+field	for_statement	increment	expression
+field	for_statement	increment	sequence_expression
+field	for_statement	initializer	empty_statement
+field	for_statement	initializer	expression
+field	for_statement	initializer	lexical_declaration
+field	for_statement	initializer	sequence_expression
+field	for_statement	initializer	using_declaration
+field	for_statement	initializer	variable_declaration
+field	function_declaration	body	statement_block
+field	function_declaration	name	identifier
+field	function_declaration	parameters	formal_parameters
+field	function_declaration	return_type	asserts_annotation
+field	function_declaration	return_type	type_annotation
+field	function_declaration	return_type	type_predicate_annotation
+field	function_declaration	type_parameters	type_parameters
+field	function_expression	body	statement_block
+field	function_expression	name	identifier
+field	function_expression	parameters	formal_parameters
+field	function_expression	return_type	asserts_annotation
+field	function_expression	return_type	type_annotation
+field	function_expression	return_type	type_predicate_annotation
+field	function_expression	type_parameters	type_parameters
+field	function_signature	name	identifier
+field	function_signature	parameters	formal_parameters
+field	function_signature	return_type	asserts_annotation
+field	function_signature	return_type	type_annotation
+field	function_signature	return_type	type_predicate_annotation
+field	function_signature	type_parameters	type_parameters
+field	function_type	parameters	formal_parameters
+field	function_type	return_type	asserts
+field	function_type	return_type	type
+field	function_type	return_type	type_predicate
+field	function_type	type_parameters	type_parameters
+field	generator_function	body	statement_block
+field	generator_function	name	identifier
+field	generator_function	parameters	formal_parameters
+field	generator_function	return_type	asserts_annotation
+field	generator_function	return_type	type_annotation
+field	generator_function	return_type	type_predicate_annotation
+field	generator_function	type_parameters	type_parameters
+field	generator_function_declaration	body	statement_block
+field	generator_function_declaration	name	identifier
+field	generator_function_declaration	parameters	formal_parameters
+field	generator_function_declaration	return_type	asserts_annotation
+field	generator_function_declaration	return_type	type_annotation
+field	generator_function_declaration	return_type	type_predicate_annotation
+field	generator_function_declaration	type_parameters	type_parameters
+field	generic_type	name	nested_type_identifier
+field	generic_type	name	type_identifier
+field	generic_type	type_arguments	type_arguments
+field	if_statement	alternative	else_clause
+field	if_statement	condition	parenthesized_expression
+field	if_statement	consequence	statement
+field	import_require_clause	source	string
+field	import_specifier	alias	identifier
+field	import_specifier	name	identifier
+field	import_specifier	name	string
+field	import_statement	source	string
+field	index_signature	index_type	type
+field	index_signature	name	identifier
+field	index_signature	sign	"+"
+field	index_signature	sign	"-"
+field	index_signature	type	adding_type_annotation
+field	index_signature	type	omitting_type_annotation
+field	index_signature	type	opting_type_annotation
+field	index_signature	type	type_annotation
+field	instantiation_expression	function	identifier
+field	instantiation_expression	function	import
+field	instantiation_expression	function	member_expression
+field	instantiation_expression	function	subscript_expression
+field	instantiation_expression	type_arguments	type_arguments
+field	interface_declaration	body	interface_body
+field	interface_declaration	name	type_identifier
+field	interface_declaration	type_parameters	type_parameters
+field	internal_module	body	statement_block
+field	internal_module	name	identifier
+field	internal_module	name	nested_identifier
+field	internal_module	name	string
+field	labeled_statement	body	statement
+field	labeled_statement	label	statement_identifier
+field	lexical_declaration	kind	"const"
+field	lexical_declaration	kind	"let"
+field	mapped_type_clause	alias	type
+field	mapped_type_clause	name	type_identifier
+field	mapped_type_clause	type	type
+field	member_expression	object	expression
+field	member_expression	object	import
+field	member_expression	optional_chain	optional_chain
+field	member_expression	property	private_property_identifier
+field	member_expression	property	property_identifier
+field	method_definition	body	statement_block
+field	method_definition	name	computed_property_name
+field	method_definition	name	number
+field	method_definition	name	private_property_identifier
+field	method_definition	name	property_identifier
+field	method_definition	name	string
+field	method_definition	parameters	formal_parameters
+field	method_definition	return_type	asserts_annotation
+field	method_definition	return_type	type_annotation
+field	method_definition	return_type	type_predicate_annotation
+field	method_definition	type_parameters	type_parameters
+field	method_signature	name	computed_property_name
+field	method_signature	name	number
+field	method_signature	name	private_property_identifier
+field	method_signature	name	property_identifier
+field	method_signature	name	string
+field	method_signature	parameters	formal_parameters
+field	method_signature	return_type	asserts_annotation
+field	method_signature	return_type	type_annotation
+field	method_signature	return_type	type_predicate_annotation
+field	method_signature	type_parameters	type_parameters
+field	module	body	statement_block
+field	module	name	identifier
+field	module	name	nested_identifier
+field	module	name	string
+field	nested_identifier	object	identifier
+field	nested_identifier	object	member_expression
+field	nested_identifier	property	property_identifier
+field	nested_type_identifier	module	identifier
+field	nested_type_identifier	module	nested_identifier
+field	nested_type_identifier	name	type_identifier
+field	new_expression	arguments	arguments
+field	new_expression	constructor	primary_expression
+field	new_expression	type_arguments	type_arguments
+field	object_assignment_pattern	left	array_pattern
+field	object_assignment_pattern	left	object_pattern
+field	object_assignment_pattern	left	shorthand_property_identifier_pattern
+field	object_assignment_pattern	right	expression
+field	optional_parameter	decorator	decorator
+field	optional_parameter	name	identifier
+field	optional_parameter	pattern	pattern
+field	optional_parameter	pattern	this
+field	optional_parameter	type	type_annotation
+field	optional_parameter	value	expression
+field	pair	key	computed_property_name
+field	pair	key	number
+field	pair	key	private_property_identifier
+field	pair	key	property_identifier
+field	pair	key	string
+field	pair	value	expression
+field	pair_pattern	key	computed_property_name
+field	pair_pattern	key	number
+field	pair_pattern	key	private_property_identifier
+field	pair_pattern	key	property_identifier
+field	pair_pattern	key	string
+field	pair_pattern	value	assignment_pattern
+field	pair_pattern	value	pattern
+field	parenthesized_expression	type	type_annotation
+field	property_signature	name	computed_property_name
+field	property_signature	name	number
+field	property_signature	name	private_property_identifier
+field	property_signature	name	property_identifier
+field	property_signature	name	string
+field	property_signature	type	type_annotation
+field	public_field_definition	decorator	decorator
+field	public_field_definition	name	computed_property_name
+field	public_field_definition	name	number
+field	public_field_definition	name	private_property_identifier
+field	public_field_definition	name	property_identifier
+field	public_field_definition	name	string
+field	public_field_definition	type	type_annotation
+field	public_field_definition	value	expression
+field	regex	flags	regex_flags
+field	regex	pattern	regex_pattern
+field	required_parameter	decorator	decorator
+field	required_parameter	name	identifier
+field	required_parameter	name	rest_pattern
+field	required_parameter	pattern	pattern
+field	required_parameter	pattern	this
+field	required_parameter	type	type_annotation
+field	required_parameter	value	expression
+field	subscript_expression	index	expression
+field	subscript_expression	index	number
+field	subscript_expression	index	predefined_type
+field	subscript_expression	index	sequence_expression
+field	subscript_expression	index	string
+field	subscript_expression	object	expression
+field	subscript_expression	optional_chain	optional_chain
+field	switch_case	body	statement
+field	switch_case	value	expression
+field	switch_case	value	sequence_expression
+field	switch_default	body	statement
+field	switch_statement	body	switch_body
+field	switch_statement	value	parenthesized_expression
+field	ternary_expression	alternative	expression
+field	ternary_expression	condition	expression
+field	ternary_expression	consequence	expression
+field	try_statement	body	statement_block
+field	try_statement	finalizer	finally_clause
+field	try_statement	handler	catch_clause
+field	type_alias_declaration	name	type_identifier
+field	type_alias_declaration	type_parameters	type_parameters
+field	type_alias_declaration	value	type
+field	type_parameter	constraint	constraint
+field	type_parameter	name	type_identifier
+field	type_parameter	value	default_type
+field	type_predicate	name	identifier
+field	type_predicate	name	this
+field	type_predicate	type	type
+field	unary_expression	argument	expression
+field	unary_expression	argument	number
+field	unary_expression	operator	"!"
+field	unary_expression	operator	"+"
+field	unary_expression	operator	"-"
+field	unary_expression	operator	"delete"
+field	unary_expression	operator	"typeof"
+field	unary_expression	operator	"void"
+field	unary_expression	operator	"~"
+field	update_expression	argument	expression
+field	update_expression	operator	"++"
+field	update_expression	operator	"--"
+field	using_declaration	kind	"await"
+field	using_declaration	kind	"using"
+field	variable_declarator	name	array_pattern
+field	variable_declarator	name	identifier
+field	variable_declarator	name	object_pattern
+field	variable_declarator	type	type_annotation
+field	variable_declarator	value	expression
+field	while_statement	body	statement
+field	while_statement	condition	parenthesized_expression
+field	with_statement	body	statement
+field	with_statement	object	parenthesized_expression
+kind	"!"
+kind	"!="
+kind	"!=="
+kind	"${"
+kind	"%"
+kind	"%="
+kind	"&"
+kind	"&&"
+kind	"&&="
+kind	"&="
+kind	"'"
+kind	"("
+kind	")"
+kind	"*"
+kind	"**"
+kind	"**="
+kind	"*="
+kind	"+"
+kind	"++"
+kind	"+="
+kind	"+?:"
+kind	","
+kind	"-"
+kind	"--"
+kind	"-="
+kind	"-?:"
+kind	"."
+kind	"..."
+kind	"/"
+kind	"/="
+kind	":"
+kind	";"
+kind	"<"
+kind	"<<"
+kind	"<<="
+kind	"<="
+kind	"="
+kind	"=="
+kind	"==="
+kind	"=>"
+kind	">"
+kind	">="
+kind	">>"
+kind	">>="
+kind	">>>"
+kind	">>>="
+kind	"?"
+kind	"?."
+kind	"?:"
+kind	"??"
+kind	"??="
+kind	"@"
+kind	"["
+kind	"\""
+kind	"]"
+kind	"^"
+kind	"^="
+kind	"`"
+kind	"abstract"
+kind	"accessor"
+kind	"any"
+kind	"as"
+kind	"assert"
+kind	"asserts"
+kind	"async"
+kind	"await"
+kind	"boolean"
+kind	"break"
+kind	"case"
+kind	"catch"
+kind	"class"
+kind	"const"
+kind	"continue"
+kind	"debugger"
+kind	"declare"
+kind	"default"
+kind	"delete"
+kind	"do"
+kind	"else"
+kind	"enum"
+kind	"export"
+kind	"extends"
+kind	"finally"
+kind	"for"
+kind	"from"
+kind	"function"
+kind	"get"
+kind	"global"
+kind	"if"
+kind	"implements"
+kind	"import"
+kind	"in"
+kind	"infer"
+kind	"instanceof"
+kind	"interface"
+kind	"is"
+kind	"keyof"
+kind	"let"
+kind	"meta"
+kind	"module"
+kind	"namespace"
+kind	"never"
+kind	"new"
+kind	"number"
+kind	"object"
+kind	"of"
+kind	"out"
+kind	"override"
+kind	"private"
+kind	"protected"
+kind	"public"
+kind	"readonly"
+kind	"require"
+kind	"return"
+kind	"satisfies"
+kind	"set"
+kind	"static"
+kind	"string"
+kind	"switch"
+kind	"symbol"
+kind	"target"
+kind	"throw"
+kind	"try"
+kind	"type"
+kind	"typeof"
+kind	"unique symbol"
+kind	"unknown"
+kind	"using"
+kind	"var"
+kind	"void"
+kind	"while"
+kind	"with"
+kind	"yield"
+kind	"{"
+kind	"{|"
+kind	"|"
+kind	"|="
+kind	"||"
+kind	"||="
+kind	"|}"
+kind	"}"
+kind	"~"
+kind	abstract_class_declaration
+kind	abstract_method_signature
+kind	accessibility_modifier
+kind	adding_type_annotation
+kind	ambient_declaration
+kind	arguments
+kind	array
+kind	array_pattern
+kind	array_type
+kind	arrow_function
+kind	as_expression
+kind	asserts
+kind	asserts_annotation
+kind	assignment_expression
+kind	assignment_pattern
+kind	augmented_assignment_expression
+kind	await_expression
+kind	binary_expression
+kind	break_statement
+kind	call_expression
+kind	call_signature
+kind	catch_clause
+kind	class
+kind	class_body
+kind	class_declaration
+kind	class_heritage
+kind	class_static_block
+kind	comment
+kind	computed_property_name
+kind	conditional_type
+kind	constraint
+kind	construct_signature
+kind	constructor_type
+kind	continue_statement
+kind	debugger_statement
+kind	declaration
+kind	decorator
+kind	default_type
+kind	do_statement
+kind	else_clause
+kind	empty_statement
+kind	enum_assignment
+kind	enum_body
+kind	enum_declaration
+kind	escape_sequence
+kind	existential_type
+kind	export_clause
+kind	export_specifier
+kind	export_statement
+kind	expression
+kind	expression_statement
+kind	extends_clause
+kind	extends_type_clause
+kind	false
+kind	finally_clause
+kind	flow_maybe_type
+kind	for_in_statement
+kind	for_statement
+kind	formal_parameters
+kind	function_declaration
+kind	function_expression
+kind	function_signature
+kind	function_type
+kind	generator_function
+kind	generator_function_declaration
+kind	generic_type
+kind	hash_bang_line
+kind	html_comment
+kind	identifier
+kind	if_statement
+kind	implements_clause
+kind	import
+kind	import_alias
+kind	import_attribute
+kind	import_clause
+kind	import_require_clause
+kind	import_specifier
+kind	import_statement
+kind	index_signature
+kind	index_type_query
+kind	infer_type
+kind	instantiation_expression
+kind	interface_body
+kind	interface_declaration
+kind	internal_module
+kind	intersection_type
+kind	labeled_statement
+kind	lexical_declaration
+kind	literal_type
+kind	lookup_type
+kind	mapped_type_clause
+kind	member_expression
+kind	meta_property
+kind	method_definition
+kind	method_signature
+kind	module
+kind	named_imports
+kind	namespace_export
+kind	namespace_import
+kind	nested_identifier
+kind	nested_type_identifier
+kind	new_expression
+kind	non_null_expression
+kind	null
+kind	number
+kind	object
+kind	object_assignment_pattern
+kind	object_pattern
+kind	object_type
+kind	omitting_type_annotation
+kind	opting_type_annotation
+kind	optional_chain
+kind	optional_parameter
+kind	optional_type
+kind	override_modifier
+kind	pair
+kind	pair_pattern
+kind	parenthesized_expression
+kind	parenthesized_type
+kind	pattern
+kind	predefined_type
+kind	primary_expression
+kind	primary_type
+kind	private_property_identifier
+kind	program
+kind	property_identifier
+kind	property_signature
+kind	public_field_definition
+kind	readonly_type
+kind	regex
+kind	regex_flags
+kind	regex_pattern
+kind	required_parameter
+kind	rest_pattern
+kind	rest_type
+kind	return_statement
+kind	satisfies_expression
+kind	sequence_expression
+kind	shorthand_property_identifier
+kind	shorthand_property_identifier_pattern
+kind	spread_element
+kind	statement
+kind	statement_block
+kind	statement_identifier
+kind	string
+kind	string_fragment
+kind	subscript_expression
+kind	super
+kind	switch_body
+kind	switch_case
+kind	switch_default
+kind	switch_statement
+kind	template_literal_type
+kind	template_string
+kind	template_substitution
+kind	template_type
+kind	ternary_expression
+kind	this
+kind	this_type
+kind	throw_statement
+kind	true
+kind	try_statement
+kind	tuple_type
+kind	type
+kind	type_alias_declaration
+kind	type_annotation
+kind	type_arguments
+kind	type_assertion
+kind	type_identifier
+kind	type_parameter
+kind	type_parameters
+kind	type_predicate
+kind	type_predicate_annotation
+kind	type_query
+kind	unary_expression
+kind	undefined
+kind	union_type
+kind	update_expression
+kind	using_declaration
+kind	variable_declaration
+kind	variable_declarator
+kind	while_statement
+kind	with_statement
+kind	yield_expression
+multiple	abstract_class_declaration	decorator
+multiple	abstract_method_signature	children
+multiple	ambient_declaration	children
+multiple	arguments	children
+multiple	array	children
+multiple	array_pattern	children
+multiple	as_expression	children
+multiple	class	decorator
+multiple	class_body	children
+multiple	class_body	decorator
+multiple	class_declaration	decorator
+multiple	class_heritage	children
+multiple	enum_body	children
+multiple	enum_body	name
+multiple	export_clause	children
+multiple	export_statement	children
+multiple	export_statement	decorator
+multiple	extends_clause	type_arguments
+multiple	extends_clause	value
+multiple	extends_type_clause	type
+multiple	for_in_statement	kind
+multiple	for_statement	condition
+multiple	formal_parameters	children
+multiple	implements_clause	children
+multiple	import_alias	children
+multiple	import_clause	children
+multiple	import_statement	children
+multiple	infer_type	children
+multiple	interface_body	children
+multiple	intersection_type	children
+multiple	lexical_declaration	children
+multiple	lookup_type	children
+multiple	method_definition	children
+multiple	method_signature	children
+multiple	named_imports	children
+multiple	object	children
+multiple	object_pattern	children
+multiple	object_type	children
+multiple	optional_parameter	children
+multiple	optional_parameter	decorator
+multiple	program	children
+multiple	property_signature	children
+multiple	public_field_definition	children
+multiple	public_field_definition	decorator
+multiple	required_parameter	children
+multiple	required_parameter	decorator
+multiple	satisfies_expression	children
+multiple	sequence_expression	children
+multiple	statement_block	children
+multiple	string	children
+multiple	switch_body	children
+multiple	switch_case	body
+multiple	switch_default	body
+multiple	template_literal_type	children
+multiple	template_string	children
+multiple	tuple_type	children
+multiple	type_arguments	children
+multiple	type_assertion	children
+multiple	type_parameters	children
+multiple	union_type	children
+multiple	using_declaration	children
+multiple	using_declaration	kind
+multiple	variable_declaration	children
+required	abstract_class_declaration	body
+required	abstract_class_declaration	name
+required	abstract_method_signature	name
+required	abstract_method_signature	parameters
+required	adding_type_annotation	children
+required	ambient_declaration	children
+required	array_type	children
+required	arrow_function	body
+required	as_expression	children
+required	asserts	children
+required	asserts_annotation	children
+required	assignment_expression	left
+required	assignment_expression	right
+required	assignment_pattern	left
+required	assignment_pattern	right
+required	augmented_assignment_expression	left
+required	augmented_assignment_expression	operator
+required	augmented_assignment_expression	right
+required	await_expression	children
+required	binary_expression	left
+required	binary_expression	operator
+required	binary_expression	right
+required	call_expression	arguments
+required	call_expression	function
+required	call_signature	parameters
+required	catch_clause	body
+required	class	body
+required	class_declaration	body
+required	class_declaration	name
+required	class_heritage	children
+required	class_static_block	body
+required	computed_property_name	children
+required	conditional_type	alternative
+required	conditional_type	consequence
+required	conditional_type	left
+required	conditional_type	right
+required	constraint	children
+required	construct_signature	parameters
+required	constructor_type	parameters
+required	constructor_type	type
+required	decorator	children
+required	default_type	children
+required	do_statement	body
+required	do_statement	condition
+required	else_clause	children
+required	enum_assignment	name
+required	enum_assignment	value
+required	enum_declaration	body
+required	enum_declaration	name
+required	export_specifier	name
+required	expression_statement	children
+required	extends_clause	value
+required	extends_type_clause	type
+required	finally_clause	body
+required	flow_maybe_type	children
+required	for_in_statement	body
+required	for_in_statement	left
+required	for_in_statement	operator
+required	for_in_statement	right
+required	for_statement	body
+required	for_statement	condition
+required	for_statement	initializer
+required	function_declaration	body
+required	function_declaration	name
+required	function_declaration	parameters
+required	function_expression	body
+required	function_expression	parameters
+required	function_signature	name
+required	function_signature	parameters
+required	function_type	parameters
+required	function_type	return_type
+required	generator_function	body
+required	generator_function	parameters
+required	generator_function_declaration	body
+required	generator_function_declaration	name
+required	generator_function_declaration	parameters
+required	generic_type	name
+required	generic_type	type_arguments
+required	if_statement	condition
+required	if_statement	consequence
+required	implements_clause	children
+required	import_alias	children
+required	import_attribute	children
+required	import_clause	children
+required	import_require_clause	children
+required	import_require_clause	source
+required	import_specifier	name
+required	index_signature	type
+required	index_type_query	children
+required	infer_type	children
+required	instantiation_expression	type_arguments
+required	interface_declaration	body
+required	interface_declaration	name
+required	internal_module	name
+required	intersection_type	children
+required	labeled_statement	body
+required	labeled_statement	label
+required	lexical_declaration	children
+required	lexical_declaration	kind
+required	literal_type	children
+required	lookup_type	children
+required	mapped_type_clause	name
+required	mapped_type_clause	type
+required	member_expression	object
+required	member_expression	property
+required	method_definition	body
+required	method_definition	name
+required	method_definition	parameters
+required	method_signature	name
+required	method_signature	parameters
+required	module	name
+required	namespace_export	children
+required	namespace_import	children
+required	nested_identifier	object
+required	nested_identifier	property
+required	nested_type_identifier	module
+required	nested_type_identifier	name
+required	new_expression	constructor
+required	non_null_expression	children
+required	object_assignment_pattern	left
+required	object_assignment_pattern	right
+required	omitting_type_annotation	children
+required	opting_type_annotation	children
+required	optional_type	children
+required	pair	key
+required	pair	value
+required	pair_pattern	key
+required	pair_pattern	value
+required	parenthesized_expression	children
+required	parenthesized_type	children
+required	property_signature	name
+required	public_field_definition	name
+required	readonly_type	children
+required	regex	pattern
+required	rest_pattern	children
+required	rest_type	children
+required	satisfies_expression	children
+required	sequence_expression	children
+required	spread_element	children
+required	subscript_expression	index
+required	subscript_expression	object
+required	switch_case	value
+required	switch_statement	body
+required	switch_statement	value
+required	template_substitution	children
+required	template_type	children
+required	ternary_expression	alternative
+required	ternary_expression	condition
+required	ternary_expression	consequence
+required	throw_statement	children
+required	try_statement	body
+required	type_alias_declaration	name
+required	type_alias_declaration	value
+required	type_annotation	children
+required	type_arguments	children
+required	type_assertion	children
+required	type_parameter	name
+required	type_predicate	name
+required	type_predicate	type
+required	type_predicate_annotation	children
+required	type_query	children
+required	unary_expression	argument
+required	unary_expression	operator
+required	union_type	children
+required	update_expression	argument
+required	update_expression	operator
+required	using_declaration	children
+required	using_declaration	kind
+required	variable_declaration	children
+required	variable_declarator	name
+required	while_statement	body
+required	while_statement	condition
+required	with_statement	body
+required	with_statement	object
+subtype	declaration	abstract_class_declaration
+subtype	declaration	ambient_declaration
+subtype	declaration	class_declaration
+subtype	declaration	enum_declaration
+subtype	declaration	function_declaration
+subtype	declaration	function_signature
+subtype	declaration	generator_function_declaration
+subtype	declaration	import_alias
+subtype	declaration	interface_declaration
+subtype	declaration	internal_module
+subtype	declaration	lexical_declaration
+subtype	declaration	module
+subtype	declaration	type_alias_declaration
+subtype	declaration	using_declaration
+subtype	declaration	variable_declaration
+subtype	expression	as_expression
+subtype	expression	assignment_expression
+subtype	expression	augmented_assignment_expression
+subtype	expression	await_expression
+subtype	expression	binary_expression
+subtype	expression	instantiation_expression
+subtype	expression	internal_module
+subtype	expression	new_expression
+subtype	expression	primary_expression
+subtype	expression	satisfies_expression
+subtype	expression	ternary_expression
+subtype	expression	type_assertion
+subtype	expression	unary_expression
+subtype	expression	update_expression
+subtype	expression	yield_expression
+subtype	pattern	array_pattern
+subtype	pattern	identifier
+subtype	pattern	member_expression
+subtype	pattern	non_null_expression
+subtype	pattern	object_pattern
+subtype	pattern	rest_pattern
+subtype	pattern	subscript_expression
+subtype	pattern	undefined
+subtype	primary_expression	array
+subtype	primary_expression	arrow_function
+subtype	primary_expression	call_expression
+subtype	primary_expression	class
+subtype	primary_expression	false
+subtype	primary_expression	function_expression
+subtype	primary_expression	generator_function
+subtype	primary_expression	identifier
+subtype	primary_expression	member_expression
+subtype	primary_expression	meta_property
+subtype	primary_expression	non_null_expression
+subtype	primary_expression	null
+subtype	primary_expression	number
+subtype	primary_expression	object
+subtype	primary_expression	parenthesized_expression
+subtype	primary_expression	regex
+subtype	primary_expression	string
+subtype	primary_expression	subscript_expression
+subtype	primary_expression	super
+subtype	primary_expression	template_string
+subtype	primary_expression	this
+subtype	primary_expression	true
+subtype	primary_expression	undefined
+subtype	primary_type	"const"
+subtype	primary_type	array_type
+subtype	primary_type	call_expression
+subtype	primary_type	conditional_type
+subtype	primary_type	existential_type
+subtype	primary_type	flow_maybe_type
+subtype	primary_type	generic_type
+subtype	primary_type	index_type_query
+subtype	primary_type	intersection_type
+subtype	primary_type	literal_type
+subtype	primary_type	lookup_type
+subtype	primary_type	member_expression
+subtype	primary_type	nested_type_identifier
+subtype	primary_type	object_type
+subtype	primary_type	parenthesized_type
+subtype	primary_type	predefined_type
+subtype	primary_type	template_literal_type
+subtype	primary_type	this_type
+subtype	primary_type	tuple_type
+subtype	primary_type	type_identifier
+subtype	primary_type	type_query
+subtype	primary_type	union_type
+subtype	statement	break_statement
+subtype	statement	continue_statement
+subtype	statement	debugger_statement
+subtype	statement	declaration
+subtype	statement	do_statement
+subtype	statement	empty_statement
+subtype	statement	export_statement
+subtype	statement	expression_statement
+subtype	statement	for_in_statement
+subtype	statement	for_statement
+subtype	statement	if_statement
+subtype	statement	import_statement
+subtype	statement	labeled_statement
+subtype	statement	return_statement
+subtype	statement	statement_block
+subtype	statement	switch_statement
+subtype	statement	throw_statement
+subtype	statement	try_statement
+subtype	statement	while_statement
+subtype	statement	with_statement
+subtype	type	call_expression
+subtype	type	constructor_type
+subtype	type	function_type
+subtype	type	infer_type
+subtype	type	member_expression
+subtype	type	primary_type
+subtype	type	readonly_type
