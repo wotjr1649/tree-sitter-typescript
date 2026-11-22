@@ -297,9 +297,9 @@ module.exports = function defineGrammar(dialect) {
         prec.dynamic(2, $.instantiation_expression),
       ),
 
-      _postfix_expression: ($, previous) => dialect === 'typescript'
-        ? choice($.primary_expression, $.new_expression)
-        : previous,
+      _postfix_expression: ($, previous) => dialect === 'typescript' ?
+        choice($.primary_expression, $.new_expression) :
+        previous,
 
       // If the dialect is regular typescript, we exclude JSX expressions and
       // include type assertions. If the dialect is TSX, we do the opposite.
