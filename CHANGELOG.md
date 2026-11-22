@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- Use the grammar, queries and license from `wotjr1649/tree-sitter-javascript` v4.4.0 (tag object `a907252`, commit
+  `e5ada30`) as the vendored JavaScript input for both grammars. This replaces upstream JavaScript v0.23.1.
+  [Vendor provenance](NOTICE)
+- Port the JavaScript external scanner and adapt it to TypeScript signatures and bindings.
+  - v4.0.0 tracks the contexts of `await` and `yield`, handles `using` and `await using` at automatic semicolon
+    insertion (ASI) boundaries, and scans quoted JSX attribute fragments and references.
+  - v4.1.0 shares scanner context entry for ordinary methods and restores shallow scope stacks directly.
+  - v4.2.0 adds the ASCII whitespace and zero-lookahead EOF fast paths and distinguishes a literal NUL from EOF.
+  - v4.3.0 carries pending ASI and declaration lookahead across incremental reuse of bare declarators and `yield`.
+  - v4.4.0 preserves trailing comments after a reused initializer or declarator at EOF and across line breaks.
+- Generated `parser.c` sizes against v2.0.0 are 9,403,434 to 11,821,348 bytes for TypeScript (+25.7%) and
+  9,432,380 to 12,502,888 bytes for TSX (+32.6%). LR states grow from 6,719 to 10,482 and from 6,851 to 10,996,
+  respectively.
+
+### Added
+
+- `using_declaration` is a named `declaration` subtype with `variable_declarator` children and a `kind` field for
+  `using` and optional `await`. Parenthesized decorators accept general expressions such as `@(a || b)`. TSX
+  permits a hyphen in the first segment of a JSX member tag, including `<a-b.C<T> />`.
+
+### Fixed
+
+- Prefer `await_expression` over an ambiguous call in modules and async functions, including `await(this)`.
+- Bind type arguments to postfix expressions before comparisons. `1 < foo<string>()` is a comparison whose right
+  operand is the generic call. Two pinned VS Code files with `unique` after `<` now parse.
+- Keep `default` an `identifier` in named import and export specifiers, including names on either side of `as`.
+  Type query member names such as `typeof import('m').default` parse as `property_identifier`.
+- Disable Annex B HTML-like comments in TypeScript and TSX. The scanner leaves `<!--` available to the expression
+  grammar and inputs such as a bare `-->` line can produce syntax errors.
+- Tagged templates, including tags with type arguments, accept `\u` without hex digits. One more pinned VS Code
+  file now parses. `test/examples/known-failures.txt` shrinks from 14 entries to 11 across 17,665 files.
+
+### Breaking
+
+- Quoted JSX attribute fragments can split before the closing quote (A1) or merge around incomplete character
+  references (A2). Trailing comments can move outside a bare declaration (A3), from an initializer's function body
+  to its declaration (A4), or from a preceding statement or body to the enclosing block or program (B8).
+- `as` now wraps the `await_expression` in `await f() as T` (B2). Generic calls and their member accesses can move
+  inside `await` (N01, N02). Non-null assertions bind to their immediate operand (B6), and prefix operators can wrap
+  a generic call and its member access (B7).
+- The member object in `@(super.decorate)` is `super` (B9) and the member object in `<this.C/>` is `this` (B10).
+  `using` and `await using` declarations now use `using_declaration` (B11). A `hash_bang_line` range ends before
+  a terminating CR (H1).
+- In both `node-types.json` files, `await_expression`, `non_null_expression` and `instantiation_expression` list
+  more specific child types in place of `expression`. `parenthesized_expression` lists those of its children
+  covered by `expression` through that supertype, including calls, identifiers and member expressions.
+- Full CST comparison against v2.0.0 found 962 changes among 21,747 input–grammar pairs where the input was valid
+  and previously parsed without error (896 TypeScript, 66 TSX). See the
+  [migration guide](docs/migrating-from-2.0.md) for the CST changes, schema details and query updates.
+
 ## [2.0.0] - 2026-11-20
 
 The first release that changes how the grammars parse. 1.0.0 is the upstream `tree-sitter/tree-sitter-typescript`

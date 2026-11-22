@@ -19,12 +19,12 @@ independent repository, as `wotjr1649/tree-sitter-mssql` already does for T-SQL.
    change at a time, never synchronized automatically. Upstream tags stay out of `refs/tags`; v0.23.2 is kept as
    `refs/upstream/v0.23.2`.
 2. The JavaScript grammar that `common/define-grammar.js` extends is vendored as
-   `third_party/tree-sitter-javascript/grammar.js`, copied unchanged from tree-sitter-javascript v0.23.1 (`3a837b6`,
-   SHA-256 `230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc`), in place of the npm dependency. The
-   JavaScript queries that `tree-sitter.json` combines with this repository's are vendored from the same tag under
-   `third_party/tree-sitter-javascript/queries/`, with the tag's `LICENSE`. `NOTICE` records the source and the
-   SHA-256 of every file there; CI checks each hash and that `third_party/` holds no other file. A later release may
-   switch it to a named tag of the owner-maintained JavaScript grammar.
+   `third_party/tree-sitter-javascript/grammar.js` in place of the npm dependency. Through v2.0.0 it came unchanged
+   from upstream tree-sitter-javascript v0.23.1 (`3a837b6`, grammar SHA-256
+   `230e330dd914d94297e5e58d53942cd5debf9c069852da93b6a6b1daae1967dc`). The port switches the input to
+   `wotjr1649/tree-sitter-javascript` v4.4.0 (tag object `a907252`, commit `e5ada30`). The JavaScript queries that
+   `tree-sitter.json` combines with this repository's come from the same tag, along with its `LICENSE`. `NOTICE`
+   records the source and SHA-256 of every vendored file. CI checks each hash and the file set under `third_party/`.
 3. Own versions start at v1.0.0, which equals the v0.23.2 baseline behaviour: regenerated with tree-sitter CLI 0.27.2,
    `parser.c`, `grammar.json`, `node-types.json` and the headers of both grammars are byte-identical to what
    go-treesitter generates from the old source. `tree-sitter.json` keeps `metadata.version` `0.23.2` because
@@ -90,13 +90,10 @@ fixes land") and refines Decision 4. Everything else in this record stands.
    document (`docs/migrating-from-1.0.md` for v2.0.0) listing every error-free tree change with before and after trees,
    the schema additions, and the recorded known differences from tsc. A MINOR or PATCH release needs none unless it finds
    something to record.
-7. **The deferred JavaScript-grammar switch** (replacing the vendored `third_party/tree-sitter-javascript` input by a
-   named tag of the owner-maintained JavaScript grammar, Decision 2) gets its version from the same rule, measured in its
-   own pull request against the then-current release: MAJOR if it changes an error-free tree or removes or renames a node
-   kind or field; MINOR or PATCH only if the measured switch has neither. The comparison against the tsc 7.0.2 oracle
-   and the node-kind snapshot (`test/node-kinds`) is part of that pull request. Measurements so far (npm JavaScript
-   0.25.0: `using` statements, the `@(super.x)` decorator hunk and three removed child types) point to MAJOR, but the
-   decision is made on the measured pull request, not in advance.
+7. **The JavaScript-grammar switch** (Decision 2) is versioned by comparing both grammars against the current release
+   with the tsc 7.0.2 oracle and the node-kind snapshots (`test/node-kinds`). The v4.4.0 port is MAJOR under the rules
+   in `AGENTS.md`. It changes previously error-free trees of valid input in both grammars. See the
+   [migration guide](../migrating-from-2.0.md).
 8. **`test/examples/known-failures.txt`.** The grammar fixes that Decision 3 and the last Consequences bullet called
    "v1.1" landed as v2.0.0. The entries for constructs the release does not fix are marked `candidate:`; they may be
    fixed in a later MINOR (error to ok) or MAJOR release. The list still may only shrink, and a pull request that adds a

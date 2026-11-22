@@ -37,10 +37,9 @@ owner approval. go-treesitter regenerates `src/parser.c` with its own pinned CLI
   only shrink. A new failure fails CI; a listed file that starts parsing is removed in the same change; a pull
   request that adds a path to the list fails CI unless it also changes `repos.txt`
   (`test/examples/check-known-failures-shrink.sh`). Entries marked
-  `candidate:` are grammar gaps not fixed yet and possible later changes: `unique` after `<`, `symbol` as a tuple
-  label, `abstract` as an object-type property, `\u` without hex digits in templates, and a call signature starting
-  with `<` on a new line. Entries marked `not complete TypeScript` are fixture inputs, not grammar gaps. Moving a pin
-  updates the list in the same change.
+  `candidate:` are grammar gaps not fixed yet and possible later changes: `symbol` as a tuple label, `abstract`
+  as an object-type property, and a call signature starting with `<` on a new line. Entries marked
+  `not complete TypeScript` are fixture inputs. Moving a pin updates the list in the same change.
 - Releases are `vMAJOR.MINOR.PATCH` tags with a GitHub Release; the latest is
   `gh release view -R wotjr1649/tree-sitter-typescript`. Record every release in `CHANGELOG.md` (Keep a Changelog).
   - MAJOR: a node kind, field or supertype subtype is removed or renamed, or the CST of valid input that the previous
