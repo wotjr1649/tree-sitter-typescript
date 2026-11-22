@@ -41,7 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Ordinary functions also parse forms such as `await g<T>()` as an await expression and retain `await(x)` as a call.
 - Bind type arguments to postfix expressions before comparisons. `1 < foo<string>()` is a comparison whose right
   operand is the generic call. Two pinned VS Code files with `unique` after `<` now parse.
-- Keep `default` an `identifier` in named import and export specifiers, including names on either side of `as`.
+- Keep `default` an `identifier` on either side of `as` in export specifiers and in the imported-name position
+  of `import {default as local} from 'm'`. The local name follows the import binding rules.
   Type query member names such as `typeof import('m').default` parse as `property_identifier`.
 - Disable Annex B HTML-like comments in TypeScript and TSX. The scanner leaves `<!--` available to the expression
   grammar and inputs such as a bare `-->` line can produce syntax errors.
@@ -62,8 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In both `node-types.json` files, `await_expression`, `non_null_expression` and `instantiation_expression` list
   more specific child types in place of `expression`. `parenthesized_expression` lists those of its children
   covered by `expression` through that supertype, including calls, identifiers and member expressions.
-- Full CST comparison against v2.0.0 found 962 changes among 21,747 input–grammar pairs where the input was valid
-  and previously parsed without error (896 TypeScript, 66 TSX). See the
+- The full CST comparison of `e0f14e6` against v2.0.0 found 962 changes among 21,747 input–grammar pairs with valid
+  input that previously parsed without error (896 TypeScript, 66 TSX). See the
   [migration guide](docs/migrating-from-2.0.md) for the CST changes, schema details and query updates.
 
 ## [2.0.0] - 2026-11-20
