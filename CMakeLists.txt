@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-typescript
-        VERSION "3.0.0"
+        VERSION "3.1.0"
 		DESCRIPTION "TypeScript and TSX grammars for tree-sitter"
         HOMEPAGE_URL "https://github.com/wotjr1649/tree-sitter-typescript"
         LANGUAGES C)

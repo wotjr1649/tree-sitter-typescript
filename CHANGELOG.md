@@ -5,17 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [3.1.0] - 2026-11-23
 
 ### Changed
 
+- Check the public node-type contract for both grammars in CI against v3.0.0.
 - Share parser states for class field initializers, type query subscript indexes and semicolons.
-  LR states fall from 11,215 to 9,695 for TypeScript and from
-  11,767 to 10,247 for TSX. Large states fall from 1,527 to 1,384
+  Against the base of the state-sharing change, LR states fall from 11,215 to 9,695 for TypeScript
+  and from 11,767 to 10,247 for TSX. Large states fall from 1,527 to 1,384
   and 1,545 to 1,402, respectively. Generated parser source shrinks from
   12,899,199 to 11,919,023 bytes and from 13,630,855 to 12,647,534 bytes.
   On Windows with GCC 16.2.0, parser DLLs shrink from 2,254,618 to 2,075,930 bytes
-  and from 2,400,020 to 2,215,700 bytes.
+  and from 2,400,020 to 2,215,700 bytes. The full CST comparison for this change found identical trees.
+  The final parsers use 787 fewer LR states per grammar than v3.0.0.
+- Document how corpus cases select grammars and record the known gap for a newline before an array
+  expression following an `as import('x').Y` or `satisfies import('x').Y` expression.
 
 ### Fixed
 
@@ -26,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse a standalone `async` followed by a line break and `in` or `instanceof` as the left operand of a
   binary expression, consistently in fresh and incremental parses.
 - Match fresh parsing after edits to `in` or `instanceof` following `await` or `async` and a line break in comment trivia.
+- Clear two pinned VS Code failures with the tuple label and object type member fixes, leaving nine known
+  failures across 17,665 example files.
 
 ## [3.0.0] - 2026-11-22
 
@@ -606,4 +612,5 @@ renamed. Schema additions: a `type_arguments` child of `member_expression`, the 
     `ucrtbase.dll` and 0 in `msvcrt.dll`.)
   - `test/examples/known-failures.txt`: no entry cleared.
 
+[3.1.0]: https://github.com/wotjr1649/tree-sitter-typescript/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/wotjr1649/tree-sitter-typescript/compare/v2.0.0...v3.0.0
