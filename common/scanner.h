@@ -269,12 +269,14 @@ static ASILookahead scan_asi_trivia(TSLexer *lexer, ASITrivia *trivia, bool pres
             } else if (lexer->lookahead == '*') {
                 lexer->advance(lexer, skip_block);
                 bool block_newline = false;
+                void (*advance_char)(TSLexer *, bool) = lexer->advance;
+                bool (*range_start)(const TSLexer *) = lexer->is_at_included_range_start;
                 while ((c = lexer->lookahead) != 0 || !lexer->eof(lexer)) {
-                    if (at_range_start(lexer, stop_at_range)) return ASI_END;
-                    lexer->advance(lexer, skip_block);
-                    if (at_range_start(lexer, stop_at_range)) return ASI_END;
+                    if (stop_at_range && range_start(lexer)) return ASI_END;
+                    advance_char(lexer, skip_block);
                     if (c == '*' && lexer->lookahead == '/') {
-                        lexer->advance(lexer, skip_block);
+                        if (stop_at_range && range_start(lexer)) return ASI_END;
+                        advance_char(lexer, skip_block);
                         break;
                     }
                     if (is_line_terminator(c)) {
@@ -789,32 +791,44 @@ static bool scan_identifier_word(TSLexer *lexer, const char *keyword) {
     return consume_word(lexer, keyword, false) && !is_identifier_part(lexer->lookahead);
 }
 
-static bool scan_context_word(const Scanner *scanner, TSLexer *lexer, bool keyword, bool allow_await_operand) {
+static bool scan_context_word(const Scanner *scanner, TSLexer *lexer, bool keyword,
+                              const bool *valid_symbols) {
     unsigned flags = context_flags(scanner);
-    const char *word = NULL;
-    bool await = lexer->lookahead == 'a';
-    if (await && (keyword || !(flags & AWAIT_CONTEXT))) {
-        word = "await";
-    } else if (lexer->lookahead == 'y' && !(flags & YIELD_CONTEXT)) {
-        word = "yield";
+    if (lexer->lookahead == 'y') {
+        if ((flags & YIELD_CONTEXT) || !scan_identifier_word(lexer, "yield")) return false;
+        lexer->mark_end(lexer);
+        lexer->result_symbol = CONTEXT_IDENTIFIER;
+        return true;
     }
-    if (!word || !consume_word(lexer, word, false)) return false;
-    if (is_identifier_part(lexer->lookahead)) return false;
+
+    advance(lexer);
+    bool await = lexer->lookahead == 'w';
+    bool allow_await_operand = valid_symbols[CONTEXT_AWAIT];
+    // In block statement states, a reused async expression can bypass the restricted-keyword ASI check.
+    if ((!await && !(allow_await_operand && valid_symbols[KEYWORD_CONTINUES])) ||
+        !scan_identifier_word(lexer, await ? "wait" : "sync")) return false;
     lexer->mark_end(lexer);
-    if (await && allow_await_operand) {
-        // Outside async scopes, tsc recognizes same-line word and literal operands such as `g()` and `42`.
+    if (!keyword && allow_await_operand) {
         ASITrivia trivia = {0};
-        ASILookahead next = scan_asi_trivia(lexer, &trivia, true, RANGE_STOP);
-        if (next == ASI_NEXT_TOKEN && !trivia.newline) {
+        // The async probe follows the ASI scan's range policy. Await also uses the scan to choose a token.
+        RangePolicy range = await ? RANGE_STOP : RANGE_BETWEEN_TOKENS;
+        ASILookahead next = scan_asi_trivia(lexer, &trivia, true, range);
+        if (next == ASI_NEXT_TOKEN) {
             int32_t c = lexer->lookahead;
-            if (c == '.') {
-                advance(lexer);
-                keyword = is_digit(lexer->lookahead);
-            } else {
-                keyword = (is_identifier_part(c) && !starts_in_operator(lexer, false)) || c == '"' || c == '\'';
+            // Read through the operator so its edits invalidate the token even when the internal lexer emits it.
+            if (trivia.comment && trivia.newline && c == 'i') starts_in_operator(lexer, false);
+            // Outside async scopes, tsc recognizes same-line word and literal operands such as g() and 42.
+            if (await && !(flags & AWAIT_CONTEXT) && !trivia.newline) {
+                if (c == '.') {
+                    advance(lexer);
+                    keyword = is_digit(lexer->lookahead);
+                } else {
+                    keyword = (is_identifier_part(c) && !starts_in_operator(lexer, false)) || c == '"' || c == '\'';
+                }
             }
         }
     }
+    if (!await || (!keyword && (flags & AWAIT_CONTEXT))) return false;
     lexer->result_symbol = keyword ? CONTEXT_AWAIT : CONTEXT_IDENTIFIER;
     return true;
 }
@@ -986,10 +1000,10 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
     }
 
     if (lexer->lookahead == 'a' && valid_symbols[CONTEXT_AWAIT] && (context_flags(scanner) & ASYNC_ARROW_CONTEXT)) {
-        return scan_context_word(scanner, lexer, true, false);
+        return scan_context_word(scanner, lexer, true, valid_symbols);
     }
     if (valid_symbols[CONTEXT_IDENTIFIER] && (lexer->lookahead == 'a' || lexer->lookahead == 'y')) {
-        return scan_context_word(scanner, lexer, false, valid_symbols[CONTEXT_AWAIT]);
+        return scan_context_word(scanner, lexer, false, valid_symbols);
     }
 
     if (valid_symbols[TERNARY_QMARK] && lexer->lookahead == '?') {

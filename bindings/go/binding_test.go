@@ -31,7 +31,7 @@ func TestCanLoadTSXGrammar(t *testing.T) {
 	parse(t, tree_sitter_typescript.LanguageTSX(), "const a = <div />;")
 }
 
-// The edit can reuse a declaration or yield subtree without reentering the lexer state that saw its trailing trivia.
+// The edit can reuse a subtree without reentering the lexer state that saw its trailing trivia.
 func TestLookaheadAfterSubtreeReuse(t *testing.T) {
 	for _, grammar := range []struct {
 		name string
@@ -42,16 +42,17 @@ func TestLookaheadAfterSubtreeReuse(t *testing.T) {
 	} {
 		t.Run(grammar.name, func(t *testing.T) {
 			language := tree_sitter.NewLanguage(grammar.lang)
-			for _, c := range []struct{ name, prefix, suffix, insertion string }{
-				{"bare declarator", "", "let x/*\n*/+y", " "},
-				{"typed bare declarator", "", "let x: T/*\n*/+y", " "},
-				{"bare yield ASI", "function* g(){return ", "yield yield\n(x);}", "/*review\n*/"},
-				{"comparison before prefix decrement", "a", "/*\n*/<!--x\n+b", " "},
-				{"initializer before prefix increment", "let", " a=b/**//*\u2028*/++c", " "},
-				{"initializer before prefix decrement", "let", " a=b//\u2029--c", " "},
-				{"declarator before line comment", "let a=b", "\nlet d=e//\nc;d;", " "},
-				{"initializer before comment at EOF", "let", " a=b//", " "},
-				{"await using across a line break", "async function f(){await", " using x = null;}", "\r\n"},
+			for _, c := range []struct{ name, prefix, suffix, insertion, deletion string }{
+				{"bare declarator", "", "let x/*\n*/+y", " ", ""},
+				{"typed bare declarator", "", "let x: T/*\n*/+y", " ", ""},
+				{"bare yield ASI", "function* g(){return ", "yield yield\n(x);}", "/*review\n*/", ""},
+				{"comparison before prefix decrement", "a", "/*\n*/<!--x\n+b", " ", ""},
+				{"initializer before prefix increment", "let", " a=b/**//*\u2028*/++c", " ", ""},
+				{"initializer before prefix decrement", "let", " a=b//\u2029--c", " ", ""},
+				{"declarator before line comment", "let a=b", "\nlet d=e//\nc;d;", " ", ""},
+				{"initializer before comment at EOF", "let", " a=b//", " ", ""},
+				{"await using across a line break", "async function f(){await", " using x = null;}", "\r\n", ""},
+				{"await before a multiline block comment", "await/*\r*/instanceo", ";", "", "f"},
 			} {
 				t.Run(c.name, func(t *testing.T) {
 					parser := tree_sitter.NewParser()
@@ -59,17 +60,19 @@ func TestLookaheadAfterSubtreeReuse(t *testing.T) {
 					if err := parser.SetLanguage(language); err != nil {
 						t.Fatal(err)
 					}
-					old := parser.Parse([]byte(c.prefix+c.suffix), nil)
+					old := parser.Parse([]byte(c.prefix+c.deletion+c.suffix), nil)
 					defer old.Close()
 					prefix := c.prefix + c.insertion
-					start := tree_sitter.Point{Column: uint(len(c.prefix))}
-					end := tree_sitter.Point{
-						Row:    uint(strings.Count(prefix, "\n")),
-						Column: uint(len(prefix) - 1 - strings.LastIndexByte(prefix, '\n')),
+					position := func(text string) tree_sitter.Point {
+						return tree_sitter.Point{
+							Row:    uint(strings.Count(text, "\n")),
+							Column: uint(len(text) - 1 - strings.LastIndexByte(text, '\n')),
+						}
 					}
+					oldPrefix := c.prefix + c.deletion
 					old.Edit(&tree_sitter.InputEdit{
-						StartByte: uint(len(c.prefix)), OldEndByte: uint(len(c.prefix)), NewEndByte: uint(len(prefix)),
-						StartPosition: start, OldEndPosition: start, NewEndPosition: end,
+						StartByte: uint(len(c.prefix)), OldEndByte: uint(len(oldPrefix)), NewEndByte: uint(len(prefix)),
+						StartPosition: position(c.prefix), OldEndPosition: position(oldPrefix), NewEndPosition: position(prefix),
 					})
 					source := []byte(prefix + c.suffix)
 					incremental := parser.Parse(source, old)

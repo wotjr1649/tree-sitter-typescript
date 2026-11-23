@@ -1,0 +1,91 @@
+=====================================
+Await before a multiline block comment
+:language(typescript)
+:language(tsx)
+=====================================
+
+await/*
+*/instanceo;
+
+---
+
+(program
+  (expression_statement
+    (await_expression (comment) (identifier))))
+
+=====================================
+Await in a class static block
+:language(typescript)
+:language(tsx)
+=====================================
+
+class C { static { await/*
+*/instanceo; } }
+
+---
+
+(program
+  (class_declaration
+    name: (type_identifier)
+    body: (class_body
+      (class_static_block
+        body: (statement_block
+          (expression_statement
+            (await_expression (comment) (identifier))))))))
+
+=====================================
+Async before two comments and an escaped identifier
+:language(typescript)
+:language(tsx)
+=====================================
+
+const f = () => { async/* a */
+/* b */instanceof\u{61}; next(); };
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (arrow_function
+        parameters: (formal_parameters)
+        body: (statement_block
+          (expression_statement (identifier))
+          (comment)
+          (comment)
+          (expression_statement (identifier))
+          (expression_statement
+            (call_expression function: (identifier) arguments: (arguments))))))))
+
+=====================================
+Await and async before comments in a JSX arrow body
+:language(tsx)
+=====================================
+
+const el = <P>{(() => { await/*
+*/inside(); async/*
+*/in x; })()}</P>;
+
+---
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (jsx_element
+        open_tag: (jsx_opening_element name: (identifier))
+        (jsx_expression
+          (call_expression
+            function: (parenthesized_expression
+              (arrow_function
+                parameters: (formal_parameters)
+                body: (statement_block
+                  (expression_statement (identifier))
+                  (comment)
+                  (expression_statement
+                    (call_expression function: (identifier) arguments: (arguments)))
+                  (expression_statement
+                    (binary_expression left: (identifier) (comment) right: (identifier))))))
+            arguments: (arguments)))
+        close_tag: (jsx_closing_element name: (identifier))))))
