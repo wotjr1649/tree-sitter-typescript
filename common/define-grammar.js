@@ -177,6 +177,14 @@ module.exports = function defineGrammar(dialect) {
       ]),
 
     rules: {
+      program: $ => choice(
+        // Keep the repeat shared with statement_block so its end-of-input recovery can reduce the list.
+        seq($.hash_bang_line, repeat($.statement)),
+        optional($._program_statement_list),
+      ),
+
+      _program_statement_list: $ => choice($.statement, seq($._program_statement_list, $.statement)),
+
       public_field_definition: $ => seq(
         repeat(field('decorator', $.decorator)),
         optional(choice(
