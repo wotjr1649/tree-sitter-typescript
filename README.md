@@ -41,6 +41,11 @@ After widening an included range or adding one, reparse from scratch with the up
 set the ranges with `ts_parser_set_included_ranges` and pass `NULL` as `old_tree`. Reusing the previous tree can
 retain tokens that ended at an earlier range boundary. This behavior also occurs in v2.0.0.
 
+## Incremental parsing performance
+
+Grammar PR authors can compare committed parsers against `origin/main`
+with the [incremental parsing benchmark](test/perf/README.md).
+
 [ci]: https://img.shields.io/github/actions/workflow/status/tree-sitter/tree-sitter-typescript/ci.yml?logo=github&label=CI
 [discord]: https://img.shields.io/discord/1063097320771698699?logo=discord&label=discord
 [matrix]: https://img.shields.io/matrix/tree-sitter-chat%3Amatrix.org?logo=matrix&label=matrix
