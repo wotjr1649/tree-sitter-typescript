@@ -560,12 +560,6 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     ASILookahead next = scan_asi_trivia(lexer, &trivia, false, RANGE_BETWEEN_TOKENS);
     *at_next_token = !trivia.comment && !trivia.newline && next == ASI_NEXT_TOKEN;
     *try_ternary = !trivia.comment && next == ASI_NEXT_TOKEN && lexer->lookahead == '?';
-    // Reuse can skip the lexer state that allows || and defers ASI across trailing comments.
-    // A reduced statement tail still allows await-using ASI, without the binding or keyword markers.
-    bool reduced_expression = valid_symbols[AWAIT_USING_ASI] && !valid_symbols[DECLARATION_END] &&
-                              !valid_symbols[BINDING_END] && !valid_symbols[CONTEXT_IDENTIFIER] &&
-                              !valid_symbols[RESTRICTED_KEYWORD] && scanner->pending_token != DECLARATION_PENDING;
-    bool defer_comments = valid_symbols[LOGICAL_OR] || reduced_expression;
     bool async_field = valid_symbols[RESTRICTED_KEYWORD] && valid_symbols[BINDING_END];
     bool restricted = valid_symbols[RESTRICTED_KEYWORD] && !async_field;
     if (valid_symbols[AWAIT_USING] && next == ASI_NEXT_TOKEN && lexer->lookahead == 'u') {
@@ -574,13 +568,6 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
                          (trivia.break_after_comment || valid_symbols[AWAIT_OPERAND_CONTINUES]);
         bool asi_for_identifier = trivia.newline && (restricted || !defer_asi);
         return scan_await_using(scanner, lexer, valid_symbols, trivia.newline, asi_for_identifier);
-    }
-    if (next == ASI_END) {
-        if (!lexer->eof(lexer)) return true;
-        // A trailing comment can be lexed as an extra before the ordinary EOF insertion.
-        bool defer_eof = !restricted && defer_comments && !trivia.leading_non_cr_break &&
-                         (trivia.line_comment || trivia.ends_at_block_comment);
-        return !defer_eof;
     }
     if (next == ASI_NEXT_TOKEN && lexer->lookahead == '}') {
         // After a destructuring pattern a colon can start its type annotation.
@@ -594,7 +581,21 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     }
     if (trivia.newline && ends_before_next_token(lexer, valid_symbols, next, false)) return true;
     *at_comparison_gt = !trivia.comment && next == ASI_NEXT_TOKEN && lexer->lookahead == '>';
-    if (!trivia.newline) return false;
+    if (next != ASI_END && !trivia.newline) return false;
+
+    // Reuse can skip the lexer state that allows || and defers ASI across trailing comments.
+    // A reduced statement tail still allows await-using ASI, without the binding or keyword markers.
+    bool reduced_expression = valid_symbols[AWAIT_USING_ASI] && !valid_symbols[DECLARATION_END] &&
+                              !valid_symbols[BINDING_END] && !valid_symbols[CONTEXT_IDENTIFIER] &&
+                              !valid_symbols[RESTRICTED_KEYWORD] && scanner->pending_token != DECLARATION_PENDING;
+    bool defer_comments = valid_symbols[LOGICAL_OR] || reduced_expression;
+    if (next == ASI_END) {
+        if (!lexer->eof(lexer)) return true;
+        // A trailing comment can be lexed as an extra before the ordinary EOF insertion.
+        bool defer_eof = !restricted && defer_comments && !trivia.leading_non_cr_break &&
+                         (trivia.line_comment || trivia.ends_at_block_comment);
+        return !defer_eof;
+    }
 
     // After return, break and continue, a line terminator ends the statement unless a ';' follows.
     if (restricted) {
