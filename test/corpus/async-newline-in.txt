@@ -1,0 +1,43 @@
+============================================
+Async identifier followed by a newline in operator
+:language(typescript)
+:language(tsx)
+============================================
+
+{ async
+in 0; }
+
+--------------------------------------------
+
+(program
+  (statement_block
+    (expression_statement
+      (binary_expression
+        left: (identifier)
+        right: (number)))))
+
+============================================
+Async identifier followed by a newline instanceof operator in an arrow body
+:language(typescript)
+:language(tsx)
+============================================
+
+const f = () => { async
+instanceof {p:1}; };
+
+--------------------------------------------
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      name: (identifier)
+      value: (arrow_function
+        parameters: (formal_parameters)
+        body: (statement_block
+          (expression_statement
+            (binary_expression
+              left: (identifier)
+              right: (object
+                (pair
+                  key: (property_identifier)
+                  value: (number))))))))))

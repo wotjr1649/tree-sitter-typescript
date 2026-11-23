@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "0822a24d80f1f5eef74d8f18a37c9dd69419c0896c7c877b642ca348d096644d",
+  "cases_sha256": "d8456f238444258e6cf507d62f6938de775a89fb1b71292be6596000f89806b7",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -9728,6 +9728,258 @@
     1109
    ],
    "at": 17
+  },
+  {
+   "id": "async-newline-in/in-lf.ts",
+   "sha256": "1a8a479a39760f1b0d88f5c0e2d5068286c0786a2ffd32ac2e0267b68273b675",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/in-lf.tsx",
+   "sha256": "1a8a479a39760f1b0d88f5c0e2d5068286c0786a2ffd32ac2e0267b68273b675",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/instanceof-arrow-lf.ts",
+   "sha256": "0fab00ef8baa4916647249164c0d9e78b9cfbdd80a0aa94177c7b96e70999d40",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/instanceof-arrow-lf.tsx",
+   "sha256": "0fab00ef8baa4916647249164c0d9e78b9cfbdd80a0aa94177c7b96e70999d40",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/in-cr.ts",
+   "sha256": "3137d5b64c9c55a278b84c8e536db28b1669d10b511fe8afe1d2c11e32746440",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/in-cr.tsx",
+   "sha256": "3137d5b64c9c55a278b84c8e536db28b1669d10b511fe8afe1d2c11e32746440",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/instanceof-crlf.ts",
+   "sha256": "5836315cf96b4612e8ac58cd9b237454ce4041a4a68ef887165f65b8c281d92a",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/instanceof-crlf.tsx",
+   "sha256": "5836315cf96b4612e8ac58cd9b237454ce4041a4a68ef887165f65b8c281d92a",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/instanceof-ls.ts",
+   "sha256": "e252d3ed277dfe8396e89bae733c8ac69f5f1319b3f722b7b707d82987cfb169",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/instanceof-ls.tsx",
+   "sha256": "e252d3ed277dfe8396e89bae733c8ac69f5f1319b3f722b7b707d82987cfb169",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/in-ps.ts",
+   "sha256": "7de8b8eb4a71cb9ce82ff427d5b73339e162dbf38cf60e746c51ec6c42a264dc",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/in-ps.tsx",
+   "sha256": "7de8b8eb4a71cb9ce82ff427d5b73339e162dbf38cf60e746c51ec6c42a264dc",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/block-comment.ts",
+   "sha256": "f7485b5593ead8d68c902395437c4fb5133808a39b1556e349c776fb23d89456",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/block-comment.tsx",
+   "sha256": "f7485b5593ead8d68c902395437c4fb5133808a39b1556e349c776fb23d89456",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/line-comment.ts",
+   "sha256": "9a415b6164e8694d3628cb885d02cdbb84f8e2cd1ca4807a283ff62ea80b5e5f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/line-comment.tsx",
+   "sha256": "9a415b6164e8694d3628cb885d02cdbb84f8e2cd1ca4807a283ff62ea80b5e5f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/contextual-identifiers.ts",
+   "sha256": "4e1eaa7d639c44d9c8cb5ddc6481838d8edf18b79e9d848b018345f868443413",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/contextual-identifiers.tsx",
+   "sha256": "4e1eaa7d639c44d9c8cb5ddc6481838d8edf18b79e9d848b018345f868443413",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/class-member.ts",
+   "sha256": "be94c8bcd6579f72f3bea702b143f51b7d2fe172acbfd577a0ef6e35e340d164",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/class-member.tsx",
+   "sha256": "be94c8bcd6579f72f3bea702b143f51b7d2fe172acbfd577a0ef6e35e340d164",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/object-value.ts",
+   "sha256": "6834a9d2b46e425285287f78ac31468cacaf5a0d51f1a118ee64cebe34043209",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/object-value.tsx",
+   "sha256": "6834a9d2b46e425285287f78ac31468cacaf5a0d51f1a118ee64cebe34043209",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/object-method.ts",
+   "sha256": "6aa0c4de1b095d2e7007fd0c2dee0aca8424e8e122d4ae6b8168cfdad84db2d6",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/object-method.tsx",
+   "sha256": "6aa0c4de1b095d2e7007fd0c2dee0aca8424e8e122d4ae6b8168cfdad84db2d6",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/return-line-break.ts",
+   "sha256": "83dcf42da97548ba03175abecc27dbc93cb102cb0a1653195b9e76ac0e8bbb1d",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/return-line-break.tsx",
+   "sha256": "83dcf42da97548ba03175abecc27dbc93cb102cb0a1653195b9e76ac0e8bbb1d",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/operator-prefix.ts",
+   "sha256": "9662382ce51bb04c663bb14fb20e2775218868c4c7cb9d8a78978a263d34ea09",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/operator-prefix.tsx",
+   "sha256": "9662382ce51bb04c663bb14fb20e2775218868c4c7cb9d8a78978a263d34ea09",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/jsx-arrow.tsx",
+   "sha256": "46f8add1191b86558ccc76480fc6644a9fb341fef7a14ef58af50cd22420e448",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "async-newline-in/incomplete-in.ts",
+   "sha256": "9dd125ea7ac85a8dd0b347e0dac8f57bff43a1699624df37563e595790c4de80",
+   "grammar": "typescript",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 10
+  },
+  {
+   "id": "async-newline-in/incomplete-in.tsx",
+   "sha256": "9dd125ea7ac85a8dd0b347e0dac8f57bff43a1699624df37563e595790c4de80",
+   "grammar": "tsx",
+   "verdict": "syntax",
+   "codes": [
+    1109
+   ],
+   "at": 10
   }
  ]
 }
