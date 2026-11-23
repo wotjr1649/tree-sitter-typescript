@@ -115,6 +115,37 @@ class C {
         (statement_block)))))
 
 ==============================================
+Block arrow class field after a standalone static field
+:language(typescript)
+:language(tsx)
+==============================================
+
+class C { static
+x: T = () => { return x }
+[y] }
+
+---
+
+(program
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (public_field_definition
+        (property_identifier))
+      (public_field_definition
+        (property_identifier)
+        (type_annotation
+          (type_identifier))
+        (arrow_function
+          (formal_parameters)
+          (statement_block
+            (return_statement
+              (identifier)))))
+      (public_field_definition
+        (computed_property_name
+          (identifier))))))
+
+==============================================
 HTML-like open marker is a comparison with prefix operators
 :language(typescript)
 :language(tsx)

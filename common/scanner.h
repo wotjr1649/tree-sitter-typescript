@@ -50,15 +50,18 @@ enum TokenType {
 enum Context {
     AWAIT_CONTEXT = 1,
     YIELD_CONTEXT = 2,
-    ASYNC_ARROW_CONTEXT = 4,
+    EXPRESSION_CONTEXT = 4,
+    ASYNC_CONCISE_ARROW_CONTEXT = EXPRESSION_CONTEXT | AWAIT_CONTEXT,
+    ASYNC_BLOCK_ARROW_CONTEXT = EXPRESSION_CONTEXT | AWAIT_CONTEXT | YIELD_CONTEXT,
 };
 
-// Keep the two-bit await/yield stack ahead of the async-arrow bitmap.
+// Keep the two-bit await/yield stack ahead of the expression-scope bitmap.
 // shortcut: excess scopes use the base lexer until they close; use parser states if deeper nesting needs full context.
 enum {
     SCOPE_HEADER_SIZE = 6,
     // Scope depths fit below the serialized flags.
     ASI_PENDING = 0x4000,
+    ARROW_MEMBER_PENDING = 0x2000,
     DECLARATION_PENDING = 0x1000,
     SCOPE_BYTES = TREE_SITTER_SERIALIZATION_BUFFER_SIZE - SCOPE_HEADER_SIZE,
 };
@@ -68,7 +71,7 @@ typedef struct {
     uint16_t depth;
     uint16_t pending_token;
     uint8_t flags[SCOPE_BYTES];
-    uint8_t async_arrows[(SCOPE_BYTES + 1) / 2];
+    uint8_t expression_scopes[(SCOPE_BYTES + 1) / 2];
 } Scanner;
 
 static void *scope_create(void) { return calloc(1, sizeof(Scanner)); }
@@ -87,15 +90,24 @@ static unsigned scope_serialize(void *payload, char *buffer) {
     unsigned used_bits = (scanner->depth % 4) * 2;
     if (used_bits) buffer[SCOPE_HEADER_SIZE + length - 1] &= (1u << used_bits) - 1;
 
-    // shortcut: if the bitmap does not fit, keep the await/yield flags; revisit for deeply nested async arrows.
-    unsigned arrow_length = (scanner->depth + 7) / 8;
+    // shortcut: if the bitmap does not fit, keep await/yield lexing; revisit for deeply nested expression scopes.
+    unsigned expression_length = (scanner->depth + 7) / 8;
     unsigned available = SCOPE_BYTES - length;
-    unsigned copied = arrow_length < available ? arrow_length : available;
-    char *arrows = buffer + SCOPE_HEADER_SIZE + length;
-    memcpy(arrows, scanner->async_arrows, copied);
+    unsigned copied = expression_length < available ? expression_length : available;
+    // Keep await enabled if the bitmap cannot retain an async block arrow's context.
+    for (unsigned index = copied * 8; index < scanner->depth; index++) {
+        unsigned shift = (index % 4) * 2;
+        unsigned flags = (scanner->flags[index / 4] >> shift) & 3u;
+        if ((flags == (AWAIT_CONTEXT | YIELD_CONTEXT)) &&
+            (scanner->expression_scopes[index / 8] & (1u << (index % 8)))) {
+            buffer[SCOPE_HEADER_SIZE + index / 4] &= ~(YIELD_CONTEXT << shift);
+        }
+    }
+    char *expressions = buffer + SCOPE_HEADER_SIZE + length;
+    memcpy(expressions, scanner->expression_scopes, copied);
     used_bits = scanner->depth % 8;
-    if (used_bits && copied == arrow_length) arrows[copied - 1] &= (1u << used_bits) - 1;
-    while (copied && !arrows[copied - 1]) copied--;
+    if (used_bits && copied == expression_length) expressions[copied - 1] &= (1u << used_bits) - 1;
+    while (copied && !expressions[copied - 1]) copied--;
     return SCOPE_HEADER_SIZE + length + copied;
 }
 
@@ -105,26 +117,27 @@ static void scope_deserialize(void *payload, const char *buffer, unsigned length
 
     uint16_t state;
     memcpy(&state, buffer + sizeof(scanner->overflow), sizeof(state));
-    uint16_t depth = state & ~(ASI_PENDING | DECLARATION_PENDING);
-    scanner->pending_token = state & (ASI_PENDING | DECLARATION_PENDING);
+    uint16_t pending_mask = ASI_PENDING | DECLARATION_PENDING | ARROW_MEMBER_PENDING;
+    uint16_t depth = state & ~pending_mask;
+    scanner->pending_token = state & pending_mask;
     if (length == SCOPE_HEADER_SIZE + 1 && depth >= 1 && depth <= 4) {
         scanner->depth = depth;
         memcpy(&scanner->overflow, buffer, sizeof(scanner->overflow));
         scanner->flags[0] = (uint8_t)buffer[SCOPE_HEADER_SIZE];
-        scanner->async_arrows[0] = 0;
+        scanner->expression_scopes[0] = 0;
         return;
     }
     unsigned flag_length = (depth + 3u) / 4;
     if (depth > SCOPE_BYTES * 4 || length < SCOPE_HEADER_SIZE + flag_length) goto empty;
-    unsigned arrow_length = (depth + 7u) / 8;
+    unsigned expression_length = (depth + 7u) / 8;
     unsigned copied = length - SCOPE_HEADER_SIZE - flag_length;
-    if (copied > arrow_length) goto empty;
+    if (copied > expression_length) goto empty;
 
     scanner->depth = depth;
     memcpy(&scanner->overflow, buffer, sizeof(scanner->overflow));
     memcpy(scanner->flags, buffer + SCOPE_HEADER_SIZE, flag_length);
-    memcpy(scanner->async_arrows, buffer + SCOPE_HEADER_SIZE + flag_length, copied);
-    memset(scanner->async_arrows + copied, 0, arrow_length - copied);
+    memcpy(scanner->expression_scopes, buffer + SCOPE_HEADER_SIZE + flag_length, copied);
+    memset(scanner->expression_scopes + copied, 0, expression_length - copied);
     return;
 
 empty:
@@ -142,8 +155,8 @@ static void enter_context(Scanner *scanner, unsigned flags) {
     unsigned shift = (index % 4) * 2;
     scanner->flags[index / 4] = (scanner->flags[index / 4] & ~(3u << shift)) | ((flags & 3u) << shift);
     unsigned bit = 1u << (index % 8);
-    scanner->async_arrows[index / 8] = (scanner->async_arrows[index / 8] & ~bit) |
-                                      ((flags & ASYNC_ARROW_CONTEXT) ? bit : 0);
+    scanner->expression_scopes[index / 8] =
+        (scanner->expression_scopes[index / 8] & ~bit) | ((flags & EXPRESSION_CONTEXT) ? bit : 0);
 }
 
 static unsigned context_flags(const Scanner *scanner) {
@@ -151,7 +164,7 @@ static unsigned context_flags(const Scanner *scanner) {
     if (!scanner->depth) return AWAIT_CONTEXT;
     unsigned index = scanner->depth - 1;
     unsigned flags = (scanner->flags[index / 4] >> ((index % 4) * 2)) & 3u;
-    if (scanner->async_arrows[index / 8] & (1u << (index % 8))) flags |= ASYNC_ARROW_CONTEXT;
+    if (scanner->expression_scopes[index / 8] & (1u << (index % 8))) flags |= EXPRESSION_CONTEXT;
     return flags;
 }
 
@@ -794,6 +807,7 @@ static bool scan_identifier_word(TSLexer *lexer, const char *keyword) {
 static bool scan_context_word(const Scanner *scanner, TSLexer *lexer, bool keyword,
                               const bool *valid_symbols) {
     unsigned flags = context_flags(scanner);
+    if (flags == ASYNC_BLOCK_ARROW_CONTEXT) flags = AWAIT_CONTEXT;
     if (lexer->lookahead == 'y') {
         if ((flags & YIELD_CONTEXT) || !scan_identifier_word(lexer, "yield")) return false;
         lexer->mark_end(lexer);
@@ -857,6 +871,8 @@ static bool at_concise_body_end(TSLexer *lexer) {
 static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
     Scanner *scanner = payload;
     if (valid_symbols[ERROR_RECOVERY]) return false;
+    bool arrow_member_pending = scanner->pending_token & ARROW_MEMBER_PENDING;
+    scanner->pending_token &= ~ARROW_MEMBER_PENDING;
     if (valid_symbols[TEMPLATE_CHARS]) {
         if (valid_symbols[AUTOMATIC_SEMICOLON]) {
             return false;
@@ -882,6 +898,15 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
 
     if (valid_symbols[LEAVE_CONTEXT]) {
         lexer->mark_end(lexer);
+        // A reused arrow expression can skip the state that sees the computed member.
+        unsigned context = context_flags(scanner);
+        if (context == EXPRESSION_CONTEXT || context == ASYNC_BLOCK_ARROW_CONTEXT) {
+            ASITrivia trivia = {0};
+            ASILookahead next = scan_asi_trivia(lexer, &trivia, false, RANGE_IGNORE);
+            if (next == ASI_NEXT_TOKEN && trivia.newline && lexer->lookahead == '[') {
+                scanner->pending_token |= ARROW_MEMBER_PENDING;
+            }
+        }
         return leave_context(scanner, lexer, LEAVE_CONTEXT);
     }
 
@@ -889,12 +914,12 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
         unsigned token = valid_symbols[ENTER_ASYNC_ARROW] ? ENTER_ASYNC_ARROW :
                          ENTER_PLAIN_EXPRESSION;
         lexer->mark_end(lexer);
-        unsigned flags = 0;
+        unsigned flags = EXPRESSION_CONTEXT;
         if (token == ENTER_ASYNC_ARROW) {
             ASITrivia trivia = {0};
             ASILookahead next = scan_asi_trivia(lexer, &trivia, true, RANGE_IGNORE);
-            flags = AWAIT_CONTEXT;
-            if (next != ASI_NEXT_TOKEN || lexer->lookahead != '{') flags |= ASYNC_ARROW_CONTEXT;
+            flags = next == ASI_NEXT_TOKEN && lexer->lookahead == '{'
+                    ? ASYNC_BLOCK_ARROW_CONTEXT : ASYNC_CONCISE_ARROW_CONTEXT;
         }
         enter_context(scanner, flags);
         lexer->result_symbol = token;
@@ -939,6 +964,11 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
         lexer->mark_end(lexer);
         ASITrivia trivia = {0};
         ASILookahead next = scan_asi_trivia(lexer, &trivia, false, RANGE_IGNORE);
+        if (arrow_member_pending && next == ASI_NEXT_TOKEN && trivia.newline && lexer->lookahead == '[') {
+            // Carry the decision through an arrow's own closing state.
+            if (valid_symbols[ARROW_FUNCTION_END]) scanner->pending_token |= ARROW_MEMBER_PENDING;
+            return leave_context(scanner, lexer, LEAVE_CONCISE_BODY);
+        }
         if (next == ASI_END || (next == ASI_NEXT_TOKEN && at_concise_body_end(lexer)) ||
             (trivia.newline && (ends_before_next_token(lexer, valid_symbols, next, true) ||
                                 semicolon_before_lookahead(lexer, valid_symbols, next, false, false)))) {
@@ -999,7 +1029,7 @@ static inline bool external_scanner_scan(void *payload, TSLexer *lexer, const bo
         }
     }
 
-    if (lexer->lookahead == 'a' && valid_symbols[CONTEXT_AWAIT] && (context_flags(scanner) & ASYNC_ARROW_CONTEXT)) {
+    if (lexer->lookahead == 'a' && valid_symbols[CONTEXT_AWAIT] && context_flags(scanner) == ASYNC_CONCISE_ARROW_CONTEXT) {
         return scan_context_word(scanner, lexer, true, valid_symbols);
     }
     if (valid_symbols[CONTEXT_IDENTIFIER] && (lexer->lookahead == 'a' || lexer->lookahead == 'y')) {

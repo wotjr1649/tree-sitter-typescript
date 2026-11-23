@@ -53,6 +53,16 @@ func TestLookaheadAfterSubtreeReuse(t *testing.T) {
 				{"initializer before comment at EOF", "let", " a=b//", " ", ""},
 				{"await using across a line break", "async function f(){await", " using x = null;}", "\r\n", ""},
 				{"await before a multiline block comment", "await/*\r*/instanceo", ";", "", "f"},
+				{"static before LF", "class C { static ", "x: T = () => {}\n[y] }", "\n", ""},
+				{"static before CR", "class C { static ", "x: T = () => {}\n[y] }", "\r", ""},
+				{"static before CRLF", "class C { static ", "x: T = () => {}\n[y] }", "\r\n", ""},
+				{"static before LS", "class C { static ", "x: T = () => {}\n[y] }", "\u2028", ""},
+				{"static before PS", "class C { static ", "x: T = () => {}\n[y] }", "\u2029", ""},
+				{"static before LF with a nonempty arrow body", "class C { static ", "x: T = () => { return x }\n[y] }", "\n", ""},
+				{"remove LF after static", "class C { static ", "x: T = () => { return x }\n[y] }", "", "\n"},
+				{"static before LF with an async arrow", "class C { static ", "x: T = async () => { return await x }\n[y] }", "\n", ""},
+				{"static before LF with nested arrows", "class C { static ", "x: T = () => () => {}\n[y] }", "\n", ""},
+				{"static before LF with a function expression", "class C { static ", "x: T = function() { return x }\n[y] }", "\n", ""},
 			} {
 				t.Run(c.name, func(t *testing.T) {
 					parser := tree_sitter.NewParser()
