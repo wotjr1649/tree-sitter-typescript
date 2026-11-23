@@ -24,7 +24,7 @@ concatenated included bytes separately.
 | ID prefix | Source |
 | --- | --- |
 | `76/bench/` | The affected `i43` benchmark inputs recorded for [JavaScript #76](https://github.com/wotjr1649/tree-sitter-javascript/pull/76). |
-| `76/probes/` | The Perf2 generated probe matrix reviewed in #76. The deleted archive held `perf2/build/perf2/probes.jsonl`. Byte-verified sources are inline. Entries with `historical` use the replacement generator below. |
+| `76/probes/` | The Perf2 generated probe matrix reviewed in #76. The deleted archive held `perf2/build/perf2/probes.jsonl`. Byte-verified sources are either inline (`source`) or marked `"generated": true` and rebuilt by `fixtures.py` to bytes that match the recorded SHA-256 (60 entries). Entries with `historical` use the replacement generator below. |
 | `76/ranges/class-ranges/` | The Perf2 range generator's `ranges.jsonl` reviewed in #76. The three restored sequences start with `/*a`, `//a` and `<!--a` followed by two excluded intervals. The first edit opens a range between them. |
 | `76/`, `79/` focused cases | Scanner reproductions for [#76](https://github.com/wotjr1649/tree-sitter-javascript/pull/76) and [#79](https://github.com/wotjr1649/tree-sitter-javascript/pull/79). |
 | `79/case3`, `79/extra-modal-exact-original` | The same Semantic UI React 2.1.5 file, `src/modules/Modal/utils/index.js`, from commit `a32499d7c72b1619044719da621ff7cc926e0eec`. The original edits insert a space at byte 1000 and 978, respectively. |
