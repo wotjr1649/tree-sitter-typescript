@@ -204,9 +204,20 @@ module.exports = function defineGrammar(dialect) {
         // accepts a little more than the type checker is harmless.
         optional('accessor'),
         field('name', $._property_name),
-        optional(choice('?', '!')),
-        field('type', optional($.type_annotation)),
-        optional($._public_field_end),
+        // Keep marked fields on the recovery path for edits such as '?' becoming '!?'.
+        choice(
+          seq(
+            choice('?', '!'),
+            field('type', optional($.type_annotation)),
+            optional($._public_field_end),
+          ),
+          optional($._unmarked_public_field_end),
+        ),
+      ),
+
+      _unmarked_public_field_end: $ => choice(
+        seq(field('type', $.type_annotation), optional($._public_field_end)),
+        $._public_field_end,
       ),
 
       _public_field_end: $ => choice($._field_initializer, $._binding_end),
