@@ -19,7 +19,7 @@
   "encoding": "utf-8",
   "offsets": "UTF-8 byte offsets",
   "cases_file": "cases.jsonl",
-  "cases_sha256": "d8456f238444258e6cf507d62f6938de775a89fb1b71292be6596000f89806b7",
+  "cases_sha256": "060328bc8b291b6eaf1317aa2e64b6536a5fadba1ad1a0a7393477800c01f434",
   "runner": "run.mjs",
   "runner_sha256": "4a0e50961400759806b5b18e61a8e78488d788e08bab79898a01b96b6d1ba684"
  },
@@ -9980,6 +9980,430 @@
     1109
    ],
    "at": 10
+  },
+  {
+   "id": "await-comment-newline/await-lf.ts",
+   "sha256": "4e904f263085e77a6bffaee017c8a6e5bf989a974d5821d8d8d3918bfbfcab61",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-lf.tsx",
+   "sha256": "4e904f263085e77a6bffaee017c8a6e5bf989a974d5821d8d8d3918bfbfcab61",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-lf.ts",
+   "sha256": "837397c09fdd75bfc71a15533352d8547c9602f660fe61dd7b527289ef231d39",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-lf.tsx",
+   "sha256": "837397c09fdd75bfc71a15533352d8547c9602f660fe61dd7b527289ef231d39",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-lf.ts",
+   "sha256": "3a333e4597bd1535db443a8d3b45268fc47143d980f2e18614b65dda836148f0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-lf.tsx",
+   "sha256": "3a333e4597bd1535db443a8d3b45268fc47143d980f2e18614b65dda836148f0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-cr.ts",
+   "sha256": "856972bf9315a941cfb39fa1e1214c5e572c8a3456cb5635e926db3e515f0edd",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-cr.tsx",
+   "sha256": "856972bf9315a941cfb39fa1e1214c5e572c8a3456cb5635e926db3e515f0edd",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-cr.ts",
+   "sha256": "923e0674642161ee7b0e56a6c11908533c66da4e01c39956359cc7c0666f7cb0",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-cr.tsx",
+   "sha256": "923e0674642161ee7b0e56a6c11908533c66da4e01c39956359cc7c0666f7cb0",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-cr.ts",
+   "sha256": "feb46b89a006b44a35c9b1bcb3509155733b87665b409a96f94076622e08b38b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-cr.tsx",
+   "sha256": "feb46b89a006b44a35c9b1bcb3509155733b87665b409a96f94076622e08b38b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-crlf.ts",
+   "sha256": "0cd5f8958c92fdffa49c3ee6c6559a09c705b4e0ff3105a10f0a3b88df3b5010",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-crlf.tsx",
+   "sha256": "0cd5f8958c92fdffa49c3ee6c6559a09c705b4e0ff3105a10f0a3b88df3b5010",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-crlf.ts",
+   "sha256": "e73c0fb267589c7313be4d81ed47c6a19eb339198574af9ed27d4f5a565c51a2",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-crlf.tsx",
+   "sha256": "e73c0fb267589c7313be4d81ed47c6a19eb339198574af9ed27d4f5a565c51a2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-crlf.ts",
+   "sha256": "2a18a730a5c5578817f2677992633b4cffb6c2f40526d2174e6b4778ded6f2e5",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-crlf.tsx",
+   "sha256": "2a18a730a5c5578817f2677992633b4cffb6c2f40526d2174e6b4778ded6f2e5",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-ls.ts",
+   "sha256": "9616802c2d2d4215b9234333001aee5d829cf62d9b6c9a87160f62aaedb1c019",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-ls.tsx",
+   "sha256": "9616802c2d2d4215b9234333001aee5d829cf62d9b6c9a87160f62aaedb1c019",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-ls.ts",
+   "sha256": "7018cb556796074a97fd24777013b3bd83ef330010b8ae4f94b863829445edfe",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-ls.tsx",
+   "sha256": "7018cb556796074a97fd24777013b3bd83ef330010b8ae4f94b863829445edfe",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-ls.ts",
+   "sha256": "2083016a90ccc546e978919a5154b6b119b815384b7eb9c5da5349c957dc9e09",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-ls.tsx",
+   "sha256": "2083016a90ccc546e978919a5154b6b119b815384b7eb9c5da5349c957dc9e09",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-ps.ts",
+   "sha256": "d205882555d347f98c3b7b65b94a7b2d9fce8a00789be69bbbfaae4adafb4131",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-ps.tsx",
+   "sha256": "d205882555d347f98c3b7b65b94a7b2d9fce8a00789be69bbbfaae4adafb4131",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-ps.ts",
+   "sha256": "b6e6ee7856dafac8770036e157ca87f44122b3717552eee2851a553d4f505e8b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-ps.tsx",
+   "sha256": "b6e6ee7856dafac8770036e157ca87f44122b3717552eee2851a553d4f505e8b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-ps.ts",
+   "sha256": "9fe39bd60c9c4fd4a379a447a450c3a78883b3f241f78d4225d2923d9a01e73f",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-ps.tsx",
+   "sha256": "9fe39bd60c9c4fd4a379a447a450c3a78883b3f241f78d4225d2923d9a01e73f",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-line.ts",
+   "sha256": "4e0fd0a577383a3b339ab7019a3365531ad0ad86d595deadf8f4ce8fa44eb344",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-line.tsx",
+   "sha256": "4e0fd0a577383a3b339ab7019a3365531ad0ad86d595deadf8f4ce8fa44eb344",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-line.ts",
+   "sha256": "06f5fb25d223e12fb0bedf912c81ee1d74157084846c30600dc45346c6791dae",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-operator-line.tsx",
+   "sha256": "06f5fb25d223e12fb0bedf912c81ee1d74157084846c30600dc45346c6791dae",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-line.ts",
+   "sha256": "1844a296550c33eb1cabd629694290785b648679ab5d2ca3e933922fb074f0d2",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-prefix-line.tsx",
+   "sha256": "1844a296550c33eb1cabd629694290785b648679ab5d2ca3e933922fb074f0d2",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/static-await-cr.ts",
+   "sha256": "2c44b88bb0e3c03c29c0cdbf5d718dabe1958cd07550e4a86731c93b000d982b",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/static-await-cr.tsx",
+   "sha256": "2c44b88bb0e3c03c29c0cdbf5d718dabe1958cd07550e4a86731c93b000d982b",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-call-prefix-ls.ts",
+   "sha256": "34ad63075894158b986d1db654ab169932317a862a87e6ffd6d92ff143c56bba",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/await-call-prefix-ls.tsx",
+   "sha256": "34ad63075894158b986d1db654ab169932317a862a87e6ffd6d92ff143c56bba",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/arrow-async-escaped-prefix.ts",
+   "sha256": "28d821394b20b12342ad3ba2a9fe21293f40ca17e4e64d86a5063d3e87af7008",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/arrow-async-escaped-prefix.tsx",
+   "sha256": "28d821394b20b12342ad3ba2a9fe21293f40ca17e4e64d86a5063d3e87af7008",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-function-await-operand.ts",
+   "sha256": "e321b4b075f5ea906813f20ce54881c22b1413a321e1ca864d968f3e1d370ac4",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/async-function-await-operand.tsx",
+   "sha256": "e321b4b075f5ea906813f20ce54881c22b1413a321e1ca864d968f3e1d370ac4",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/generator-yield.ts",
+   "sha256": "29290e201d1c503320a32df2e3c42128c71254e24cdd23fd198653bd7c46ab43",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/generator-yield.tsx",
+   "sha256": "29290e201d1c503320a32df2e3c42128c71254e24cdd23fd198653bd7c46ab43",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/return.ts",
+   "sha256": "414b3580673f641d52eda06a5acb59ee2db830cd2bc89603756af63424516fa9",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/return.tsx",
+   "sha256": "414b3580673f641d52eda06a5acb59ee2db830cd2bc89603756af63424516fa9",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/let-binding.ts",
+   "sha256": "b65658315e2dc719eb59898f631b5b42cd9d6d87b4a7c9dbb3e053820cae9962",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/let-binding.tsx",
+   "sha256": "b65658315e2dc719eb59898f631b5b42cd9d6d87b4a7c9dbb3e053820cae9962",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/class-field.ts",
+   "sha256": "78eaf191f8d2828e37c1a025d14f28513cbf5ae70f2e9dbfe4567a23f2c9d0cd",
+   "grammar": "typescript",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/class-field.tsx",
+   "sha256": "78eaf191f8d2828e37c1a025d14f28513cbf5ae70f2e9dbfe4567a23f2c9d0cd",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
+  },
+  {
+   "id": "await-comment-newline/jsx-arrow.tsx",
+   "sha256": "f9a745d6d98b119d8f48da507f9881c55868f8c93863f3a7fe8d75b398deb724",
+   "grammar": "tsx",
+   "verdict": "accept",
+   "codes": [],
+   "at": null
   }
  ]
 }

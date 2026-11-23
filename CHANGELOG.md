@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and type members to end at a line break before a member named `in` or `instanceof`.
 - Parse a standalone `async` followed by a line break and `in` or `instanceof` as the left operand of a
   binary expression, consistently in fresh and incremental parses.
+- Match fresh parsing after edits to `in` or `instanceof` following `await` or `async` and a line break in comment trivia.
 
 ## [3.0.0] - 2026-11-22
 
