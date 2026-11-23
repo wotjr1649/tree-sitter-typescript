@@ -596,7 +596,10 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
 
     // After return, break and continue, a line terminator ends the statement unless a ';' follows.
     if (restricted) {
-        return next != ASI_NEXT_TOKEN || lexer->lookahead != ';';
+        if (next != ASI_NEXT_TOKEN) return true;
+        // In an expression state, async can be the left operand of a binary operator.
+        return lexer->lookahead != ';' &&
+               !(valid_symbols[LOGICAL_OR] && lexer->lookahead == 'i' && starts_in_operator(lexer, true));
     }
 
     // Leave room for the await operand or for extras to consume a comment before the next scan.
