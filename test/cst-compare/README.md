@@ -8,14 +8,16 @@ parsers.
 
 ```powershell
 git fetch --no-tags origin main
-jobrun --timeout 3600 -- python -u -B test/cst-compare/compare.py origin/main HEAD grammar-pr
+python -u -B test/cst-compare/compare.py origin/main HEAD grammar-pr
 ```
 
 Use Windows with PowerShell 7, Python 3.12 or later, Git, GCC (MSYS2 UCRT64),
 Go, and the Node.js and npm versions supported by the selected oracle.
-The Python runner uses only the standard library. Use trusted revisions:
-the runner evaluates their grammar JavaScript, runs the selected oracle
-self-test and builds and loads their C parsers and scanners.
+The Python runner uses only the standard library. You can prefix a command
+with the optional wrapper `jobrun --timeout 3600 --` to set a time limit.
+Use trusted revisions because the runner evaluates their grammar JavaScript,
+runs the selected oracle self-test and builds and loads their C parsers
+and scanners.
 
 Install the Tree-sitter executable matching the candidate's
 `devDependencies.tree-sitter-cli` in `package.json`. The runner uses
@@ -40,7 +42,9 @@ examples and external example pins. It also provides the compiler from
 `oracle/replay/go.mod` and `go.sum`. Pass `--inputs-ref` to fix these to a
 different Git revision for comparisons across multiple releases. Both
 parsers receive the same inputs and share the runtime and syntax checker.
-The runtime must support both parser ABIs.
+The runtime must support both parser ABIs. Choose an input ref with
+`oracle/run.mjs`, `oracle/replay/go.mod` and its `go.sum`. The
+`v1.0.0` tag predates these files. Use `v2.0.0` or a later input ref.
 
 The runner includes new corpus and oracle sources from the compared
 revisions and runs unqualified corpus cases with both grammars. It keeps
@@ -58,8 +62,8 @@ Use a previously unused cache name for each cold run.
 
 ```powershell
 git fetch --tags origin
-jobrun --timeout 3600 -- python -u -B test/cst-compare/compare.py v3.1.0 v3.1.0 same-release --cache-name cold-same --expect-identical
-jobrun --timeout 3600 -- python -u -B test/cst-compare/compare.py v3.0.0 v3.1.0 release-delta --inputs-ref v2.0.0 --cache-name cold-delta
+python -u -B test/cst-compare/compare.py v3.1.0 v3.1.0 same-release --cache-name cold-same --expect-identical
+python -u -B test/cst-compare/compare.py v3.0.0 v3.1.0 release-delta --inputs-ref v2.0.0 --cache-name cold-delta
 ```
 
 ## Read the verdict
@@ -85,6 +89,13 @@ A changed included-range list triggers a fresh parse, counted in
 gate differences and incremental checks are reported independently of
 the fresh CST verdict.
 
+An example gate is `comparable: true` when the selected input ref and
+the ref behind the gate's known-failure list have the same external
+example pins and tracked examples (paths and source bytes). A gate
+always shows observed and listed failures. It includes `new_failures`
+and `now_passing` only when the gate is comparable. The CST comparison
+still uses the selected examples for both parsers.
+
 - `typescript.jsonl` and `tsx.jsonl` record classification, syntax validity,
   ERROR/MISSING status and the first CST difference, including anonymous
   and extra nodes, fields, and byte and point ranges.
@@ -100,6 +111,6 @@ the fresh CST verdict.
 A completed comparison reports differences through its output files.
 Use `--expect-identical` to fail on a non-identical verdict, a changed
 incremental comparison, generation drift, forbidden pragmas or a
-mismatch with either side's known example failure list. Check the
-per-side incremental counts even when this flag passes, since both
+mismatch with either side's comparable known example failure list. Check
+the per-side incremental counts even when this flag passes, since both
 versions can have the same mismatch.

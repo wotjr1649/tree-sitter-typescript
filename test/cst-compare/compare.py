@@ -3,16 +3,18 @@ import ctypes as c
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import closing
+from pathlib import Path
 
 sys.dont_write_bytecode = True
 
 from contract import compare_contract, node_types, self_test
-from inputs import EXT, inputs, known_failures
+from inputs import EXT, example_inputs, inputs, known_failures
 from native import LANGUAGES, Edit, Runtime, build_grammar, build_runtime, digest, generate, pinned_cli, point
 from prepare import BUILD, pins, prepare, revision, snapshot
 from reduce import minimize
@@ -151,6 +153,32 @@ def reduce_case(rt, baseline, candidate, dialect, source, row, verdicts, tsc, va
                         lambda trial: valid(trial, screening=True), earlier, contexts)
 
 
+def reducer_self_test(cache):
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+
+    source, dialect = b'x + y', 'typescript'
+    difference = {'before': {'kind': 'identifier', 'parent': 'program', 'bytes': [0, 1]}, 'after': None}
+    row = {'first_difference': difference, 'baseline_error_or_missing': False,
+           'candidate_error_or_missing': False}
+    checked = []
+
+    def check(language, trial, folder, *, screening):
+        assert language == dialect and folder.is_dir() and not screening
+        checked.append(trial)
+        return {'valid': True}
+
+    rt = SimpleNamespace(parser=lambda library, _: nullcontext(library),
+                         tree=lambda parser, text, **kwargs: nullcontext(text),
+                         set_timeout=lambda *_: None, root=lambda tree: tree,
+                         has_error=lambda _: False,
+                         difference=lambda before, after: difference if b'x' in before else None)
+    tsc = SimpleNamespace(cache=cache, check=check)
+    verdicts = {(dialect, digest(source)): {'valid': True}}
+    result = reduce_case(rt, 'baseline', 'candidate', dialect, source, row, verdicts, tsc, {}, None)
+    assert result['source'] == 'x' and b'x' in checked
+
+
 def earlier_reproductions(dialect):
     seeds = {}
     for path in sorted((BUILD / 'results').glob(f'*/{dialect}-major.jsonl')):
@@ -219,10 +247,18 @@ def compare_dialect(rt, baseline, candidate, dialect, cases, verdicts, tsc, reco
     return {'counts': dict(counts), 'groups': groups, 'verified_reproductions': verified}, examples_a, examples_b
 
 
-def example_gate(observed, listed, dialect):
+def example_set(cache, root, example_pins):
+    tracked = {case.name: case.source() for case in example_inputs(cache, root, ())}
+    return set(example_pins), tracked
+
+
+def example_gate(observed, listed, dialect, comparable):
     listed = {name for name in listed if name.endswith('.' + EXT[dialect])}
-    return {'observed_failures': sorted(observed), 'listed_failures': sorted(listed),
-            'new_failures': sorted(observed - listed), 'now_passing': sorted(listed - observed)}
+    result = {'observed_failures': sorted(observed), 'listed_failures': sorted(listed),
+              'comparable': comparable}
+    if comparable:
+        result.update(new_failures=sorted(observed - listed), now_passing=sorted(listed - observed))
+    return result
 
 
 def run(args, cache, dest):
@@ -231,14 +267,42 @@ def run(args, cache, dest):
     assert kind(False, True, False, False) == 'invalid-ok-to-error'
     assert kind(True, True, True, False) == 'error-to-error'
     assert kind(True, False, True, False) == 'error-to-ok'
+    reducer_self_test(cache)
     refs = {'baseline': args.baseline, 'candidate': args.candidate,
-            'inputs': args.inputs_ref or args.baseline}
-    shas = {label: revision(ref) for label, ref in refs.items()}
+            'inputs': args.baseline if args.inputs_ref is None else args.inputs_ref}
+    resolved = {}
+    for label, ref in refs.items():
+        if ref not in resolved:
+            try:
+                resolved[ref] = revision(ref)
+            except subprocess.CalledProcessError as error:
+                argument = '--inputs-ref' if label == 'inputs' else label
+                raise SystemExit(f'{argument} {ref!r}: {error.stderr.strip()}') from None
+    shas = {label: resolved[ref] for label, ref in refs.items()}
     roots = {label: snapshot(cache, sha) for label, sha in shas.items()}
     base, candidate, input_root = (roots[label] for label in refs)
-    cli = {'baseline': pinned_cli(base, args.base_cli or args.cli),
-           'candidate': pinned_cli(candidate, args.cli)}
+    cli = {}
+    for label in ('baseline', 'candidate'):
+        argument, executable = '--cli', args.cli
+        if label == 'baseline' and args.base_cli is not None:
+            argument, executable = '--base-cli', args.base_cli
+        try:
+            cli[label] = pinned_cli(roots[label], executable)
+        except (ValueError, OSError, KeyError, subprocess.CalledProcessError) as error:
+            raise SystemExit(f'{argument} ({label}): {error}') from None
+
+    for path in ('oracle/run.mjs', 'oracle/replay/go.mod'):
+        if not (input_root / path).is_file():
+            raise SystemExit(f"--inputs-ref {refs['inputs']!r}: missing {path}")
+
     example_pins = list(pins(input_root))
+    selected_examples = example_set(cache, input_root, example_pins)
+    comparable = {label: example_set(cache, roots[label], pins(roots[label])) == selected_examples
+                  for label in ('baseline', 'candidate')}
+    try:
+        dest.mkdir(parents=True)
+    except FileExistsError:
+        raise SystemExit(f'output already exists: {dest}') from None
     runtime_src, runtime_version, runtime_sum = prepare(cache, input_root, example_pins)
     fixtures = regression_inputs(cache)
     cases = list(inputs(cache, input_root, base, candidate, example_pins, fixtures))
@@ -268,9 +332,10 @@ def run(args, cache, dest):
         contract = compare_contract(node_types(base, dialect), node_types(candidate, dialect))
         (dest / f'{dialect}-contract.json').write_text(json.dumps(contract, indent=2) + '\n', encoding='utf-8')
         summary.update(generation=generation, contract=dict(Counter(row['level'] for row in contract)),
-                       examples={'baseline': example_gate(errors_a, baseline_known, dialect),
-                                 'candidate': example_gate(errors_b, candidate_known, dialect),
-                                 'relative_to_baseline_list': example_gate(errors_b, baseline_known, dialect)})
+                       examples={'baseline': example_gate(errors_a, baseline_known, dialect, comparable['baseline']),
+                                 'candidate': example_gate(errors_b, candidate_known, dialect, comparable['candidate']),
+                                 'relative_to_baseline_list': example_gate(errors_b, baseline_known, dialect,
+                                                                           comparable['baseline'])})
         result['dialects'][dialect] = summary
         print(dialect, summary['counts'], summary['contract'], summary['incremental'], flush=True)
 
@@ -302,7 +367,7 @@ def run(args, cache, dest):
                     raise SystemExit(f'{dialect}: {side} generation check failed')
             for side in ('baseline', 'candidate'):
                 gate = summary['examples'][side]
-                if gate['new_failures'] or gate['now_passing']:
+                if gate['comparable'] and (gate['new_failures'] or gate['now_passing']):
                     raise SystemExit(f'{dialect}: {side} example failures differ from its list')
 
 
@@ -336,9 +401,7 @@ def main():
         except OSError:
             parser.error(f'cache is in use: {cache}')
         dest = BUILD / 'results' / args.run_name
-        try:
-            dest.mkdir(parents=True)
-        except FileExistsError:
+        if dest.exists():
             parser.error(f'output already exists: {dest}')
         run(args, cache, dest)
 
